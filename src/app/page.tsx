@@ -3,9 +3,59 @@
 import { useState } from 'react';
 import Image from "next/image";
 
+class Exercise {
+  name: string;
+  primaryBodyparts: string[];
+  secondaryBodyparts: string[]; 
+  lastDayPerformed?: Date;
+ 
+  constructor(name: string, primaryBodyparts: string[], secondaryBodyparts: string[], lastDayPerformed?: Date) {
+    this.name = name;
+    this.primaryBodyparts = primaryBodyparts;
+    this.secondaryBodyparts = secondaryBodyparts;
+    this.lastDayPerformed = lastDayPerformed;
+  }
+}
+
+function ExerciseButton({ exercise }: {exercise: Exercise}) {
+  return (
+    <a className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30">
+        <h2 className={`mb-3 text-2xl font-semibold`}>
+          {exercise.name}{" "}
+          <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
+            -&gt;
+          </span>
+        </h2>
+        <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
+          {exercise.lastDayPerformed?.toDateString()}
+        </p>
+      </a>
+  );
+}
+
+  function ExerciseTable({ exercises }: { exercises: Exercise[] }) {
+    const rows:JSX.Element[] = [];  
+    exercises.forEach((exercise) => {
+      rows.push(
+        <ExerciseButton
+          exercise={exercise}/>
+      );
+    });
+
+    return (
+      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
+      {rows}
+      </div>
+    );
+  }
+  
+
 function Train(){
+  const e1 = new Exercise("bench", ["chest"], [], new Date("2024-01-30"))
+  const e2 = new Exercise("squat", ["quads"], [])
+  const exercises = [e1, e2]
   return(
-    "Some exos"
+    <ExerciseTable exercises={exercises} />
   )
 }
 
@@ -23,7 +73,7 @@ function Config(){
 
 function Content({currentPage, leftPos}:{currentPage: string, leftPos:string}){
   return(
-    <div className={"absolute "+leftPos} >
+    <div className={"absolute px-5 "+leftPos} >
     {currentPage === 'train' && <Train  />}
     {currentPage === 'stats' &&  <Stats /> }
     {currentPage === 'config' &&  <Config /> }
