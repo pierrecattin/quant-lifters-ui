@@ -8,38 +8,42 @@ class Exercise {
   primaryBodyparts: string[];
   secondaryBodyparts: string[]; 
   lastDayPerformed?: Date;
+  isCustom: boolean;
  
-  constructor(name: string, primaryBodyparts: string[], secondaryBodyparts: string[], lastDayPerformed?: Date) {
+  constructor(name: string, primaryBodyparts: string[], secondaryBodyparts: string[], isCustom: boolean, lastDayPerformed?: Date) {
     this.name = name;
     this.primaryBodyparts = primaryBodyparts;
     this.secondaryBodyparts = secondaryBodyparts;
+    this.isCustom = isCustom;
     this.lastDayPerformed = lastDayPerformed;
   }
 }
 
 function ExerciseButton({ exercise }: {exercise: Exercise}) {
   return (
-    <a className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30">
+    <button className="group m-1 rounded-lg border border-gray-500 px-5 py-4 transition-colors hover:border-gray-100 hover:bg-gray-100 hover:dark:border-red-700 hover:dark:bg-neutral-800/50">
         <h2 className={`mb-3 text-2xl font-semibold`}>
           {exercise.name}{" "}
-          <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
+          <span className="inline-block transition-transform group-hover:translate-x-2 motion-reduce:transform-none">
             -&gt;
           </span>
         </h2>
         <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
           {exercise.lastDayPerformed?.toDateString()}
         </p>
-      </a>
+      </button>
   );
 }
 
-  function ExerciseTable({ exercises }: { exercises: Exercise[] }) {
+  function ExerciseTable({ exercises, filterText }: { exercises: Exercise[], filterText: string }) {
     const rows:JSX.Element[] = [];  
     exercises.forEach((exercise) => {
-      rows.push(
-        <ExerciseButton
-          exercise={exercise}/>
-      );
+      if(exercise.name.toLowerCase().includes(filterText.toLocaleLowerCase())){
+        rows.push(
+          <ExerciseButton
+            exercise={exercise}/>
+        );
+      }
     });
 
     return (
@@ -49,25 +53,50 @@ function ExerciseButton({ exercise }: {exercise: Exercise}) {
     );
   }
   
+function SearchBar({filterText, onFilterChange}: {filterText: string, onFilterChange: any}){
+  return(
+      <form className='px-5 py-4 shadow-sm' >
+        <input className='text-gray-100 bg-gray-900 border-transparent'
+          type="text" 
+          placeholder="Search exercises..."
+          value={filterText}
+          onChange={(e) => onFilterChange(e.target.value)}/>
+      </form>
+    );
+}
+
+function FilterableExerciseTable({ exercises }: { exercises: Exercise[] }) {
+  const [filterText, setFilterText] = useState('');
+
+  return(
+    <div>
+      <SearchBar filterText={filterText} onFilterChange={setFilterText}/>
+      <ExerciseTable 
+        exercises={exercises}
+        filterText={filterText} />
+    </div>
+  )
+}
 
 function Train(){
-  const e1 = new Exercise("bench", ["chest"], [], new Date("2024-01-30"))
-  const e2 = new Exercise("squat", ["quads"], [])
-  const exercises = [e1, e2]
+  const e1 = new Exercise("Barbell incline benchpress", ["chest"], [], false,new Date("2024-01-30"))
+  const e2 = new Exercise("Barbell squat", ["quads"], [], false)
+  const [exercises, setExercises] = useState([e1, e2]);
+
   return(
-    <ExerciseTable exercises={exercises} />
+    <FilterableExerciseTable exercises={exercises} />
   )
 }
 
 function Stats(){
   return(
-    "Some stats"
+    "Stats"
   )
 }
 
 function Config(){
   return(
-      "Some config"
+    "Config"
   )
 }
 
