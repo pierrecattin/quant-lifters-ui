@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from "react";
 import Image from "next/image";
+
+const BACKEND_URL = "http://192.168.72.108:8000/trainer/"
 
 class Exercise {
   name: string;
@@ -117,10 +119,33 @@ function FilterableExerciseTable({ exercises, bodyparts }: { exercises: Exercise
 }
 
 function Train(){
-  const e1 = new Exercise("Barbell incline benchpress", ["Chest"], [], false,new Date("2024-01-30"))
-  const e2 = new Exercise("Barbell squat", ["Quads"], [], false)
-  const [exercises, setExercises] = useState([e1, e2]);
-  const [bodyparts, setBodyparts] = useState(["Chest", "Quads"])
+  const initExercises: Exercise[] = []
+  const initBodyparts: string[] = []
+  const [exercises, setExercises] = useState(initExercises);
+  const [bodyparts, setBodyparts] = useState(initBodyparts)
+
+  function fillExercises(exercisesJson: any[]){
+    let exercisesToSave: Exercise[] = []
+    exercisesJson.forEach(exercise => {
+      const newExercise = new Exercise(exercise.name, exercise.primary_bodyparts, exercise.secondary_bodyparts, false)
+      console.log(newExercise)
+      exercisesToSave.push(newExercise)
+    });
+    setExercises(exercisesToSave);
+  }
+
+  useEffect(() => {
+    fetch(BACKEND_URL+"allbodyparts/")
+      .then(response => response.json())
+      .then(json => setBodyparts(json.bodyparts))
+      .catch(error => console.error(error));
+
+    fetch(BACKEND_URL+"allexercises/")
+      .then(response => response.json())
+      .then(json => fillExercises(json))
+      .catch(error => console.error(error));
+  }, []);
+
 
   return(
     <FilterableExerciseTable exercises={exercises} bodyparts={bodyparts}  />
