@@ -21,7 +21,7 @@ class Exercise {
 
 function ExerciseButton({ exercise }: {exercise: Exercise}) {
   return (
-    <button className="group m-1 rounded-lg border border-gray-500 px-5 py-4 transition-colors hover:border-gray-100 hover:bg-gray-100 hover:dark:border-red-700 hover:dark:bg-neutral-800/50">
+    <button className="group m-1 rounded-lg border border-gray-500 px-5 py-4 transition-colors bg-gray-900 hover:border-red-700 hover:bg-neutral-800/50">
         <h2 className={`mb-3 text-2xl font-semibold`}>
           {exercise.name}{" "}
           <span className="inline-block transition-transform group-hover:translate-x-2 motion-reduce:transform-none">
@@ -35,28 +35,45 @@ function ExerciseButton({ exercise }: {exercise: Exercise}) {
   );
 }
 
-  function ExerciseTable({ exercises, filterText }: { exercises: Exercise[], filterText: string }) {
-    const rows:JSX.Element[] = [];  
+
+function BodypartButton({name, onToggleBodypart}: {name: string, onToggleBodypart: any}){
+  const [isSelected, setIsSelected] = useState(false)
+  function toggle(){
+    onToggleBodypart(name, !isSelected)
+    setIsSelected(!isSelected)
+  }
+  const className =  isSelected ? 'bg-gray-100 text-gray-900 border-blue-200' : 'bg-gray-900 text-gray-100 border-neutral-500'
+  return(
+    <button className={'rounded-[5px] m-1 p-1 border ' + className } onClick={toggle}>
+      {name}
+    </button>
+  )
+}
+
+function ExerciseTable({ exercises, filterText, selectedBodyparts }: { exercises: Exercise[], filterText: string, selectedBodyparts: string[] }) {
+    const exerciseButtons:JSX.Element[] = [];
     exercises.forEach((exercise) => {
-      if(exercise.name.toLowerCase().includes(filterText.toLocaleLowerCase())){
-        rows.push(
-          <ExerciseButton
-            exercise={exercise}/>
-        );
+      if(selectedBodyparts.length == 0 || 
+        selectedBodyparts.filter(x => exercise.primaryBodyparts.includes(x) || exercise.secondaryBodyparts.includes(x)).length>0){
+        if(exercise.name.toLowerCase().includes(filterText.toLowerCase())){
+          exerciseButtons.push(
+            <ExerciseButton exercise={exercise} key={exercise.name}/>
+          );
+        }
       }
     });
 
     return (
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-      {rows}
+      <div className="mb-32 grid lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
+      {exerciseButtons}
       </div>
     );
   }
   
 function SearchBar({filterText, onFilterChange}: {filterText: string, onFilterChange: any}){
   return(
-      <form className='px-5 py-4 shadow-sm' >
-        <input className='text-gray-100 bg-gray-900 border-transparent'
+      <form className='m-1' >
+        <input className='text-gray-100 bg-gray-800 border border-neutral-500'
           type="text" 
           placeholder="Search exercises..."
           value={filterText}
@@ -65,26 +82,48 @@ function SearchBar({filterText, onFilterChange}: {filterText: string, onFilterCh
     );
 }
 
-function FilterableExerciseTable({ exercises }: { exercises: Exercise[] }) {
+function FilterableExerciseTable({ exercises, bodyparts }: { exercises: Exercise[], bodyparts: string[]}) {
   const [filterText, setFilterText] = useState('');
+  const initSelectedBodyparts: string[] = []
+  const [selectedBodyparts, setSelectedBodyparts] = useState(initSelectedBodyparts)
+
+  function addOrRemoveBodypart(bodypart: string, add: boolean){
+    let newBodyparts = [...selectedBodyparts]
+    if(add){
+      newBodyparts.push(bodypart)
+    } else{
+      newBodyparts = newBodyparts.filter(x => x != bodypart)
+    }
+    setSelectedBodyparts(newBodyparts)
+    
+  }
+  const bodypartButtons:JSX.Element[] = [];  
+  bodyparts.forEach((bodypart) => {
+    bodypartButtons.push(
+      <BodypartButton name={bodypart} onToggleBodypart={addOrRemoveBodypart} key={bodypart}/>
+    )
+  });
 
   return(
     <div>
       <SearchBar filterText={filterText} onFilterChange={setFilterText}/>
+      {bodypartButtons}
       <ExerciseTable 
         exercises={exercises}
-        filterText={filterText} />
+        filterText={filterText} 
+        selectedBodyparts={selectedBodyparts}/>
     </div>
   )
 }
 
 function Train(){
-  const e1 = new Exercise("Barbell incline benchpress", ["chest"], [], false,new Date("2024-01-30"))
-  const e2 = new Exercise("Barbell squat", ["quads"], [], false)
+  const e1 = new Exercise("Barbell incline benchpress", ["Chest"], [], false,new Date("2024-01-30"))
+  const e2 = new Exercise("Barbell squat", ["Quads"], [], false)
   const [exercises, setExercises] = useState([e1, e2]);
+  const [bodyparts, setBodyparts] = useState(["Chest", "Quads"])
 
   return(
-    <FilterableExerciseTable exercises={exercises} />
+    <FilterableExerciseTable exercises={exercises} bodyparts={bodyparts}  />
   )
 }
 
@@ -147,6 +186,7 @@ function SideNav({showTrain, showStats, showConfig}:{showTrain: any, showStats:a
                 alt="Settings"
                 width={25}
                 height={25}
+                priority
               />
             </span>
           </a>
