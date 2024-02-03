@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 
-const BACKEND_URL = "http://192.168.72.108:8000/trainer/"
+const BACKEND_URL = "http://192.168.5.135:8000/trainer/"
 
 class Exercise {
   name: string;
