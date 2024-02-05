@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 
-const BACKEND_URL = "https://quant-lifters.onrender.com/trainer/"
+const BACKEND_URL = process.env.NEXT_PUBLIC_QUANT_LIFTERS_BACKEND_URL
 
 class Exercise {
   name: string;
@@ -128,7 +128,6 @@ function Train(){
     let exercisesToSave: Exercise[] = []
     exercisesJson.forEach(exercise => {
       const newExercise = new Exercise(exercise.name, exercise.primary_bodyparts, exercise.secondary_bodyparts, false)
-      console.log(newExercise)
       exercisesToSave.push(newExercise)
     });
     setExercises(exercisesToSave);
@@ -243,6 +242,7 @@ export default function Home() {
   const [showSideNav, setShowSideNav] = useState(true);
 
   function showTrain(){
+    console.log(BACKEND_URL)
     setCurrentPage("train")
     setShowSideNav(false)
   }
