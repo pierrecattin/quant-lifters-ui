@@ -21,9 +21,40 @@ class Exercise {
   }
 }
 
-function ExerciseButton({ exercise }: {exercise: Exercise}) {
+
+function ExercisePage({ exercise, goBack}: {exercise: Exercise, goBack:any}){
+  const primary_bodyparts = "Primary bodypart" + (exercise.primaryBodyparts.length>1 ? "s": "") + ": " + exercise.primaryBodyparts.join(", ")
+  const secondary_bodyparts = exercise.secondaryBodyparts.length == 0 ? "": "Secondary bodypart" + (exercise.secondaryBodyparts.length>1 ? "s": "") + ": " + exercise.secondaryBodyparts.join(", ")
+  return(
+    <>
+    <span
+      className="mr-4 [&>svg]:h-4 [&>svg]:w-4 [&>svg]:text-gray-300">
+      <button onClick={goBack}>
+        <Image
+        src="/return_arrow.svg"
+        alt="Return"
+        width={50}
+        height={50}
+        priority
+      />
+      </button>
+    </span>
+    <br/>
+    {primary_bodyparts}
+    <br/>
+    {secondary_bodyparts}
+    </>
+  )
+}
+
+function ExerciseButton({ exercise, onExerciseClick }: {exercise: Exercise, onExerciseClick: any}) {
+  function click(){
+    onExerciseClick(exercise)
+  }
   return (
-    <button className="group m-1 rounded-lg border border-gray-500 px-5 py-4 transition-colors bg-gray-900 hover:border-red-700 hover:bg-neutral-800/50">
+    <button 
+      className="group m-1 rounded-lg border border-gray-500 px-5 py-4 transition-colors bg-gray-900 hover:border-red-700 hover:bg-neutral-800/50"
+      onClick={click}>
         <h2 className={`mb-3 text-2xl font-semibold`}>
           {exercise.name}{" "}
           <span className="inline-block transition-transform group-hover:translate-x-2 motion-reduce:transform-none">
@@ -52,14 +83,15 @@ function BodypartButton({name, onToggleBodypart}: {name: string, onToggleBodypar
   )
 }
 
-function ExerciseTable({ exercises, filterText, selectedBodyparts }: { exercises: Exercise[], filterText: string, selectedBodyparts: string[] }) {
+function ExerciseTable({ exercises, filterText, selectedBodyparts, onExerciseClick }: 
+  { exercises: Exercise[], filterText: string, selectedBodyparts: string[], onExerciseClick: any }) {
     const exerciseButtons:JSX.Element[] = [];
     exercises.forEach((exercise) => {
       if(selectedBodyparts.length == 0 || 
         selectedBodyparts.filter(x => exercise.primaryBodyparts.includes(x) || exercise.secondaryBodyparts.includes(x)).length>0){
         if(exercise.name.toLowerCase().includes(filterText.toLowerCase())){
           exerciseButtons.push(
-            <ExerciseButton exercise={exercise} key={exercise.name}/>
+            <ExerciseButton exercise={exercise} key={exercise.name} onExerciseClick={onExerciseClick}/>
           );
         }
       }
@@ -84,10 +116,9 @@ function SearchBar({filterText, onFilterChange}: {filterText: string, onFilterCh
     );
 }
 
-function FilterableExerciseTable({ exercises, bodyparts }: { exercises: Exercise[], bodyparts: string[]}) {
+function FilterableExerciseTable({ exercises, bodyparts, onExerciseClick }: { exercises: Exercise[], bodyparts: string[], onExerciseClick: any}) {
   const [filterText, setFilterText] = useState('');
-  const initSelectedBodyparts: string[] = []
-  const [selectedBodyparts, setSelectedBodyparts] = useState(initSelectedBodyparts)
+  const [selectedBodyparts, setSelectedBodyparts] = useState<string[]>([])
 
   function addOrRemoveBodypart(bodypart: string, add: boolean){
     let newBodyparts = [...selectedBodyparts]
@@ -113,16 +144,16 @@ function FilterableExerciseTable({ exercises, bodyparts }: { exercises: Exercise
       <ExerciseTable 
         exercises={exercises}
         filterText={filterText} 
-        selectedBodyparts={selectedBodyparts}/>
+        selectedBodyparts={selectedBodyparts}
+        onExerciseClick={onExerciseClick}/>
     </div>
   )
 }
 
 function Train(){
-  const initExercises: Exercise[] = []
-  const initBodyparts: string[] = []
-  const [exercises, setExercises] = useState(initExercises);
-  const [bodyparts, setBodyparts] = useState(initBodyparts)
+  const [selectedExercise, setSelectedExercise] = useState<Exercise|undefined>(undefined)
+  const [exercises, setExercises] = useState< Exercise[]>([]);
+  const [bodyparts, setBodyparts] = useState<string[]>([]);
 
   function fillExercises(exercisesJson: any[]){
     let exercisesToSave: Exercise[] = []
@@ -131,6 +162,10 @@ function Train(){
       exercisesToSave.push(newExercise)
     });
     setExercises(exercisesToSave);
+  }
+
+  function resetSelectedExercise(){
+    setSelectedExercise(undefined)
   }
 
   useEffect(() => {
@@ -147,7 +182,10 @@ function Train(){
 
 
   return(
-    <FilterableExerciseTable exercises={exercises} bodyparts={bodyparts}  />
+    <>
+    {selectedExercise === undefined && <FilterableExerciseTable exercises={exercises} bodyparts={bodyparts} onExerciseClick={setSelectedExercise}/>}  
+    {selectedExercise == undefined ? <></>: <ExercisePage exercise={selectedExercise} goBack={resetSelectedExercise}/>} 
+    </>
   )
 }
 
@@ -242,7 +280,6 @@ export default function Home() {
   const [showSideNav, setShowSideNav] = useState(true);
 
   function showTrain(){
-    console.log(BACKEND_URL)
     setCurrentPage("train")
     setShowSideNav(false)
   }
