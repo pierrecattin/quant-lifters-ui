@@ -281,9 +281,22 @@ function SideNavButton({toggleSideNav}: {toggleSideNav: any}){
   )
 }
 
-function LoginPage({ onLogin }: { onLogin: (username: string, password: string) => void }) {
+function LoginPage({ onLogin, setIsAuthenticated }: 
+  { onLogin: (username: string, password: string) => void , setIsAuthenticated: any }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+
+  // ByPass login if user is already authenticated (via cookie authToken)
+  const userIsAuthenticated = async () =>{
+    fetch(`${BACKEND_URL}userisauthenticated`, {
+      method: 'GET',
+      credentials: 'include',
+    })
+    .then(response => response.json())
+    .then(x => setIsAuthenticated(Boolean(x.is_authenticated)))
+    .catch(error => console.error(error));
+  }
+  userIsAuthenticated();
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -305,7 +318,7 @@ export default function Home() {
   const [showSideNav, setShowSideNav] = useState(true);
 
   const login = async (username: string, password: string) => {
-    const response = await fetch(`${BACKEND_URL}api-token-auth/`, {
+    const response = await fetch(`${BACKEND_URL}login`, {
       method: 'POST',
       body: String(JSON.stringify({ username, password })),
       headers: {
@@ -349,7 +362,7 @@ export default function Home() {
           <Content currentPage={currentPage} leftPos={showSideNav ? "left-60" : "left-0"}/>
         </>
       ) : (
-        <LoginPage onLogin={login} />
+        <LoginPage onLogin={login} setIsAuthenticated={setIsAuthenticated}/>
       )}
     </>
   );
