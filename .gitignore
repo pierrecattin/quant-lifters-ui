@@ -12,6 +12,8 @@
 /.next/
 
 
+/public/*.map
+/public/*.js
 
 # misc
 .DS_Store

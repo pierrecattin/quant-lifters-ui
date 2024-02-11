@@ -169,12 +169,18 @@ function Train(){
   }
 
   useEffect(() => {
-    fetch(BACKEND_URL+"allbodyparts/")
+      fetch(`${BACKEND_URL}allbodyparts/`, {
+        method: 'GET',
+        credentials: 'include',
+      })
       .then(response => response.json())
       .then(json => setBodyparts(json.bodyparts))
       .catch(error => console.error(error));
-
-    fetch(BACKEND_URL+"allexercises/")
+      
+      fetch(`${BACKEND_URL}allexercises/`, {
+        method: 'GET',
+        credentials: 'include',
+      })
       .then(response => response.json())
       .then(json => fillExercises(json))
       .catch(error => console.error(error));
@@ -275,9 +281,45 @@ function SideNavButton({toggleSideNav}: {toggleSideNav: any}){
   )
 }
 
+function LoginPage({ onLogin }: { onLogin: (username: string, password: string) => void }) {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    onLogin(username, password);
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Username" required />
+      <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" required />
+      <button type="submit">Login</button>
+    </form>
+  );
+}
+
 export default function Home() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentPage, setCurrentPage] = useState("blank");
   const [showSideNav, setShowSideNav] = useState(true);
+
+  const login = async (username: string, password: string) => {
+    const response = await fetch(`${BACKEND_URL}api-token-auth/`, {
+      method: 'POST',
+      body: String(JSON.stringify({ username, password })),
+      headers: {
+        'Content-Type': 'application/json', 
+      },
+      credentials: 'include',
+    });
+  
+    if (response.ok) {
+      setIsAuthenticated(true);
+    } else {
+      alert('Login failed');
+    }
+  };
 
   function showTrain(){
     setCurrentPage("train")
@@ -298,11 +340,17 @@ export default function Home() {
     setShowSideNav(!showSideNav)
   }
 
-  return(
+  return (
     <>
-      {showSideNav && <SideNav showTrain={showTrain} showStats={showStats} showConfig={showConfig} />}
-      {!showSideNav && <SideNavButton toggleSideNav={toggleSideNav} />}
-      <Content currentPage={currentPage} leftPos={showSideNav ? "left-60" : "left-0"}/>
+      {isAuthenticated ? (
+        <>
+          {showSideNav && <SideNav showTrain={showTrain} showStats={showStats} showConfig={showConfig} />}
+          {!showSideNav && <SideNavButton toggleSideNav={toggleSideNav} />}
+          <Content currentPage={currentPage} leftPos={showSideNav ? "left-60" : "left-0"}/>
+        </>
+      ) : (
+        <LoginPage onLogin={login} />
+      )}
     </>
-  )
+  );
 }
