@@ -201,18 +201,23 @@ function Stats(){
   )
 }
 
-function Config(){
+function Config({logout}: {logout:any}){
+
   return(
-    "Config"
+    <button type="submit" 
+    onClick={logout}
+    className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+      Logout
+  </button>
   )
 }
 
-function Content({currentPage, leftPos}:{currentPage: string, leftPos:string}){
+function Content({currentPage, leftPos, logout}:{currentPage: string, leftPos:string, logout: any}){
   return(
     <div className={"absolute px-5 "+leftPos} >
     {currentPage === 'train' && <Train  />}
     {currentPage === 'stats' &&  <Stats /> }
-    {currentPage === 'config' &&  <Config /> }
+    {currentPage === 'config' &&  <Config logout={logout}/> }
     </div>
   )
 }
@@ -280,7 +285,6 @@ function SideNavButton({toggleSideNav}: {toggleSideNav: any}){
     </button>
   )
 }
-
 
 function LoginPage({
   onLogin, onSignUpClick}: {onLogin: (username: string, password: string) => void, onSignUpClick: any }) {
@@ -453,6 +457,16 @@ export default function Home() {
       }
   };
 
+  const logout = async () => {
+    const response = await fetch(`${BACKEND_URL}logout`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+    setIsAuthenticated(false);
+  };
+
+
+
   function showTrain(){
     setCurrentPage("train")
     setShowSideNav(false)
@@ -478,7 +492,7 @@ export default function Home() {
         <>
           {showSideNav && <SideNav showTrain={showTrain} showStats={showStats} showConfig={showConfig} />}
           {!showSideNav && <SideNavButton toggleSideNav={toggleSideNav} />}
-          <Content currentPage={currentPage} leftPos={showSideNav ? "left-60" : "left-0"}/>
+          <Content currentPage={currentPage} leftPos={showSideNav ? "left-60" : "left-0"} logout={logout}/>
         </>
       ) : (
         <LoginOrSignupPage onLogin={login} setIsAuthenticated={setIsAuthenticated}/>
