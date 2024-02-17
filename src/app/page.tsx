@@ -31,13 +31,91 @@ enum pageName {
 
 
 
-function ExerciseTrack(){
-  return(
-    <div className="relative" >
-    track
-    </div>
-  )
-} 
+function ExerciseTrack() {
+  const [sets, setSets] = useState([{ weight: '', reps: '', rir: '' }]);
+
+  const handleSetChange = (index: number, field: string, value: string) => {
+    const newSets = [...sets];
+    newSets[index] = { ...newSets[index], [field]: value };
+    setSets(newSets);
+  };
+
+  const addSet = () => {
+    setSets([...sets, { weight: '', reps: '', rir: '' }]);
+  };
+
+  const removeSet = (index: number) => {
+    const newSets = [...sets];
+    newSets.splice(index, 1);
+    setSets(newSets);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    alert('TODO: SaveExercisesSets endpoint');
+    /*const response = await fetch(`${BACKEND_URL}/SaveExercisesSets`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ sets }),
+    });
+
+    if (response.ok) {
+      console.log('Sets saved successfully!');
+    } else {
+      console.error('Failed to save sets');
+    }*/
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-2">
+      {sets.map((set, index) => (
+        <div key={index} className="flex items-center space-x-2">
+          <span className="text-lg">{index + 1}.</span>
+          <input
+            type="number"
+            step="0.25"
+            min="0"
+            className="w-20 p-1 border rounded-md text-gray-100 bg-gray-800"
+            value={set.weight}
+            onChange={(e) => handleSetChange(index, 'weight', e.target.value)}
+            placeholder="Weight"
+          />
+          <input
+            type="number"
+            min="1"
+            className="w-20 p-1 border rounded-md text-gray-100 bg-gray-800 "
+            value={set.reps}
+            onChange={(e) => handleSetChange(index, 'reps', e.target.value)}
+            placeholder="Reps"
+          />
+          <input
+            type="number"
+            min="0"
+            className="w-20 p-1 border rounded-md  bg-gray-800"
+            value={set.rir}
+            onChange={(e) => handleSetChange(index, 'rir', e.target.value)}
+            placeholder="RiR"
+          />
+          {sets.length > 1 && (
+            <button type="button" onClick={() => removeSet(index)} className="p-1 bg-red-800 text-white rounded-md">
+              -
+            </button>
+          )}
+        </div>
+      ))}
+      <div className="flex space-x-2 my-6">
+        <button type="button" onClick={addSet} className="py-1 px-3 mx-3 my-4 bg-green-900 text-white rounded-md">
+          +
+        </button>
+        <button type="submit" className="p-1 bg-purple-900 text-white rounded-md my-4">
+          Save
+        </button>
+      </div>
+    </form>
+  );
+}
 
 function ExerciseHistory(){
   return(
