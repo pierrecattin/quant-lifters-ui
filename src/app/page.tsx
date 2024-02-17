@@ -21,6 +21,14 @@ class Exercise {
   }
 }
 
+enum pageName {
+  profile,
+  workout,
+  exercises,
+  stats,
+  competition,
+}
+
 
 function ExercisePage({ exercise, goBack}: {exercise: Exercise, goBack:any}){
   const primary_bodyparts = "Primary bodypart" + (exercise.primaryBodyparts.length>1 ? "s": "") + ": " + exercise.primaryBodyparts.join(", ")
@@ -202,21 +210,21 @@ function Exercises(){
   )
 }
 
-function Train(){
+function Workout(){
   return(
-    "Train"
+    "Workout page. For know, log your sets using the exercises page"
   )
 }
 
 function Stats(){
   return(
-    "Stats"
+    "Stats page"
   )
 }
 
-function Compete(){
+function Competition(){
   return(
-    "Compete"
+    "Competition page"
   )
 }
 
@@ -231,27 +239,27 @@ function Profile({logout}: {logout:any}){
   )
 }
 
-function Content({currentPage, logout}:{currentPage: string, logout: any}){
+function Content({currentPage, logout}:{currentPage: pageName, logout: any}){
   return(
     <div className={"absolute p-5 "} >
-    {currentPage === 'profile' && <Profile  logout={logout}/>}
-    {currentPage === 'train' && <Train  />}
-    {currentPage === 'exercises' &&  <Exercises/> }
-    {currentPage === 'stats' &&  <Stats /> }
-    {currentPage === 'compete' &&  <Compete/> }
+    {currentPage === pageName.profile && <Profile  logout={logout}/>}
+    {currentPage === pageName.workout && <Workout  />}
+    {currentPage === pageName.exercises &&  <Exercises/> }
+    {currentPage === pageName.stats &&  <Stats /> }
+    {currentPage === pageName.competition &&  <Competition/> }
     </div>
   )
 }
 
-function BottomNavBar({ currentPage, showProfile, showTrain, showExercises, showStats, showCompete }:
-  { currentPage: string, showProfile: any, showTrain: any, showExercises: any, showStats: any, showCompete: any }) {
+function BottomNavBar({ currentPage, showProfile, showWorkout, showExercises, showStats, showCompetition }:
+  { currentPage: pageName, showProfile: any, showWorkout: any, showExercises: any, showStats: any, showCompetition: any }) {
 
   const pages = [
-    { name: 'profile', action: showProfile, icon: '/icons/profile.svg' },
-    { name: 'train', action: showTrain, icon: '/icons/train.svg' },
-    { name: 'exercises', action: showExercises, icon: '/icons/exercises.svg' },
-    { name: 'stats', action: showStats, icon: '/icons/stats.svg' },
-    { name: 'compete', action: showCompete, icon: '/icons/compete.svg' },
+    { name: pageName.profile, action: showProfile, icon: '/icons/profile.svg' },
+    { name: pageName.workout, action: showWorkout, icon: '/icons/workout.svg' },
+    { name: pageName.exercises, action: showExercises, icon: '/icons/exercises.svg' },
+    { name: pageName.stats, action: showStats, icon: '/icons/stats.svg' },
+    { name: pageName.competition, action: showCompetition, icon: '/icons/competition.svg' },
   ];
 
   return (
@@ -420,7 +428,7 @@ function LoginOrSignupPage({
 
 export default function Home() {
   const [isAuthenticated, setIsAuthenticated] = useState(true);
-  const [currentPage, setCurrentPage] = useState("profile");
+  const [currentPage, setCurrentPage] = useState(pageName.profile);
 
   const login = async (email: string, password: string) => {
     const response = await fetch(`${BACKEND_URL}login`, {
@@ -450,30 +458,30 @@ export default function Home() {
 
   
   function showProfile(){
-    setCurrentPage("profile")
+    setCurrentPage(pageName.profile)
   }
 
-  function showTrain(){
-    setCurrentPage("train")
+  function showWorkout(){
+    setCurrentPage(pageName.workout)
   }
 
   function showExercises(){
-    setCurrentPage("exercises")
+    setCurrentPage(pageName.exercises)
   }
 
   function showStats(){
-    setCurrentPage("stats")
+    setCurrentPage(pageName.stats)
   }
   
-  function showCompete(){
-    setCurrentPage("compete")
+  function showCompetition(){
+    setCurrentPage(pageName.competition)
   }
 
   return (
     <>
       {isAuthenticated ? (
         <>
-          <BottomNavBar currentPage={currentPage} showProfile={showProfile} showTrain={showTrain} showExercises={showExercises} showStats={showStats} showCompete={showCompete} />
+          <BottomNavBar currentPage={currentPage} showProfile={showProfile} showWorkout={showWorkout} showExercises={showExercises} showStats={showStats} showCompetition={showCompetition} />
           <Content currentPage={currentPage} logout={logout}/>
         </>
       ) : (
