@@ -28,7 +28,7 @@ function ExercisePage({ exercise, goBack}: {exercise: Exercise, goBack:any}){
   return(
     <>
     <span
-      className="mr-4 [&>svg]:h-4 [&>svg]:w-4 [&>svg]:text-gray-300">
+      className="mr-4">
       <button onClick={goBack}>
         <Image
         src="icons/return_arrow.svg"
@@ -233,7 +233,7 @@ function Profile({logout}: {logout:any}){
 
 function Content({currentPage, logout}:{currentPage: string, logout: any}){
   return(
-    <div className={"absolute px-5 "} >
+    <div className={"absolute p-5 "} >
     {currentPage === 'profile' && <Profile  logout={logout}/>}
     {currentPage === 'train' && <Train  />}
     {currentPage === 'exercises' &&  <Exercises/> }
@@ -255,7 +255,7 @@ function BottomNavBar({ currentPage, showProfile, showTrain, showExercises, show
   ];
 
   return (
-    <div className="fixed inset-x-0 bottom-0 bg-gray-800 text-white flex justify-around items-center h-12 shadow-lg">
+    <div className="fixed z-50 inset-x-0 bottom-0 bg-gray-800 text-white flex justify-around items-center h-12 shadow-lg">
       {pages.map((page) => (
         <button 
           key={page.name} 
