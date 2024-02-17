@@ -31,7 +31,7 @@ function ExercisePage({ exercise, goBack}: {exercise: Exercise, goBack:any}){
       className="mr-4 [&>svg]:h-4 [&>svg]:w-4 [&>svg]:text-gray-300">
       <button onClick={goBack}>
         <Image
-        src="/return_arrow.svg"
+        src="icons/return_arrow.svg"
         alt="Return"
         width={50}
         height={50}
@@ -150,7 +150,7 @@ function FilterableExerciseTable({ exercises, bodyparts, onExerciseClick }: { ex
   )
 }
 
-function Train(){
+function Exercises(){
   const [selectedExercise, setSelectedExercise] = useState<Exercise|undefined>(undefined)
   const [exercises, setExercises] = useState< Exercise[]>([]);
   const [bodyparts, setBodyparts] = useState<string[]>([]);
@@ -202,95 +202,72 @@ function Train(){
   )
 }
 
+function Train(){
+  return(
+    "Train"
+  )
+}
+
 function Stats(){
   return(
     "Stats"
   )
 }
 
-function Config({logout}: {logout:any}){
+function Compete(){
+  return(
+    "Compete"
+  )
+}
 
+
+function Profile({logout}: {logout:any}){
   return(
     <button type="submit" 
     onClick={logout}
-    className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+    className="w-full m-4 flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
       Logout
   </button>
   )
 }
 
-function Content({currentPage, leftPos, logout}:{currentPage: string, leftPos:string, logout: any}){
+function Content({currentPage, logout}:{currentPage: string, logout: any}){
   return(
-    <div className={"absolute px-5 "+leftPos} >
+    <div className={"absolute px-5 "} >
+    {currentPage === 'profile' && <Profile  logout={logout}/>}
     {currentPage === 'train' && <Train  />}
+    {currentPage === 'exercises' &&  <Exercises/> }
     {currentPage === 'stats' &&  <Stats /> }
-    {currentPage === 'config' &&  <Config logout={logout}/> }
+    {currentPage === 'compete' &&  <Compete/> }
     </div>
   )
 }
 
-function SideNav({showTrain, showStats, showConfig}:{showTrain: any, showStats:any, showConfig: any}){
-  return(
-    <nav
-        id="sidenav-1"
-        className="absolute left-0 top-0 z-[1035] h-full w-60 -translate-x-full overflow-hidden shadow-[0_4px_12px_0_rgba(0,0,0,0.07),_0_2px_4px_rgba(0,0,0,0.05)] data-[te-sidenav-hidden='false']:translate-x-0 bg-zinc-800"
-        data-te-sidenav-init
-        data-te-sidenav-hidden="false"
-        data-te-sidenav-position="absolute">
-      <ul className="relative m-0 list-none px-[0.2rem]" data-te-sidenav-menu-ref>
-        <li className="relative">
-          <a
-            className="flex h-12 cursor-pointer items-center truncate rounded-[5px] px-6 py-4 text-[0.875rem] outline-none transition duration-300 ease-linear hover:bg-slate-50 hover:text-inherit hover:outline-none focus:bg-slate-50 focus:text-inherit focus:outline-none active:bg-slate-50 active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none text-gray-300 hover:bg-white/10 focus:bg-white/10 active:bg-white/10"
-            data-te-sidenav-link-ref
-            onClick={showTrain}>
-            <span>Train</span>
-          </a>
-        </li>
-        <li className="relative">
-          <a
-            className="flex h-12 cursor-pointer items-center truncate rounded-[5px] px-6 py-4 text-[0.875rem] outline-none transition duration-300 ease-linear hover:bg-slate-50 hover:text-inherit hover:outline-none focus:bg-slate-50 focus:text-inherit focus:outline-none active:bg-slate-50 active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none text-gray-300 hover:bg-white/10 focus:bg-white/10 active:bg-white/10"
-            data-te-sidenav-link-ref
-            onClick={showStats}>
-            <span>Stats</span>
-          </a>
-        </li>
-        <li className="relative">
-          <a
-            className="flex h-12 cursor-pointer items-center truncate rounded-[5px] px-6 py-4 text-[0.875rem] outline-none transition duration-300 ease-linear hover:bg-slate-50 hover:text-inherit hover:outline-none focus:bg-slate-50 focus:text-inherit focus:outline-none active:bg-slate-50 active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none text-gray-300 hover:bg-white/10 focus:bg-white/10 active:bg-white/10"
-            data-te-sidenav-link-ref
-            onClick={showConfig}>
-            <span
-              className="mr-4 [&>svg]:h-4 [&>svg]:w-4 [&>svg]:text-gray-300">
-              <Image
-                src="/cogwheel.svg"
-                alt="Settings"
-                width={25}
-                height={25}
-                priority
-              />
-            </span>
-          </a>
-        </li>
-      </ul>
-    </nav> 
-  )
-}
+function BottomNavBar({ currentPage, showProfile, showTrain, showExercises, showStats, showCompete }:
+  { currentPage: string, showProfile: any, showTrain: any, showExercises: any, showStats: any, showCompete: any }) {
 
-function SideNavButton({toggleSideNav}: {toggleSideNav: any}){
-  return(
-    <button
-        className="inline-block rounded bg-primary px-2 py-2.5 text-xs font-medium uppercase leading-tight text-white transition duration-150 ease-in-out hover:bg-primary-700 hover:shadow-lg focus:bg-primary-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-primary-800 active:shadow-lg z-[1036]"
-       onClick={toggleSideNav}>
-    <span className="block [&>svg]:h-5 [&>svg]:w-5 [&>svg]:text-white">
-      <Image
-        src="/sandwich.svg"
-        alt="Settings"
-        width={25}
-        height={25}
-      />
-    </span>
-    </button>
-  )
+  const pages = [
+    { name: 'profile', action: showProfile, icon: '/icons/profile.svg' },
+    { name: 'train', action: showTrain, icon: '/icons/train.svg' },
+    { name: 'exercises', action: showExercises, icon: '/icons/exercises.svg' },
+    { name: 'stats', action: showStats, icon: '/icons/stats.svg' },
+    { name: 'compete', action: showCompete, icon: '/icons/compete.svg' },
+  ];
+
+  return (
+    <div className="fixed inset-x-0 bottom-0 bg-gray-800 text-white flex justify-around items-center h-12 shadow-lg">
+      {pages.map((page) => (
+        <button 
+          key={page.name} 
+          onClick={page.action} 
+          className={`flex-1 flex justify-center items-center h-full transition-all duration-300 ease-in-out
+                      ${currentPage === page.name ? 'bg-gray-700 -translate-y-1 shadow-xl' : 'shadow-black'}`}
+          style={{ transform: currentPage === page.name ? 'translateY(-4px) ' : 'none' }}>
+            <img src={page.icon} alt={`${page.name} icon`} className="w-10 h-10" />
+        </button>
+      ))}
+    </div>
+  );
 }
 
 function LoginPage({
@@ -442,9 +419,8 @@ function LoginOrSignupPage({
 
 
 export default function Home() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [currentPage, setCurrentPage] = useState("blank");
-  const [showSideNav, setShowSideNav] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [currentPage, setCurrentPage] = useState("profile");
 
   const login = async (email: string, password: string) => {
     const response = await fetch(`${BACKEND_URL}login`, {
@@ -472,34 +448,33 @@ export default function Home() {
     setIsAuthenticated(false);
   };
 
-
+  
+  function showProfile(){
+    setCurrentPage("profile")
+  }
 
   function showTrain(){
     setCurrentPage("train")
-    setShowSideNav(false)
   }
 
-  function showConfig(){
-    setCurrentPage("config")
-    setShowSideNav(false)
+  function showExercises(){
+    setCurrentPage("exercises")
   }
 
   function showStats(){
     setCurrentPage("stats")
-    setShowSideNav(false)
   }
-
-  function toggleSideNav(){
-    setShowSideNav(!showSideNav)
+  
+  function showCompete(){
+    setCurrentPage("compete")
   }
 
   return (
     <>
       {isAuthenticated ? (
         <>
-          {showSideNav && <SideNav showTrain={showTrain} showStats={showStats} showConfig={showConfig} />}
-          {!showSideNav && <SideNavButton toggleSideNav={toggleSideNav} />}
-          <Content currentPage={currentPage} leftPos={showSideNav ? "left-60" : "left-0"} logout={logout}/>
+          <BottomNavBar currentPage={currentPage} showProfile={showProfile} showTrain={showTrain} showExercises={showExercises} showStats={showStats} showCompete={showCompete} />
+          <Content currentPage={currentPage} logout={logout}/>
         </>
       ) : (
         <LoginOrSignupPage onLogin={login} setIsAuthenticated={setIsAuthenticated}/>
