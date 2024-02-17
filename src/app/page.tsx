@@ -30,28 +30,90 @@ enum pageName {
 }
 
 
-function ExercisePage({ exercise, goBack}: {exercise: Exercise, goBack:any}){
-  const primary_bodyparts = "Primary bodypart" + (exercise.primaryBodyparts.length>1 ? "s": "") + ": " + exercise.primaryBodyparts.join(", ")
-  const secondary_bodyparts = exercise.secondaryBodyparts.length == 0 ? "": "Secondary bodypart" + (exercise.secondaryBodyparts.length>1 ? "s": "") + ": " + exercise.secondaryBodyparts.join(", ")
+
+function ExerciseTrack(){
   return(
-    <>
-    <span
-      className="mr-4">
-      <button onClick={goBack}>
-        <Image
-        src="icons/return_arrow.svg"
-        alt="Return"
-        width={50}
-        height={50}
-        priority
-      />
-      </button>
-    </span>
-    <br/>
-    {primary_bodyparts}
-    <br/>
-    {secondary_bodyparts}
-    </>
+    <div className="relative" >
+    track
+    </div>
+  )
+} 
+
+function ExerciseHistory(){
+  return(
+    "history"
+  )
+} 
+
+function ExerciseDetails(){
+  return(
+    "details"
+  )
+} 
+
+function ExercisePage({ exercise, goBack}: {exercise: Exercise, goBack:any}){ 
+  enum exerciseSubPageName {
+    track = "Track",
+    history = "History",
+    details = "Details",
+  }
+  const [currentExerciseSubpage, setCurrentExerciseSubpage] = useState(exerciseSubPageName.track);
+  
+  function showTrack(){
+    setCurrentExerciseSubpage(exerciseSubPageName.track)
+  }
+
+  function showHistory(){
+    setCurrentExerciseSubpage(exerciseSubPageName.history)
+  }
+
+  function showDetails(){
+    setCurrentExerciseSubpage(exerciseSubPageName.details)
+  }
+  
+  const pages = [
+    { name: exerciseSubPageName.track, action: showTrack},
+    { name: exerciseSubPageName.history, action: showHistory },
+    { name: exerciseSubPageName.details, action: showDetails },
+  ];
+
+
+  return(
+    <div className ="z-40 fixed w-full">
+      <div className = "top-0">
+        <div>
+          <span>
+            <button onClick={goBack}>
+              <Image
+              src="icons/return_arrow.svg"
+              alt="Return"
+              width={20}
+              height={20}
+            />
+            </button>
+          </span>
+          <span className="text-lg mx-7">
+            {exercise.name} 
+          </span>
+      </div>
+      <div className="inset-x-0 flex justify-around items-center h-12  ">
+        {pages.map((page) => (
+          <button 
+            key={page.name} 
+            onClick={page.action} 
+            className={`flex-1 flex justify-center items-center h-full shadow-md
+            ${currentExerciseSubpage === page.name ?  ' border-b border-white text-white' : ' text-slate-500'}`}>
+            {page.name}
+          </button>
+        ))}
+      </div>
+      </div>
+      <div className="my-3">
+        {currentExerciseSubpage === exerciseSubPageName.track && <ExerciseTrack  />}
+        {currentExerciseSubpage === exerciseSubPageName.history && <ExerciseHistory />}
+        {currentExerciseSubpage === exerciseSubPageName.details && <ExerciseDetails />}
+      </div>
+    </div>
   )
 }
 
@@ -428,7 +490,7 @@ function LoginOrSignupPage({
 
 export default function Home() {
   const [isAuthenticated, setIsAuthenticated] = useState(true);
-  const [currentPage, setCurrentPage] = useState(pageName.profile);
+  const [currentPage, setCurrentPage] = useState(pageName.exercises);
 
   const login = async (email: string, password: string) => {
     const response = await fetch(`${BACKEND_URL}login`, {
