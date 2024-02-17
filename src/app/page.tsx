@@ -220,49 +220,12 @@ function FilterableExerciseTable({ exercises, bodyparts, onExerciseClick }: { ex
   )
 }
 
-function Exercises(){
+function Exercises({exercises, bodyparts}: {exercises:Exercise[], bodyparts: string[]}){
   const [selectedExercise, setSelectedExercise] = useState<Exercise|undefined>(undefined)
-  const [exercises, setExercises] = useState< Exercise[]>([]);
-  const [bodyparts, setBodyparts] = useState<string[]>([]);
-
-  function flattenBodyparts(bodypartsJson: any[]){
-    return (
-      bodypartsJson.flatMap((b) => (b.name))
-    )
-  }
-
-  function fillExercises(exercisesJson: any[]){
-    let exercisesToSave: Exercise[] = []
-    exercisesJson.forEach(exercise => {
-      const newExercise = new Exercise(exercise.name, flattenBodyparts(exercise.primary_bodyparts), flattenBodyparts(exercise.secondary_bodyparts), false)
-      exercisesToSave.push(newExercise)
-    });
-    setExercises(exercisesToSave);
-  }
 
   function resetSelectedExercise(){
     setSelectedExercise(undefined)
   }
-
-  useEffect(() => {
-      fetch(`${BACKEND_URL}allbodyparts/`, {
-        method: 'GET',
-        credentials: 'include',
-      })
-      .then(response => response.json())
-      .then(json => flattenBodyparts(json.bodyparts))
-      .then(stringArray => setBodyparts(stringArray))
-      .catch(error => console.error(error));
-      
-      fetch(`${BACKEND_URL}allexercises/`, {
-        method: 'GET',
-        credentials: 'include',
-      })
-      .then(response => response.json())
-      .then(json => fillExercises(json.exercises))
-      .catch(error => console.error(error));
-  }, []);
-
 
   return(
     <>
@@ -302,11 +265,50 @@ function Profile({logout}: {logout:any}){
 }
 
 function Content({currentPage, logout}:{currentPage: pageName, logout: any}){
+  const [exercises, setExercises] = useState< Exercise[]>([]);
+  const [bodyparts, setBodyparts] = useState<string[]>([]);
+
+  function flattenBodyparts(bodypartsJson: any[]){
+    return (
+      bodypartsJson.flatMap((b) => (b.name))
+    )
+  }
+
+  function fillExercises(exercisesJson: any[]){
+    let exercisesToSave: Exercise[] = []
+    exercisesJson.forEach(exercise => {
+        const newExercise = new Exercise(exercise.name, flattenBodyparts(exercise.primary_bodyparts), flattenBodyparts(exercise.secondary_bodyparts), false)
+        exercisesToSave.push(newExercise)
+      });
+      setExercises(exercisesToSave);
+    }
+
+
+
+  useEffect(() => {
+      fetch(`${BACKEND_URL}allbodyparts/`, {
+        method: 'GET',
+        credentials: 'include',
+      })
+      .then(response => response.json())
+      .then(json => flattenBodyparts(json.bodyparts))
+      .then(stringArray => setBodyparts(stringArray))
+      .catch(error => console.error(error));
+      
+      fetch(`${BACKEND_URL}allexercises/`, {
+        method: 'GET',
+        credentials: 'include',
+      })
+      .then(response => response.json())
+      .then(json => fillExercises(json.exercises))
+      .catch(error => console.error(error));
+  }, []);
+
   return(
     <div className={"absolute p-5 "} >
     {currentPage === pageName.profile && <Profile  logout={logout}/>}
     {currentPage === pageName.workout && <Workout  />}
-    {currentPage === pageName.exercises &&  <Exercises/> }
+    {currentPage === pageName.exercises &&  <Exercises exercises={exercises} bodyparts={bodyparts}/> }
     {currentPage === pageName.stats &&  <Stats /> }
     {currentPage === pageName.competition &&  <Competition/> }
     </div>
