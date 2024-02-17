@@ -21,6 +21,18 @@ class Exercise {
   }
 }
 
+class ExerciseSetInProgress {
+  weight?: number;
+  reps?: number;
+  rir?: number; 
+ 
+  constructor(weight?: number, reps?: number, rir?: number) {
+    this.weight = weight;
+    this.reps = reps;
+    this.rir = rir
+  }
+}
+
 enum pageName {
   profile,
   workout,
@@ -30,9 +42,17 @@ enum pageName {
 }
 
 
+function ExerciseTrack({exercise}:{exercise: Exercise}) {
+  const storageKey = exercise.name + "SetInProgress"
+  const [sets, setSets] = useState<ExerciseSetInProgress[]>(() => {
+    const savedSets = localStorage.getItem(storageKey);
+    return savedSets ? JSON.parse(savedSets) : [new ExerciseSetInProgress];
+  });
 
-function ExerciseTrack() {
-  const [sets, setSets] = useState([{ weight: '', reps: '', rir: '' }]);
+  // Use useEffect to update localStorage when sets change
+  useEffect(() => {
+    localStorage.setItem(storageKey, JSON.stringify(sets));
+  }, [sets]);
 
   const handleSetChange = (index: number, field: string, value: string) => {
     const newSets = [...sets];
@@ -41,7 +61,7 @@ function ExerciseTrack() {
   };
 
   const addSet = () => {
-    setSets([...sets, { weight: '', reps: '', rir: '' }]);
+    setSets([...sets, new ExerciseSetInProgress() ]);
   };
 
   const removeSet = (index: number) => {
@@ -53,6 +73,7 @@ function ExerciseTrack() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     alert('TODO: SaveExercisesSets endpoint');
+
     /*const response = await fetch(`${BACKEND_URL}/SaveExercisesSets`, {
       method: 'POST',
       headers: {
@@ -187,7 +208,7 @@ function ExercisePage({ exercise, goBack}: {exercise: Exercise, goBack:any}){
       </div>
       </div>
       <div className="my-3">
-        {currentExerciseSubpage === exerciseSubPageName.track && <ExerciseTrack  />}
+        {currentExerciseSubpage === exerciseSubPageName.track && <ExerciseTrack exercise={exercise}  />}
         {currentExerciseSubpage === exerciseSubPageName.history && <ExerciseHistory />}
         {currentExerciseSubpage === exerciseSubPageName.details && <ExerciseDetails />}
       </div>
@@ -299,16 +320,23 @@ function FilterableExerciseTable({ exercises, bodyparts, onExerciseClick }: { ex
 }
 
 function Exercises({exercises, bodyparts}: {exercises:Exercise[], bodyparts: string[]}){
-  const [selectedExercise, setSelectedExercise] = useState<Exercise|undefined>(undefined)
+  const [selectedExercise, setSelectedExercise]  = useState<Exercise|null>(() => {
+    const selectedExercise = localStorage.getItem("selectedExercise");
+    return selectedExercise ? JSON.parse(selectedExercise) : null;
+  });
+
+  useEffect(() => {
+      localStorage.setItem("selectedExercise", JSON.stringify(selectedExercise));
+    }, [selectedExercise]);
 
   function resetSelectedExercise(){
-    setSelectedExercise(undefined)
+    setSelectedExercise(null)
   }
 
   return(
     <>
-    {selectedExercise === undefined && <FilterableExerciseTable exercises={exercises} bodyparts={bodyparts} onExerciseClick={setSelectedExercise}/>}  
-    {selectedExercise == undefined ? <></>: <ExercisePage exercise={selectedExercise} goBack={resetSelectedExercise}/>} 
+    {selectedExercise === null && <FilterableExerciseTable exercises={exercises} bodyparts={bodyparts} onExerciseClick={setSelectedExercise}/>}  
+    {selectedExercise == null ? <></>: <ExercisePage exercise={selectedExercise} goBack={resetSelectedExercise}/>} 
     </>
   )
 }
