@@ -155,10 +155,16 @@ function Train(){
   const [exercises, setExercises] = useState< Exercise[]>([]);
   const [bodyparts, setBodyparts] = useState<string[]>([]);
 
+  function flattenBodyparts(bodypartsJson: any[]){
+    return (
+      bodypartsJson.flatMap((b) => (b.name))
+    )
+  }
+
   function fillExercises(exercisesJson: any[]){
     let exercisesToSave: Exercise[] = []
     exercisesJson.forEach(exercise => {
-      const newExercise = new Exercise(exercise.name, exercise.primary_bodyparts, exercise.secondary_bodyparts, false)
+      const newExercise = new Exercise(exercise.name, flattenBodyparts(exercise.primary_bodyparts), flattenBodyparts(exercise.secondary_bodyparts), false)
       exercisesToSave.push(newExercise)
     });
     setExercises(exercisesToSave);
@@ -174,7 +180,8 @@ function Train(){
         credentials: 'include',
       })
       .then(response => response.json())
-      .then(json => setBodyparts(json.bodyparts))
+      .then(json => flattenBodyparts(json.bodyparts))
+      .then(stringArray => setBodyparts(stringArray))
       .catch(error => console.error(error));
       
       fetch(`${BACKEND_URL}allexercises/`, {
@@ -182,7 +189,7 @@ function Train(){
         credentials: 'include',
       })
       .then(response => response.json())
-      .then(json => fillExercises(json))
+      .then(json => fillExercises(json.exercises))
       .catch(error => console.error(error));
   }, []);
 
