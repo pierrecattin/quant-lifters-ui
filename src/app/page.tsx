@@ -45,7 +45,10 @@ enum pageName {
 function ExerciseTrack({exercise}:{exercise: Exercise}) {
   const storageKey = exercise.name + "SetInProgress"
   const [sets, setSets] = useState<ExerciseSetInProgress[]>(() => {
-    const savedSets = localStorage.getItem(storageKey);
+    let savedSets = null
+    if (typeof window !== 'undefined') { 
+      savedSets = localStorage.getItem(storageKey);
+    } 
     return savedSets ? JSON.parse(savedSets) : [new ExerciseSetInProgress];
   });
 
@@ -120,17 +123,17 @@ function ExerciseTrack({exercise}:{exercise: Exercise}) {
             placeholder="RiR"
           />
           {sets.length > 1 && (
-            <button type="button" onClick={() => removeSet(index)} className="p-1 bg-red-800 text-white rounded-md">
-              -
+            <button type="button" onClick={() => removeSet(index)} className="py-1 px-3 my-2 bg-red-800 text-white rounded-md">
+              <span className="font-black">-</span>
             </button>
           )}
         </div>
       ))}
       <div className="flex space-x-2 my-6">
-        <button type="button" onClick={addSet} className="py-1 px-3 mx-3 my-4 bg-green-900 text-white rounded-md">
-          +
+        <button type="button" onClick={addSet} className="py-1 px-3 mx-3 my-4 bg-green-500 text-white rounded-md">
+          <span className="font-black">+</span>
         </button>
-        <button type="submit" className="p-1 bg-purple-900 text-white rounded-md my-4">
+        <button type="submit" className="p-1 bg-purple-900 text-white rounded-md my-4 px-5">
           Save
         </button>
       </div>
@@ -321,7 +324,10 @@ function FilterableExerciseTable({ exercises, bodyparts, onExerciseClick }: { ex
 
 function Exercises({exercises, bodyparts}: {exercises:Exercise[], bodyparts: string[]}){
   const [selectedExercise, setSelectedExercise]  = useState<Exercise|null>(() => {
-    const selectedExercise = localStorage.getItem("selectedExercise");
+    let selectedExercise = null
+    if (typeof window !== 'undefined') { 
+      selectedExercise = localStorage.getItem("selectedExercise");
+    }
     return selectedExercise ? JSON.parse(selectedExercise) : null;
   });
 
@@ -597,7 +603,7 @@ function LoginOrSignupPage({
 
 
 export default function Home() {
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentPage, setCurrentPage] = useState(pageName.exercises);
 
   const login = async (email: string, password: string) => {
