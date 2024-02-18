@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_QUANT_LIFTERS_BACKEND_URL
@@ -143,13 +143,19 @@ function ExerciseTrack({exercise}:{exercise: Exercise}) {
 
 function ExerciseHistory(){
   return(
-    "history"
+    "TODO: History"
   )
 } 
 
-function ExerciseDetails(){
+function ExerciseDetails({exercise}: {exercise: Exercise}){
+  
+  const primary_bodyparts = "Primary bodypart" + (exercise.primaryBodyparts.length>1 ? "s": "") + ": " + exercise.primaryBodyparts.join(", ")
+  const secondary_bodyparts = exercise.secondaryBodyparts.length == 0 ? "": "Secondary bodypart" + (exercise.secondaryBodyparts.length>1 ? "s": "") + ": " + exercise.secondaryBodyparts.join(", ")
   return(
-    "details"
+    <>
+      <div>{primary_bodyparts}</div>
+      <div>{secondary_bodyparts}</div>
+    </>
   )
 } 
 
@@ -160,7 +166,20 @@ function ExercisePage({ exercise, goBack}: {exercise: Exercise, goBack:any}){
     details = "Details",
   }
   const [currentExerciseSubpage, setCurrentExerciseSubpage] = useState(exerciseSubPageName.track);
-  
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLSpanElement>(null);
+
+  const handleClickOutsideDropdown = (event: MouseEvent) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      setIsDropdownOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutsideDropdown);
+    return () => document.removeEventListener("mousedown", handleClickOutsideDropdown);
+  }, []);
+
   function showTrack(){
     setCurrentExerciseSubpage(exerciseSubPageName.track)
   }
@@ -179,27 +198,60 @@ function ExercisePage({ exercise, goBack}: {exercise: Exercise, goBack:any}){
     { name: exerciseSubPageName.details, action: showDetails },
   ];
 
+  function onMenuClick(){
+    alert("TODO: only enable for custom exercise")
+  }
 
-  return(
-    <div className ="z-40 fixed w-full">
-      <div className = "top-0">
-        <div>
+
+  return (
+    <div className="z-40 fixed w-full">
+      <div className="top-0">
+        <div className="flex justify-between items-center">
           <span>
             <button onClick={goBack}>
               <Image
-              src="icons/return_arrow.svg"
-              alt="Return"
-              width={20}
-              height={20}
-            />
+                src="icons/return_arrow.svg"
+                alt="Return"
+                width={20}
+                height={20}
+              />
             </button>
           </span>
-          <span className="text-lg mx-7">
-            {exercise.name} 
+          <span className="text-lg">
+            {exercise.name}
           </span>
-      </div>
-      <div className="inset-x-0 flex justify-around items-center h-12  ">
-        {pages.map((page) => (
+          <span className="relative mx-7" ref={dropdownRef}>
+            <button onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
+              <Image
+                src="icons/menu.svg"
+                alt="Menu"
+                width={20}
+                height={20}
+              />
+            </button>
+            {isDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md py-1 z-50">
+                <button
+                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                onClick={onMenuClick}>
+                  Edit
+                </button>
+                <button 
+                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                onClick={onMenuClick}>
+                  Delete
+                </button>
+                <button
+                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                onClick={onMenuClick}>
+                  Share
+                </button>
+              </div>
+            )}
+          </span>
+        </div>
+        <div className="inset-x-0 flex justify-around items-center h-12  ">
+          {pages.map((page) => (
           <button 
             key={page.name} 
             onClick={page.action} 
@@ -208,17 +260,16 @@ function ExercisePage({ exercise, goBack}: {exercise: Exercise, goBack:any}){
             {page.name}
           </button>
         ))}
-      </div>
+        </div>
       </div>
       <div className="my-3">
         {currentExerciseSubpage === exerciseSubPageName.track && <ExerciseTrack exercise={exercise}  />}
         {currentExerciseSubpage === exerciseSubPageName.history && <ExerciseHistory />}
-        {currentExerciseSubpage === exerciseSubPageName.details && <ExerciseDetails />}
+        {currentExerciseSubpage === exerciseSubPageName.details && <ExerciseDetails exercise={exercise} />}
       </div>
     </div>
-  )
+  );
 }
-
 function ExerciseButton({ exercise, onExerciseClick }: {exercise: Exercise, onExerciseClick: any}) {
   function click(){
     onExerciseClick(exercise)
@@ -349,19 +400,19 @@ function Exercises({exercises, bodyparts}: {exercises:Exercise[], bodyparts: str
 
 function Workout(){
   return(
-    "Workout page. For know, log your sets using the exercises page"
+    "TODO: Workout page. For know, log your sets using the exercises page."
   )
 }
 
 function Stats(){
   return(
-    "Stats page"
+    "TODO: Stats page"
   )
 }
 
 function Competition(){
   return(
-    "Competition page"
+    "TODO: Competition page"
   )
 }
 
