@@ -439,8 +439,8 @@ function Content({currentPage, logout}:{currentPage: pageName, logout: any}){
 
   function fillExercises(exercisesJson: any[]){
     let exercisesToSave: Exercise[] = []
-    exercisesJson.forEach(exercise => {
-        const newExercise = new Exercise(exercise.name, flattenBodyparts(exercise.primary_bodyparts), flattenBodyparts(exercise.secondary_bodyparts), false)
+        exercisesJson.forEach(exercise => {
+        const newExercise = new Exercise(exercise.name, flattenBodyparts(exercise.primary_bodyparts), flattenBodyparts(exercise.secondary_bodyparts), exercise.is_custom)
         exercisesToSave.push(newExercise)
       });
       setExercises(exercisesToSave);
@@ -449,7 +449,7 @@ function Content({currentPage, logout}:{currentPage: pageName, logout: any}){
 
 
   useEffect(() => {
-      fetch(`${BACKEND_URL}allbodyparts/`, {
+      fetch(`${BACKEND_URL}allbodyparts`, {
         method: 'GET',
         credentials: 'include',
       })
@@ -458,7 +458,7 @@ function Content({currentPage, logout}:{currentPage: pageName, logout: any}){
       .then(stringArray => setBodyparts(stringArray))
       .catch(error => console.error(error));
       
-      fetch(`${BACKEND_URL}allexercises/`, {
+      fetch(`${BACKEND_URL}userexerciseslog`, {
         method: 'GET',
         credentials: 'include',
       })
