@@ -5,31 +5,58 @@ import Image from "next/image";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_QUANT_LIFTERS_BACKEND_URL
 
-class Exercise {
+
+class ExerciseSet{
+  exercise: string;
+  weight: number;
+  reps: number;
+  rir: number;
+
+  constructor(weight: number, reps: number, rir: number, exercise: string){
+    this.exercise = exercise;
+    this.weight = weight;
+    this.reps = reps;
+    this.rir = rir;
+  }
+}
+
+class ExerciseSetInProgress{
+  weight: string; // Using string to allow partially filled without using undefined, to prevent: https://medium.com/@kirichuk/why-react-component-is-changing-an-uncontrolled-input-to-be-controlled-1f19f9a1ef35
+  reps: string;
+  rir: string; 
+ 
+  constructor(weight="", reps="", rir="") {
+    this.weight = weight;
+    this.reps = reps;
+    this.rir = rir
+  }
+}
+
+class Workout{
+  startTime: Date;
+  exerciseSets: ExerciseSet[];
+
+  constructor(startTime: Date, exerciseSets: ExerciseSet[]){
+    this.startTime = startTime;
+    this.exerciseSets = exerciseSets;
+  }
+}
+
+class Exercise{
+  id: string;
   name: string;
   primaryBodyparts: string[];
   secondaryBodyparts: string[]; 
   lastDayPerformed?: Date;
   isCustom: boolean;
  
-  constructor(name: string, primaryBodyparts: string[], secondaryBodyparts: string[], isCustom: boolean, lastDayPerformed?: Date) {
+  constructor(id: string, name: string, primaryBodyparts: string[], secondaryBodyparts: string[], isCustom: boolean, lastDayPerformed?: Date) {
+    this.id = id;
     this.name = name;
     this.primaryBodyparts = primaryBodyparts;
     this.secondaryBodyparts = secondaryBodyparts;
     this.isCustom = isCustom;
     this.lastDayPerformed = lastDayPerformed;
-  }
-}
-
-class ExerciseSetInProgress {
-  weight?: number;
-  reps?: number;
-  rir?: number; 
- 
-  constructor(weight?: number, reps?: number, rir?: number) {
-    this.weight = weight;
-    this.reps = reps;
-    this.rir = rir
   }
 }
 
@@ -42,14 +69,14 @@ enum pageName {
 }
 
 
-function ExerciseTrack({exercise}:{exercise: Exercise}) {
-  const storageKey = exercise.name + "SetInProgress"
+function ExerciseTrackPage({exercise}:{exercise: Exercise}) {
+  const storageKey = "SetInProgress_" + exercise.id
   const [sets, setSets] = useState<ExerciseSetInProgress[]>(() => {
     let savedSets = null
     if (typeof window !== 'undefined') { 
       savedSets = localStorage.getItem(storageKey);
     } 
-    return savedSets ? JSON.parse(savedSets) : [new ExerciseSetInProgress];
+    return savedSets ? JSON.parse(savedSets) : [new ExerciseSetInProgress()];
   });
 
   // Use useEffect to update localStorage when sets change
@@ -74,22 +101,28 @@ function ExerciseTrack({exercise}:{exercise: Exercise}) {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
+    const currentDate = new Date();
+    const body={
+      "exercise_id": exercise.id,
+      "time":  currentDate.toISOString(),
+      "sets": sets,
+    }
     e.preventDefault();
-    alert('TODO: SaveExercisesSets endpoint');
-
-    /*const response = await fetch(`${BACKEND_URL}/SaveExercisesSets`, {
+    const response = await fetch(`${BACKEND_URL}saveexercisesets`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ sets }),
+      credentials: 'include',
+      body: JSON.stringify(body),
     });
 
     if (response.ok) {
-      console.log('Sets saved successfully!');
+      alert("Set saved.")
+      setSets([new ExerciseSetInProgress()]);
     } else {
-      console.error('Failed to save sets');
-    }*/
+      alert('Failed to save sets');
+    }
   };
 
   return (
@@ -105,6 +138,7 @@ function ExerciseTrack({exercise}:{exercise: Exercise}) {
             value={set.weight}
             onChange={(e) => handleSetChange(index, 'weight', e.target.value)}
             placeholder="Weight"
+            required
           />
           <input
             type="number"
@@ -113,6 +147,7 @@ function ExerciseTrack({exercise}:{exercise: Exercise}) {
             value={set.reps}
             onChange={(e) => handleSetChange(index, 'reps', e.target.value)}
             placeholder="Reps"
+            required
           />
           <input
             type="number"
@@ -121,6 +156,7 @@ function ExerciseTrack({exercise}:{exercise: Exercise}) {
             value={set.rir}
             onChange={(e) => handleSetChange(index, 'rir', e.target.value)}
             placeholder="RiR"
+            required
           />
           {sets.length > 1 && (
             <button type="button" onClick={() => removeSet(index)} className="py-1 px-3 my-2 bg-red-800 text-white rounded-md">
@@ -141,13 +177,13 @@ function ExerciseTrack({exercise}:{exercise: Exercise}) {
   );
 }
 
-function ExerciseHistory(){
+function ExerciseHistoryPage(){
   return(
     "TODO: History"
   )
 } 
 
-function ExerciseDetails({exercise}: {exercise: Exercise}){
+function ExerciseDetailsPage({exercise}: {exercise: Exercise}){
   
   const primary_bodyparts = "Primary bodypart" + (exercise.primaryBodyparts.length>1 ? "s": "") + ": " + exercise.primaryBodyparts.join(", ")
   const secondary_bodyparts = exercise.secondaryBodyparts.length == 0 ? "": "Secondary bodypart" + (exercise.secondaryBodyparts.length>1 ? "s": "") + ": " + exercise.secondaryBodyparts.join(", ")
@@ -263,9 +299,9 @@ function ExercisePage({ exercise, goBack}: {exercise: Exercise, goBack:any}){
         </div>
       </div>
       <div className="my-3">
-        {currentExerciseSubpage === exerciseSubPageName.track && <ExerciseTrack exercise={exercise}  />}
-        {currentExerciseSubpage === exerciseSubPageName.history && <ExerciseHistory />}
-        {currentExerciseSubpage === exerciseSubPageName.details && <ExerciseDetails exercise={exercise} />}
+        {currentExerciseSubpage === exerciseSubPageName.track && <ExerciseTrackPage exercise={exercise}  />}
+        {currentExerciseSubpage === exerciseSubPageName.history && <ExerciseHistoryPage />}
+        {currentExerciseSubpage === exerciseSubPageName.details && <ExerciseDetailsPage exercise={exercise} />}
       </div>
     </div>
   );
@@ -373,7 +409,7 @@ function FilterableExerciseTable({ exercises, bodyparts, onExerciseClick }: { ex
   )
 }
 
-function Exercises({exercises, bodyparts}: {exercises:Exercise[], bodyparts: string[]}){
+function ExercisesPage({exercises, bodyparts}: {exercises:Exercise[], bodyparts: string[]}){
   const [selectedExercise, setSelectedExercise]  = useState<Exercise|null>(() => {
     let selectedExercise = null
     if (typeof window !== 'undefined') { 
@@ -398,26 +434,26 @@ function Exercises({exercises, bodyparts}: {exercises:Exercise[], bodyparts: str
   )
 }
 
-function Workout(){
+function WorkoutPage(){
   return(
     "TODO: Workout page. For know, log your sets using the exercises page."
   )
 }
 
-function Stats(){
+function StatsPage(){
   return(
     "TODO: Stats page"
   )
 }
 
-function Competition(){
+function CompetitionPage(){
   return(
     "TODO: Competition page"
   )
 }
 
 
-function Profile({logout}: {logout:any}){
+function ProfilePage({logout}: {logout:any}){
   return(
     <button type="submit" 
     onClick={logout}
@@ -440,7 +476,7 @@ function Content({currentPage, logout}:{currentPage: pageName, logout: any}){
   function fillExercises(exercisesJson: any[]){
     let exercisesToSave: Exercise[] = []
         exercisesJson.forEach(exercise => {
-        const newExercise = new Exercise(exercise.name, flattenBodyparts(exercise.primary_bodyparts), flattenBodyparts(exercise.secondary_bodyparts), exercise.is_custom)
+        const newExercise = new Exercise(exercise.id, exercise.name, flattenBodyparts(exercise.primary_bodyparts), flattenBodyparts(exercise.secondary_bodyparts), exercise.is_custom)
         exercisesToSave.push(newExercise)
       });
       setExercises(exercisesToSave);
@@ -469,11 +505,11 @@ function Content({currentPage, logout}:{currentPage: pageName, logout: any}){
 
   return(
     <div className={"absolute p-5 "} >
-    {currentPage === pageName.profile && <Profile  logout={logout}/>}
-    {currentPage === pageName.workout && <Workout  />}
-    {currentPage === pageName.exercises &&  <Exercises exercises={exercises} bodyparts={bodyparts}/> }
-    {currentPage === pageName.stats &&  <Stats /> }
-    {currentPage === pageName.competition &&  <Competition/> }
+    {currentPage === pageName.profile && <ProfilePage  logout={logout}/>}
+    {currentPage === pageName.workout && <WorkoutPage  />}
+    {currentPage === pageName.exercises &&  <ExercisesPage exercises={exercises} bodyparts={bodyparts}/> }
+    {currentPage === pageName.stats &&  <StatsPage /> }
+    {currentPage === pageName.competition &&  <CompetitionPage /> }
     </div>
   )
 }
