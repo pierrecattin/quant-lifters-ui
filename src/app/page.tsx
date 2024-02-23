@@ -7,17 +7,24 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_QUANT_LIFTERS_BACKEND_URL
 
 
 class ExerciseSet{
-  exercise: string;
+  time: Date;
   weight: number;
   reps: number;
   rir: number;
+  wilks: number;
 
-  constructor(weight: number, reps: number, rir: number, exercise: string){
-    this.exercise = exercise;
+  constructor(time: Date|string, weight: number, reps: number, rir: number, wilks: number){
+    this.time = (typeof time === 'string') ? new Date(time) : time;
     this.weight = weight;
     this.reps = reps;
     this.rir = rir;
+    this.wilks = wilks;
   }
+
+  getTimeAsString() {
+    return this.time.toDateString();
+  }
+
 }
 
 class ExerciseSetInProgress{
@@ -32,31 +39,27 @@ class ExerciseSetInProgress{
   }
 }
 
-class Workout{
-  startTime: Date;
-  exerciseSets: ExerciseSet[];
 
-  constructor(startTime: Date, exerciseSets: ExerciseSet[]){
-    this.startTime = startTime;
-    this.exerciseSets = exerciseSets;
-  }
-}
-
-class Exercise{
+class ExerciseWithHistory{
   id: string;
   name: string;
   primaryBodyparts: string[];
   secondaryBodyparts: string[]; 
-  lastDayPerformed?: Date;
   isCustom: boolean;
+  createdBy: string;
+  sharedWith: string[];
+  sets: ExerciseSet[];
  
-  constructor(id: string, name: string, primaryBodyparts: string[], secondaryBodyparts: string[], isCustom: boolean, lastDayPerformed?: Date) {
+  constructor(id: string, name: string, primaryBodyparts: string[], secondaryBodyparts: string[], isCustom: boolean, 
+    createdBy: string, sharedWith: string[], sets:ExerciseSet[]) {
     this.id = id;
     this.name = name;
     this.primaryBodyparts = primaryBodyparts;
     this.secondaryBodyparts = secondaryBodyparts;
     this.isCustom = isCustom;
-    this.lastDayPerformed = lastDayPerformed;
+    this.createdBy = createdBy;
+    this.sharedWith = sharedWith;
+    this.sets = sets;
   }
 }
 
@@ -69,7 +72,7 @@ enum pageName {
 }
 
 
-function ExerciseTrackPage({exercise}:{exercise: Exercise}) {
+function ExerciseTrackPage({exercise}:{exercise: ExerciseWithHistory}) {
   const storageKey = "SetInProgress_" + exercise.id
   const [sets, setSets] = useState<ExerciseSetInProgress[]>(() => {
     let savedSets = null
@@ -177,13 +180,43 @@ function ExerciseTrackPage({exercise}:{exercise: Exercise}) {
   );
 }
 
-function ExerciseHistoryPage(){
-  return(
-    "TODO: History"
-  )
-} 
+function ExerciseHistoryPage({exerciseSets}: {exerciseSets: ExerciseSet[]}) {
 
-function ExerciseDetailsPage({exercise}: {exercise: Exercise}){
+  const setsByDay = new Map<string, ExerciseSet[]>();
+  exerciseSets.forEach(exerciseSet => {
+    const exerciseSetConv = new ExerciseSet(exerciseSet.time, exerciseSet.weight, exerciseSet.reps, exerciseSet.rir, exerciseSet.wilks); // strange failure if we don't create new
+    const date = exerciseSetConv.getTimeAsString();
+    if (!setsByDay.get(date)) {
+      setsByDay.set(date, []);
+    }
+    setsByDay.get(date)?.push(exerciseSetConv);
+  });
+
+  const daysSorted = Array.from(setsByDay.keys()).sort((a, b) => new Date(a) > new Date(b) ? 1 : -1);
+  return (
+    <div className="me-12">
+      {daysSorted.map(day => {
+        const daySets = setsByDay.get(day) ?? [];
+        return (
+          <div key={day} className="bg-gray-800 border border-gray-200 rounded-lg p-4 ">
+            <div className="text-lg font-bold">
+              {day}
+            </div>
+            <div>
+              {daySets.map((set, index) => (
+                <div key={index} className="">
+                  <span>{set.reps} x {1 * set.weight}kg with {set.rir}RiR - Wilks: {set.wilks}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function ExerciseDetailsPage({exercise}: {exercise: ExerciseWithHistory}){
   
   const primary_bodyparts = "Primary bodypart" + (exercise.primaryBodyparts.length>1 ? "s": "") + ": " + exercise.primaryBodyparts.join(", ")
   const secondary_bodyparts = exercise.secondaryBodyparts.length == 0 ? "": "Secondary bodypart" + (exercise.secondaryBodyparts.length>1 ? "s": "") + ": " + exercise.secondaryBodyparts.join(", ")
@@ -195,7 +228,7 @@ function ExerciseDetailsPage({exercise}: {exercise: Exercise}){
   )
 } 
 
-function ExercisePage({ exercise, goBack}: {exercise: Exercise, goBack:any}){ 
+function ExercisePage({ exercise, goBack}: {exercise: ExerciseWithHistory, goBack:any}){ 
   enum exerciseSubPageName {
     track = "Track",
     history = "History",
@@ -300,13 +333,13 @@ function ExercisePage({ exercise, goBack}: {exercise: Exercise, goBack:any}){
       </div>
       <div className="my-3">
         {currentExerciseSubpage === exerciseSubPageName.track && <ExerciseTrackPage exercise={exercise}  />}
-        {currentExerciseSubpage === exerciseSubPageName.history && <ExerciseHistoryPage />}
+        {currentExerciseSubpage === exerciseSubPageName.history && <ExerciseHistoryPage exerciseSets={exercise.sets} />}
         {currentExerciseSubpage === exerciseSubPageName.details && <ExerciseDetailsPage exercise={exercise} />}
       </div>
     </div>
   );
 }
-function ExerciseButton({ exercise, onExerciseClick }: {exercise: Exercise, onExerciseClick: any}) {
+function ExerciseButton({ exercise, onExerciseClick }: {exercise: ExerciseWithHistory, onExerciseClick: any}) {
   function click(){
     onExerciseClick(exercise)
   }
@@ -320,9 +353,6 @@ function ExerciseButton({ exercise, onExerciseClick }: {exercise: Exercise, onEx
             -&gt;
           </span>
         </h2>
-        <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-          {exercise.lastDayPerformed?.toDateString()}
-        </p>
       </button>
   );
 }
@@ -343,7 +373,7 @@ function BodypartButton({name, onToggleBodypart}: {name: string, onToggleBodypar
 }
 
 function ExerciseTable({ exercises, filterText, selectedBodyparts, onExerciseClick }: 
-  { exercises: Exercise[], filterText: string, selectedBodyparts: string[], onExerciseClick: any }) {
+  { exercises: ExerciseWithHistory[], filterText: string, selectedBodyparts: string[], onExerciseClick: any }) {
     const exerciseButtons:JSX.Element[] = [];
     exercises.forEach((exercise) => {
       if(selectedBodyparts.length == 0 || 
@@ -375,7 +405,7 @@ function SearchBar({filterText, onFilterChange}: {filterText: string, onFilterCh
     );
 }
 
-function FilterableExerciseTable({ exercises, bodyparts, onExerciseClick }: { exercises: Exercise[], bodyparts: string[], onExerciseClick: any}) {
+function FilterableExerciseTable({ exercises, bodyparts, onExerciseClick }: { exercises: ExerciseWithHistory[], bodyparts: string[], onExerciseClick: any}) {
   const [filterText, setFilterText] = useState('');
   const [selectedBodyparts, setSelectedBodyparts] = useState<string[]>([])
 
@@ -409,8 +439,8 @@ function FilterableExerciseTable({ exercises, bodyparts, onExerciseClick }: { ex
   )
 }
 
-function ExercisesPage({exercises, bodyparts}: {exercises:Exercise[], bodyparts: string[]}){
-  const [selectedExercise, setSelectedExercise]  = useState<Exercise|null>(() => {
+function ExercisesPage({exercises, bodyparts}: {exercises:ExerciseWithHistory[], bodyparts: string[]}){
+  const [selectedExercise, setSelectedExercise]  = useState<ExerciseWithHistory|null>(() => {
     let selectedExercise = null
     if (typeof window !== 'undefined') { 
       selectedExercise = localStorage.getItem("selectedExercise");
@@ -429,7 +459,7 @@ function ExercisesPage({exercises, bodyparts}: {exercises:Exercise[], bodyparts:
   return(
     <>
     {selectedExercise === null && <FilterableExerciseTable exercises={exercises} bodyparts={bodyparts} onExerciseClick={setSelectedExercise}/>}  
-    {selectedExercise == null ? <></>: <ExercisePage exercise={selectedExercise} goBack={resetSelectedExercise}/>} 
+    {selectedExercise === null ? <></>: <ExercisePage exercise={selectedExercise} goBack={resetSelectedExercise}/>} 
     </>
   )
 }
@@ -464,7 +494,7 @@ function ProfilePage({logout}: {logout:any}){
 }
 
 function Content({currentPage, logout}:{currentPage: pageName, logout: any}){
-  const [exercises, setExercises] = useState< Exercise[]>([]);
+  const [exercises, setExercises] = useState< ExerciseWithHistory[]>([]);
   const [bodyparts, setBodyparts] = useState<string[]>([]);
 
   function flattenBodyparts(bodypartsJson: any[]){
@@ -474,10 +504,24 @@ function Content({currentPage, logout}:{currentPage: pageName, logout: any}){
   }
 
   function fillExercises(exercisesJson: any[]){
-    let exercisesToSave: Exercise[] = []
+    let exercisesToSave: ExerciseWithHistory[] = []
         exercisesJson.forEach(exercise => {
-        const newExercise = new Exercise(exercise.id, exercise.name, flattenBodyparts(exercise.primary_bodyparts), flattenBodyparts(exercise.secondary_bodyparts), exercise.is_custom)
-        exercisesToSave.push(newExercise)
+          let exerciseSets: ExerciseSet[] = []
+          const exerciseSetsRaw: any[] = exercise.sets 
+          exerciseSetsRaw.forEach(s => {
+            const exerciseSet = new ExerciseSet(new Date(s.workout.start_time), s.weight, s.reps, s.rir, s.wilksScore)
+            exerciseSets.push(exerciseSet)
+          })
+
+          const newExercise = new ExerciseWithHistory(exercise.id, 
+            exercise.name, 
+            flattenBodyparts(exercise.primary_bodyparts), 
+            flattenBodyparts(exercise.secondary_bodyparts), 
+            exercise.is_custom,
+            exercise.created_by,
+            exercise.shared_with,
+            exerciseSets)
+          exercisesToSave.push(newExercise)
       });
       setExercises(exercisesToSave);
     }
