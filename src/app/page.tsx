@@ -223,11 +223,11 @@ function ExerciseHistoryPage({exerciseSets}: {exerciseSets: ExerciseSet[]}) {
   });
 
   return (
-    <>
+    <div className="max-h-[550px] overflow-y-scroll">
       {setsByDay.size > 0 && <ExerciseSetsBoxes setsByDay={setsByDay}/>}
       {setsByDay.size === 0 && (
           <span className="text-gray-200 mx-5">Not performed yet </span>)}
-    </>
+    </div>
   );
 }
 
