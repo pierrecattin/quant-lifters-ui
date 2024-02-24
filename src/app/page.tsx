@@ -72,7 +72,7 @@ enum pageName {
 }
 
 
-function ExerciseTrackPage({exercise}:{exercise: ExerciseWithHistory}) {
+function ExerciseTrackPage({exercise, onAddExerciseSets }:{exercise: ExerciseWithHistory, onAddExerciseSets: any}) {
   const storageKey = "SetInProgress_" + exercise.id
   const [sets, setSets] = useState<ExerciseSetInProgress[]>(() => {
     let savedSets = null
@@ -104,10 +104,10 @@ function ExerciseTrackPage({exercise}:{exercise: ExerciseWithHistory}) {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    const currentDate = new Date();
+    const time = new Date().toISOString();
     const body={
       "exercise_id": exercise.id,
-      "time":  currentDate.toISOString(),
+      "time":  time,
       "sets": sets,
     }
     e.preventDefault();
@@ -122,6 +122,11 @@ function ExerciseTrackPage({exercise}:{exercise: ExerciseWithHistory}) {
 
     if (response.ok) {
       alert("Set saved.")
+      // Store new sets in react state so that it's available without having to fetch from the backen
+      const completedExerciseSets = sets.map(set => 
+        new ExerciseSet(time, parseFloat(set.weight), parseInt(set.reps), parseInt(set.rir), 0)
+        );
+        onAddExerciseSets(completedExerciseSets)
       setSets([new ExerciseSetInProgress()]);
     } else {
       alert('Failed to save sets');
@@ -180,6 +185,31 @@ function ExerciseTrackPage({exercise}:{exercise: ExerciseWithHistory}) {
   );
 }
 
+function ExerciseSetsBoxes({setsByDay}: {setsByDay:Map<string, ExerciseSet[]>}){
+  const daysSorted = Array.from(setsByDay.keys()).sort((a, b) => new Date(a) < new Date(b) ? 1 : -1);
+  return(
+    <div className="me-12">
+    {daysSorted.map(day => {
+      const daySets = setsByDay.get(day) ?? [];
+      return (
+        <div key={day} className="bg-gray-800 border border-gray-200 rounded-lg p-4 my-4">
+          <div className="text-lg font-bold">
+            {day}
+          </div>
+          <div>
+            {daySets.map((set, index) => (
+              <div key={index} className="">
+                <span>{set.reps} x {1 * set.weight}kg with {set.rir}RiR - Wilks: {1*set.wilks}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    })}
+  </div>
+)
+}
+
 function ExerciseHistoryPage({exerciseSets}: {exerciseSets: ExerciseSet[]}) {
 
   const setsByDay = new Map<string, ExerciseSet[]>();
@@ -192,27 +222,12 @@ function ExerciseHistoryPage({exerciseSets}: {exerciseSets: ExerciseSet[]}) {
     setsByDay.get(date)?.push(exerciseSetConv);
   });
 
-  const daysSorted = Array.from(setsByDay.keys()).sort((a, b) => new Date(a) > new Date(b) ? 1 : -1);
   return (
-    <div className="me-12">
-      {daysSorted.map(day => {
-        const daySets = setsByDay.get(day) ?? [];
-        return (
-          <div key={day} className="bg-gray-800 border border-gray-200 rounded-lg p-4 ">
-            <div className="text-lg font-bold">
-              {day}
-            </div>
-            <div>
-              {daySets.map((set, index) => (
-                <div key={index} className="">
-                  <span>{set.reps} x {1 * set.weight}kg with {set.rir}RiR - Wilks: {set.wilks}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        );
-      })}
-    </div>
+    <>
+      {setsByDay.size > 0 && <ExerciseSetsBoxes setsByDay={setsByDay}/>}
+      {setsByDay.size === 0 && (
+          <span className="text-gray-200 mx-5">Not performed yet </span>)}
+    </>
   );
 }
 
@@ -228,12 +243,14 @@ function ExerciseDetailsPage({exercise}: {exercise: ExerciseWithHistory}){
   )
 } 
 
-function ExercisePage({ exercise, goBack}: {exercise: ExerciseWithHistory, goBack:any}){ 
+function ExercisePage({ exercise, goBack, handleAddExerciseSets }: {exercise: ExerciseWithHistory, goBack:any, handleAddExerciseSets:any}){ 
   enum exerciseSubPageName {
     track = "Track",
     history = "History",
     details = "Details",
   }
+
+  const [currentExercise, setCurrentExercise] = useState(exercise); // Updatable by children
   const [currentExerciseSubpage, setCurrentExerciseSubpage] = useState(exerciseSubPageName.track);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLSpanElement>(null);
@@ -248,6 +265,12 @@ function ExercisePage({ exercise, goBack}: {exercise: ExerciseWithHistory, goBac
     document.addEventListener("mousedown", handleClickOutsideDropdown);
     return () => document.removeEventListener("mousedown", handleClickOutsideDropdown);
   }, []);
+
+  function handleAddExerciseSetsInExercisePage(newSets: ExerciseSet[]){
+      const updatedExercise = { ...exercise, sets: [...exercise.sets, ...newSets] };
+      setCurrentExercise(updatedExercise);
+      handleAddExerciseSets(exercise.id, newSets);
+  };
 
   function showTrack(){
     setCurrentExerciseSubpage(exerciseSubPageName.track)
@@ -332,9 +355,9 @@ function ExercisePage({ exercise, goBack}: {exercise: ExerciseWithHistory, goBac
         </div>
       </div>
       <div className="my-3">
-        {currentExerciseSubpage === exerciseSubPageName.track && <ExerciseTrackPage exercise={exercise}  />}
-        {currentExerciseSubpage === exerciseSubPageName.history && <ExerciseHistoryPage exerciseSets={exercise.sets} />}
-        {currentExerciseSubpage === exerciseSubPageName.details && <ExerciseDetailsPage exercise={exercise} />}
+        {currentExerciseSubpage === exerciseSubPageName.track && <ExerciseTrackPage exercise={currentExercise} onAddExerciseSets={handleAddExerciseSetsInExercisePage} />}
+        {currentExerciseSubpage === exerciseSubPageName.history && <ExerciseHistoryPage exerciseSets={currentExercise.sets} />}
+        {currentExerciseSubpage === exerciseSubPageName.details && <ExerciseDetailsPage exercise={currentExercise} />}
       </div>
     </div>
   );
@@ -439,7 +462,8 @@ function FilterableExerciseTable({ exercises, bodyparts, onExerciseClick }: { ex
   )
 }
 
-function ExercisesPage({exercises, bodyparts}: {exercises:ExerciseWithHistory[], bodyparts: string[]}){
+function ExercisesPage({exercises, bodyparts, handleAddExerciseSets }: 
+  {exercises:ExerciseWithHistory[], bodyparts: string[], handleAddExerciseSets: any}){
   const [selectedExercise, setSelectedExercise]  = useState<ExerciseWithHistory|null>(() => {
     let selectedExercise = null
     if (typeof window !== 'undefined') { 
@@ -459,7 +483,7 @@ function ExercisesPage({exercises, bodyparts}: {exercises:ExerciseWithHistory[],
   return(
     <>
     {selectedExercise === null && <FilterableExerciseTable exercises={exercises} bodyparts={bodyparts} onExerciseClick={setSelectedExercise}/>}  
-    {selectedExercise === null ? <></>: <ExercisePage exercise={selectedExercise} goBack={resetSelectedExercise}/>} 
+    {selectedExercise === null ? <></>: <ExercisePage exercise={selectedExercise} goBack={resetSelectedExercise} handleAddExerciseSets ={handleAddExerciseSets }/>} 
     </>
   )
 }
@@ -526,8 +550,6 @@ function Content({currentPage, logout}:{currentPage: pageName, logout: any}){
       setExercises(exercisesToSave);
     }
 
-
-
   useEffect(() => {
       fetch(`${BACKEND_URL}allbodyparts`, {
         method: 'GET',
@@ -547,11 +569,21 @@ function Content({currentPage, logout}:{currentPage: pageName, logout: any}){
       .catch(error => console.error(error));
   }, []);
 
+  function handleAddExerciseSets(exercise_id: string, newExerciseSets: ExerciseSet[]){
+    const newExercises = exercises.map(exercise => {
+      if (exercise.id === exercise_id){
+        return {...exercise, sets: [...exercise.sets, ...newExerciseSets]};
+      }
+      return exercise;
+    })
+    setExercises(newExercises)
+  }
+
   return(
     <div className={"absolute p-5 "} >
     {currentPage === pageName.profile && <ProfilePage  logout={logout}/>}
     {currentPage === pageName.workout && <WorkoutPage  />}
-    {currentPage === pageName.exercises &&  <ExercisesPage exercises={exercises} bodyparts={bodyparts}/> }
+    {currentPage === pageName.exercises &&  <ExercisesPage exercises={exercises} bodyparts={bodyparts} handleAddExerciseSets ={handleAddExerciseSets}/> }
     {currentPage === pageName.stats &&  <StatsPage /> }
     {currentPage === pageName.competition &&  <CompetitionPage /> }
     </div>
