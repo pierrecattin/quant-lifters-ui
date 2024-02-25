@@ -33,7 +33,7 @@ class ExerciseSetInProgress{
   weight: string; // Using string to allow partially filled without using undefined, to prevent: https://medium.com/@kirichuk/why-react-component-is-changing-an-uncontrolled-input-to-be-controlled-1f19f9a1ef35
   reps: string;
   rir: string; 
- 
+
   constructor(weight="", reps="", rir="") {
     this.weight = weight;
     this.reps = reps;
@@ -41,6 +41,37 @@ class ExerciseSetInProgress{
   }
 }
 
+class Records{
+  weight: Number;
+  wilks: Number;
+
+  constructor(weight=0, wilks=0) {
+    this.weight = weight;
+    this.wilks = wilks;
+  }
+}
+
+// function needed to stringify objects with fields of type Map
+function mapReplacer(key : any, value: any) {
+  if(value instanceof Map) {
+    return {
+      dataType: 'Map',
+      value: Array.from(value.entries()),
+    };
+  } else {
+    return value;
+  }
+}
+
+// function needed to parse objects with fields of type Map
+function mapReviver(key : any, value: any) {
+  if(typeof value === 'object' && value !== null) {
+    if (value.dataType === 'Map') {
+      return new Map(value.value);
+    }
+  }
+  return value;
+}
 
 class ExerciseWithHistory{
   id: string;
@@ -51,7 +82,7 @@ class ExerciseWithHistory{
   createdBy: string;
   sharedWith: string[];
   sets: ExerciseSet[];
- 
+
   constructor(id: string, name: string, primaryBodyparts: string[], secondaryBodyparts: string[], isCustom: boolean, 
     createdBy: string, sharedWith: string[], sets:ExerciseSet[]) {
     this.id = id;
@@ -63,6 +94,21 @@ class ExerciseWithHistory{
     this.sharedWith = sharedWith;
     this.sets = sets;
   }
+}
+
+function recordsByTotalReps(exerciseSets: ExerciseSet[]): Map<number, Records> {
+  let recordsByTotalReps = new Map<number, Records>();
+  exerciseSets.forEach(set => {
+    const currentRecord = recordsByTotalReps.get(set.reps + set.rir);
+    if (currentRecord === undefined){
+      recordsByTotalReps.set(set.reps + set.rir, new Records(set.weight, set.wilks));
+    }
+    else{
+      const newRecord = new Records(Math.max(set.weight, currentRecord!.weight.valueOf()), Math.max(set.wilks, currentRecord!.wilks.valueOf()));
+      recordsByTotalReps.set(set.reps + set.rir, newRecord);
+    } 
+  });
+  return recordsByTotalReps;
 }
 
 enum pageName {
@@ -125,7 +171,7 @@ function ExerciseTrackPage({exercise, onAddExerciseSets }:{exercise: ExerciseWit
     if (response.ok) {
       alert("Set saved.")
       const setsJson: any[] = await response.json()
-      // Store new sets in react state so that it's available without having to fetch from the backen
+      // Store new sets in react state so that it's available without having to fetch from the backend
       const completedExerciseSets = setsJson.map(exerciseSet => 
         new ExerciseSet(exerciseSet.id, time, parseFloat(exerciseSet.weight), parseInt(exerciseSet.reps), parseInt(exerciseSet.rir), exerciseSet.wilksScore)
         );
@@ -174,6 +220,9 @@ function ExerciseTrackPage({exercise, onAddExerciseSets }:{exercise: ExerciseWit
               <span className="font-black">-</span>
             </button>
           )}
+          {set.weight != "" && set.reps != "" && set.rir != ""  &&  recordsByTotalReps(exercise.sets).has(Number(set.reps) + Number(set.rir)) && (
+            <span>{parseFloat((Number(set.weight) / recordsByTotalReps(exercise.sets).get(Number(set.reps) + Number(set.rir))!.weight.valueOf() * 100).toPrecision(3))}% of PR</span>
+          )}
         </div>
       ))}
       <div className="flex space-x-2 my-6">
@@ -216,7 +265,7 @@ function ExerciseHistoryPage({exerciseSets}: {exerciseSets: ExerciseSet[]}) {
                   <div>
                     {daySets.map((set, index) => (
                       <div key={index} className="">
-                        <span>{set.reps} x {1 * set.weight}kg with {set.rir}RiR - Wilks: {1*set.wilks}</span>
+                        <span>{set.reps} x {1 * set.weight}kg with {set.rir} RiR - Wilks: {1*set.wilks}</span>
                       </div>
                     ))}
                   </div>
@@ -230,6 +279,53 @@ function ExerciseHistoryPage({exerciseSets}: {exerciseSets: ExerciseSet[]}) {
     </div>
   );
 }
+
+
+function ExerciseRecordsPage({exercise}: {exercise: ExerciseWithHistory}) {
+  
+  const repsSorted = Array.from(recordsByTotalReps(exercise.sets).keys()).sort((a, b) => a - b);
+  
+  return(
+    <div className="relative overflow-x-auto">
+      <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+        <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+          <tr>
+            <th scope="col" className="px-6 py-3">
+              Record per Reps              
+            </th>
+            {repsSorted.map((reps) => (
+              <th key={reps} scope="col" className="px-6 py-3">
+                {reps}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+            <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+              Weight
+            </th>
+            {repsSorted.map((reps) => (
+              <td key={reps} className="px-6 py-4">
+                {recordsByTotalReps(exercise.sets).get(reps)!.weight.valueOf()}
+              </td>
+            ))}
+          </tr>
+          <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+            <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+              Wilks-adjusted Weight
+            </th>
+            {repsSorted.map((reps) => (
+              <td key={reps} className="px-6 py-4">
+                {recordsByTotalReps(exercise.sets).get(reps)!.wilks.valueOf()}
+              </td>
+            ))}
+          </tr>
+        </tbody>
+    </table>
+</div>
+  )
+} 
 
 function ExerciseDetailsPage({exercise}: {exercise: ExerciseWithHistory}){
   
@@ -247,6 +343,7 @@ function ExercisePage({ exercise, goBack, handleAddExerciseSets }: {exercise: Ex
   enum exerciseSubPageName {
     track = "Track",
     history = "History",
+    records = "Records",
     details = "Details",
   }
 
@@ -281,6 +378,10 @@ function ExercisePage({ exercise, goBack, handleAddExerciseSets }: {exercise: Ex
     setCurrentExerciseSubpage(exerciseSubPageName.history)
   }
 
+  function showRecords(){
+    setCurrentExerciseSubpage(exerciseSubPageName.records)
+  }
+
   function showDetails(){
     setCurrentExerciseSubpage(exerciseSubPageName.details)
   }
@@ -288,6 +389,7 @@ function ExercisePage({ exercise, goBack, handleAddExerciseSets }: {exercise: Ex
   const pages = [
     { name: exerciseSubPageName.track, action: showTrack},
     { name: exerciseSubPageName.history, action: showHistory },
+    { name: exerciseSubPageName.records, action: showRecords },
     { name: exerciseSubPageName.details, action: showDetails },
   ];
 
@@ -358,6 +460,7 @@ function ExercisePage({ exercise, goBack, handleAddExerciseSets }: {exercise: Ex
       <div>
         {currentExerciseSubpage === exerciseSubPageName.track && <ExerciseTrackPage exercise={currentExercise} onAddExerciseSets={handleAddExerciseSetsInExercisePage} />}
         {currentExerciseSubpage === exerciseSubPageName.history && <ExerciseHistoryPage exerciseSets={currentExercise.sets} />}
+        {currentExerciseSubpage === exerciseSubPageName.records && <ExerciseRecordsPage exercise={currentExercise} />}
         {currentExerciseSubpage === exerciseSubPageName.details && <ExerciseDetailsPage exercise={currentExercise} />}
       </div>
     </div>
@@ -470,11 +573,11 @@ function ExercisesPage({exercises, bodyparts, handleAddExerciseSets }:
     if (typeof window !== 'undefined') { 
       selectedExercise = localStorage.getItem("selectedExercise");
     }
-    return selectedExercise ? JSON.parse(selectedExercise) : null;
+    return selectedExercise ? JSON.parse(selectedExercise, mapReviver) : null;
   });
 
   useEffect(() => {
-      localStorage.setItem("selectedExercise", JSON.stringify(selectedExercise));
+      localStorage.setItem("selectedExercise", JSON.stringify(selectedExercise, mapReplacer));
     }, [selectedExercise]);
 
   function resetSelectedExercise(){
