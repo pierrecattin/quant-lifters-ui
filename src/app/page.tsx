@@ -137,10 +137,10 @@ function ExerciseTrackPage({exercise, onAddExerciseSets }:{exercise: ExerciseWit
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-2">
+    <form onSubmit={handleSubmit} className="mt-2 space-y-2">
       {sets.map((set, index) => (
         <div key={index} className="flex items-center space-x-2">
-          <span className="text-lg">{index + 1}.</span>
+          <span className="text-lg my-2">{index + 1}.</span>
           <input
             type="number"
             step="0.25"
@@ -170,7 +170,7 @@ function ExerciseTrackPage({exercise, onAddExerciseSets }:{exercise: ExerciseWit
             required
           />
           {sets.length > 1 && (
-            <button type="button" onClick={() => removeSet(index)} className="py-1 px-3 my-2 bg-red-800 text-white rounded-md">
+            <button type="button" onClick={() => removeSet(index)} className="py-1 px-3 bg-red-800 text-white rounded-md">
               <span className="font-black">-</span>
             </button>
           )}
@@ -188,31 +188,6 @@ function ExerciseTrackPage({exercise, onAddExerciseSets }:{exercise: ExerciseWit
   );
 }
 
-function ExerciseSetsBoxes({setsByDay}: {setsByDay:Map<string, ExerciseSet[]>}){
-  const daysSorted = Array.from(setsByDay.keys()).sort((a, b) => new Date(a) < new Date(b) ? 1 : -1);
-  return(
-    <div className="me-12">
-    {daysSorted.map(day => {
-      const daySets = setsByDay.get(day) ?? [];
-      return (
-        <div key={day} className="bg-gray-800 border border-gray-200 rounded-lg p-4 my-4">
-          <div className="text-lg font-bold">
-            {day}
-          </div>
-          <div>
-            {daySets.map((set, index) => (
-              <div key={index} className="">
-                <span>{set.reps} x {1 * set.weight}kg with {set.rir}RiR - Wilks: {1*set.wilks}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      );
-    })}
-  </div>
-)
-}
-
 function ExerciseHistoryPage({exerciseSets}: {exerciseSets: ExerciseSet[]}) {
 
   const setsByDay = new Map<string, ExerciseSet[]>();
@@ -225,9 +200,31 @@ function ExerciseHistoryPage({exerciseSets}: {exerciseSets: ExerciseSet[]}) {
     setsByDay.get(date)?.push(exerciseSetConv);
   });
 
+  const daysSorted = Array.from(setsByDay.keys()).sort((a, b) => new Date(a) < new Date(b) ? 1 : -1);
+
   return (
-    <div className="max-h-[550px] overflow-y-scroll">
-      {setsByDay.size > 0 && <ExerciseSetsBoxes setsByDay={setsByDay}/>}
+    <div className="h-screen overflow-y-scroll pb-96 mt-1">
+      {setsByDay.size > 0 && (
+            <div className="me-12">
+            {daysSorted.map(day => {
+              const daySets = setsByDay.get(day) ?? [];
+              return (
+                <div key={day} className="bg-gray-800 border border-gray-200 rounded-lg p-4 mb-4">
+                  <div className="text-lg font-bold">
+                    {day}
+                  </div>
+                  <div>
+                    {daySets.map((set, index) => (
+                      <div key={index} className="">
+                        <span>{set.reps} x {1 * set.weight}kg with {set.rir}RiR - Wilks: {1*set.wilks}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+      )}
       {setsByDay.size === 0 && (
           <span className="text-gray-200 mx-5">Not performed yet </span>)}
     </div>
@@ -358,7 +355,7 @@ function ExercisePage({ exercise, goBack, handleAddExerciseSets }: {exercise: Ex
         ))}
         </div>
       </div>
-      <div className="my-3">
+      <div>
         {currentExerciseSubpage === exerciseSubPageName.track && <ExerciseTrackPage exercise={currentExercise} onAddExerciseSets={handleAddExerciseSetsInExercisePage} />}
         {currentExerciseSubpage === exerciseSubPageName.history && <ExerciseHistoryPage exerciseSets={currentExercise.sets} />}
         {currentExerciseSubpage === exerciseSubPageName.details && <ExerciseDetailsPage exercise={currentExercise} />}
