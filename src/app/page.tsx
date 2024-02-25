@@ -7,13 +7,15 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_QUANT_LIFTERS_BACKEND_URL
 
 
 class ExerciseSet{
+  id: string
   time: Date;
   weight: number;
   reps: number;
   rir: number;
   wilks: number;
 
-  constructor(time: Date|string, weight: number, reps: number, rir: number, wilks: number){
+  constructor(id: string, time: Date|string, weight: number, reps: number, rir: number, wilks: number){
+    this.id = id
     this.time = (typeof time === 'string') ? new Date(time) : time;
     this.weight = weight;
     this.reps = reps;
@@ -122,9 +124,10 @@ function ExerciseTrackPage({exercise, onAddExerciseSets }:{exercise: ExerciseWit
 
     if (response.ok) {
       alert("Set saved.")
+      const setsJson: any[] = await response.json()
       // Store new sets in react state so that it's available without having to fetch from the backen
-      const completedExerciseSets = sets.map(set => 
-        new ExerciseSet(time, parseFloat(set.weight), parseInt(set.reps), parseInt(set.rir), 0)
+      const completedExerciseSets = setsJson.map(exerciseSet => 
+        new ExerciseSet(exerciseSet.id, time, parseFloat(exerciseSet.weight), parseInt(exerciseSet.reps), parseInt(exerciseSet.rir), exerciseSet.wilksScore)
         );
         onAddExerciseSets(completedExerciseSets)
       setSets([new ExerciseSetInProgress()]);
@@ -214,7 +217,7 @@ function ExerciseHistoryPage({exerciseSets}: {exerciseSets: ExerciseSet[]}) {
 
   const setsByDay = new Map<string, ExerciseSet[]>();
   exerciseSets.forEach(exerciseSet => {
-    const exerciseSetConv = new ExerciseSet(exerciseSet.time, exerciseSet.weight, exerciseSet.reps, exerciseSet.rir, exerciseSet.wilks); // strange failure if we don't create new
+    const exerciseSetConv = new ExerciseSet(exerciseSet.id, exerciseSet.time, exerciseSet.weight, exerciseSet.reps, exerciseSet.rir, exerciseSet.wilks); // fails if we don't create new
     const date = exerciseSetConv.getTimeAsString();
     if (!setsByDay.get(date)) {
       setsByDay.set(date, []);
@@ -267,9 +270,10 @@ function ExercisePage({ exercise, goBack, handleAddExerciseSets }: {exercise: Ex
   }, []);
 
   function handleAddExerciseSetsInExercisePage(newSets: ExerciseSet[]){
-      const updatedExercise = { ...exercise, sets: [...exercise.sets, ...newSets] };
-      setCurrentExercise(updatedExercise);
-      handleAddExerciseSets(exercise.id, newSets);
+    const updatedSets = [...currentExercise.sets, ...newSets];
+    const updatedExercise = { ...currentExercise, sets: updatedSets };
+    setCurrentExercise(updatedExercise);
+    handleAddExerciseSets(exercise.id, newSets);
   };
 
   function showTrack(){
@@ -533,7 +537,7 @@ function Content({currentPage, logout}:{currentPage: pageName, logout: any}){
           let exerciseSets: ExerciseSet[] = []
           const exerciseSetsRaw: any[] = exercise.sets 
           exerciseSetsRaw.forEach(s => {
-            const exerciseSet = new ExerciseSet(new Date(s.workout.start_time), s.weight, s.reps, s.rir, s.wilksScore)
+            const exerciseSet = new ExerciseSet(s.id, new Date(s.workout.start_time), s.weight, s.reps, s.rir, s.wilksScore)
             exerciseSets.push(exerciseSet)
           })
 
