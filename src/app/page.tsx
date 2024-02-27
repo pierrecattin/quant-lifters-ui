@@ -192,7 +192,7 @@ function ExerciseTrackPage({exercise, handleAddExerciseSets }:{exercise: Exercis
   const [sets, setSets] = useState<ExerciseSetInProgress[]>(() => {
     let savedSets = null
     if (typeof window !== 'undefined') { 
-      savedSets = localStorage.getItem(storageKey);
+      savedSets = sessionStorage.getItem(storageKey);
     } 
     if (savedSets){
       const parsedSets:any[] = JSON.parse(savedSets);
@@ -202,9 +202,9 @@ function ExerciseTrackPage({exercise, handleAddExerciseSets }:{exercise: Exercis
     } 
   });
 
-  // Use useEffect to update localStorage when sets change
+  // Use useEffect to update sessionStorage when sets change
   useEffect(() => {
-    localStorage.setItem(storageKey, JSON.stringify(sets));
+    sessionStorage.setItem(storageKey, JSON.stringify(sets));
   }, [sets]);
 
   const handleSetChange = (index: number, field: string, value: string) => {
@@ -709,7 +709,7 @@ function ExercisesPage({exercises, bodyparts, handleUpdateExerciseSets }:
   const [selectedExercise, setSelectedExercise]  = useState<ExerciseWithHistory|null>(() => {
     let selectedExercise = null
     if (typeof window !== 'undefined') { 
-      selectedExercise = localStorage.getItem("selectedExercise");
+      selectedExercise = sessionStorage.getItem("selectedExercise");
       selectedExercise = selectedExercise == "null" ? null: selectedExercise 
     }
     if (selectedExercise){
@@ -720,7 +720,7 @@ function ExercisesPage({exercises, bodyparts, handleUpdateExerciseSets }:
   });
 
   useEffect(() => {
-      localStorage.setItem("selectedExercise", JSON.stringify(selectedExercise));
+      sessionStorage.setItem("selectedExercise", JSON.stringify(selectedExercise));
     }, [selectedExercise]);
 
   function resetSelectedExercise(){
