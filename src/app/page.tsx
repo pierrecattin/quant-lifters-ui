@@ -27,6 +27,17 @@ class ExerciseSet{
     return this.time.toDateString();
   }
 
+  clone(){
+    return new ExerciseSet(
+      this.id,
+      this.time,
+      this.weight,
+      this.reps,
+      this.rir,
+      this.wilks
+    )
+  }
+
 }
 
 class ExerciseSetInProgress{
@@ -94,6 +105,62 @@ class ExerciseWithHistory{
     this.sharedWith = sharedWith;
     this.sets = sets;
   }
+
+   clone(): ExerciseWithHistory {
+    // Create a deep copy for complex types to avoid shared references
+    const primaryBodypartsCopy = [...this.primaryBodyparts];
+    const secondaryBodypartsCopy = [...this.secondaryBodyparts];
+    const sharedWithCopy = [...this.sharedWith];
+    const setsCopy = this.sets.map(set => set.clone()); 
+
+    return new ExerciseWithHistory(
+      this.id,
+      this.name,
+      primaryBodypartsCopy,
+      secondaryBodypartsCopy,
+      this.isCustom,
+      this.createdBy,
+      sharedWithCopy,
+      setsCopy
+    );
+  }
+}
+
+class Deserializers{
+  public static deserializeExerciseSet(data: string){
+    const parsedData = JSON.parse(data)
+    return new ExerciseSet(parsedData.id, 
+      parsedData.time, 
+      parseFloat(parsedData.weight), 
+      parseInt(parsedData.reps), 
+      parseInt(parsedData.rir), 
+      parsedData.wilksScore)
+  }
+
+  public static deserializeExerciseSetInProgress(data: string){
+    const parsedData = JSON.parse(data);
+    return new ExerciseSetInProgress(
+      parsedData.weight, 
+      parsedData.reps, 
+      parsedData.rir
+    );
+  }
+
+  public static deserializeExerciseWithHistory(data: string): ExerciseWithHistory {
+    const parsedData = JSON.parse(data);
+    const sets = parsedData.sets.map((set: any) => Deserializers.deserializeExerciseSet(JSON.stringify(set)));
+    return new ExerciseWithHistory(
+      parsedData.id, 
+      parsedData.name, 
+      parsedData.primaryBodyparts, 
+      parsedData.secondaryBodyparts, 
+      parsedData.isCustom, 
+      parsedData.createdBy, 
+      parsedData.sharedWith, 
+      sets
+    );
+  }
+
 }
 
 function recordsByTotalReps(exerciseSets: ExerciseSet[]): Map<number, Records> {
@@ -120,14 +187,19 @@ enum pageName {
 }
 
 
-function ExerciseTrackPage({exercise, onAddExerciseSets }:{exercise: ExerciseWithHistory, onAddExerciseSets: any}) {
+function ExerciseTrackPage({exercise, handleAddExerciseSets }:{exercise: ExerciseWithHistory, handleAddExerciseSets: any}) {
   const storageKey = "SetInProgress_" + exercise.id
   const [sets, setSets] = useState<ExerciseSetInProgress[]>(() => {
     let savedSets = null
     if (typeof window !== 'undefined') { 
       savedSets = localStorage.getItem(storageKey);
     } 
-    return savedSets ? JSON.parse(savedSets) : [new ExerciseSetInProgress()];
+    if (savedSets){
+      const parsedSets:any[] = JSON.parse(savedSets);
+      return parsedSets.map((set) => Deserializers.deserializeExerciseSetInProgress(JSON.stringify(set)))
+    } else {
+      return [new ExerciseSetInProgress()];
+    } 
   });
 
   // Use useEffect to update localStorage when sets change
@@ -175,7 +247,7 @@ function ExerciseTrackPage({exercise, onAddExerciseSets }:{exercise: ExerciseWit
       const completedExerciseSets = setsJson.map(exerciseSet => 
         new ExerciseSet(exerciseSet.id, time, parseFloat(exerciseSet.weight), parseInt(exerciseSet.reps), parseInt(exerciseSet.rir), exerciseSet.wilksScore)
         );
-        onAddExerciseSets(completedExerciseSets)
+        handleAddExerciseSets(completedExerciseSets)
       setSets([new ExerciseSetInProgress()]);
     } else {
       alert('Failed to save sets');
@@ -237,30 +309,86 @@ function ExerciseTrackPage({exercise, onAddExerciseSets }:{exercise: ExerciseWit
   );
 }
 
-function ExerciseHistoryPage({exerciseSets}: {exerciseSets: ExerciseSet[]}) {
+
+function ConfirmDeleteSetsOfDay({isOpen, day, onClose, onConfirm }: {day:string, isOpen:boolean, onClose:any, onConfirm:any }) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+      <div className="bg-white p-10 rounded-lg text-black">
+        <p className="m-5">Are you sure you want to delete the sets of {day}?</p>
+        <div className="flex justify-end space-x-2">
+          <button onClick={onClose} className="bg-gray-900 rounded-lg text-white p-4">Cancel</button>
+          <button onClick={onConfirm} className="bg-red-950 rounded-lg text-white p-4">Confirm</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ExerciseHistoryPage({exerciseSets, handleDeleteExerciseSets}: {exerciseSets: ExerciseSet[], handleDeleteExerciseSets: any}) {
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [dayToDelete, setDayToDelete] = useState(''); 
 
   const setsByDay = new Map<string, ExerciseSet[]>();
   exerciseSets.forEach(exerciseSet => {
-    const exerciseSetConv = new ExerciseSet(exerciseSet.id, exerciseSet.time, exerciseSet.weight, exerciseSet.reps, exerciseSet.rir, exerciseSet.wilks); // fails if we don't create new
-    const date = exerciseSetConv.getTimeAsString();
+    const date = exerciseSet.getTimeAsString();
     if (!setsByDay.get(date)) {
       setsByDay.set(date, []);
     }
-    setsByDay.get(date)?.push(exerciseSetConv);
+    setsByDay.get(date)?.push(exerciseSet);
   });
 
   const daysSorted = Array.from(setsByDay.keys()).sort((a, b) => new Date(a) < new Date(b) ? 1 : -1);
 
+  const handleDeleteConfirm = async () => {
+    const setsIds = setsByDay.get(dayToDelete)?.map(set => set.id);
+    if (setsIds) {
+      const response = await fetch(`${BACKEND_URL}deleteexercisesets`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ ids: setsIds }),
+      });
+
+      if (response.ok) {
+        handleDeleteExerciseSets(setsIds)
+      } else {
+        alert('Failed to delete sets.');
+      }
+    }
+
+    setIsDeleteModalOpen(false);
+  };
+
+  const deleteSetsOfDay = (day: string) => {
+    setDayToDelete(day);
+    setIsDeleteModalOpen(true);
+  };
+
   return (
     <div className="h-screen overflow-y-scroll pb-96 mt-1">
+       <ConfirmDeleteSetsOfDay isOpen={isDeleteModalOpen} day={dayToDelete} onClose={() => setIsDeleteModalOpen(false)} onConfirm={handleDeleteConfirm} />
       {setsByDay.size > 0 && (
             <div className="me-12">
             {daysSorted.map(day => {
               const daySets = setsByDay.get(day) ?? [];
               return (
                 <div key={day} className="bg-gray-800 border border-gray-200 rounded-lg p-4 mb-4">
-                  <div className="text-lg font-bold">
-                    {day}
+                  <div className="text-lg font-bold flex justify-between items-center">
+                    <span>{day}</span>
+                    <span className="">
+                      <button onClick={() => deleteSetsOfDay(day)}>
+                        <Image
+                          src="icons/bin.svg"
+                          alt="Delete"
+                          width={20}
+                          height={20}
+                        />
+                      </button>
+                    </span>
                   </div>
                   <div>
                     {daySets.map((set, index) => (
@@ -339,7 +467,8 @@ function ExerciseDetailsPage({exercise}: {exercise: ExerciseWithHistory}){
   )
 } 
 
-function ExercisePage({ exercise, goBack, handleAddExerciseSets }: {exercise: ExerciseWithHistory, goBack:any, handleAddExerciseSets:any}){ 
+function ExercisePage({ exercise, goBack, handleUpdateExerciseSets }: 
+  {exercise: ExerciseWithHistory, goBack:any, handleUpdateExerciseSets:any}){ 
   enum exerciseSubPageName {
     track = "Track",
     history = "History",
@@ -363,12 +492,21 @@ function ExercisePage({ exercise, goBack, handleAddExerciseSets }: {exercise: Ex
     return () => document.removeEventListener("mousedown", handleClickOutsideDropdown);
   }, []);
 
-  function handleAddExerciseSetsInExercisePage(newSets: ExerciseSet[]){
+  function handleAddExerciseSets(newSets: ExerciseSet[]){
     const updatedSets = [...currentExercise.sets, ...newSets];
-    const updatedExercise = { ...currentExercise, sets: updatedSets };
+    const updatedExercise =  currentExercise.clone();
+    updatedExercise.sets = updatedSets;
     setCurrentExercise(updatedExercise);
-    handleAddExerciseSets(exercise.id, newSets);
+    handleUpdateExerciseSets(exercise.id, newSets);
   };
+
+  function handleDeleteExerciseSets(setsIds: string[]){
+    const updatedSets = currentExercise.sets.filter((set) => !(setsIds.includes(set.id)))
+    const updatedExercise =  currentExercise.clone()
+    updatedExercise.sets = updatedSets 
+    setCurrentExercise(updatedExercise);
+    handleUpdateExerciseSets(exercise.id, updatedExercise.sets);
+  };  
 
   function showTrack(){
     setCurrentExerciseSubpage(exerciseSubPageName.track)
@@ -458,8 +596,8 @@ function ExercisePage({ exercise, goBack, handleAddExerciseSets }: {exercise: Ex
         </div>
       </div>
       <div>
-        {currentExerciseSubpage === exerciseSubPageName.track && <ExerciseTrackPage exercise={currentExercise} onAddExerciseSets={handleAddExerciseSetsInExercisePage} />}
-        {currentExerciseSubpage === exerciseSubPageName.history && <ExerciseHistoryPage exerciseSets={currentExercise.sets} />}
+        {currentExerciseSubpage === exerciseSubPageName.track && <ExerciseTrackPage exercise={currentExercise} handleAddExerciseSets={handleAddExerciseSets} />}
+        {currentExerciseSubpage === exerciseSubPageName.history && <ExerciseHistoryPage exerciseSets={currentExercise.sets} handleDeleteExerciseSets={handleDeleteExerciseSets} />}
         {currentExerciseSubpage === exerciseSubPageName.records && <ExerciseRecordsPage exercise={currentExercise} />}
         {currentExerciseSubpage === exerciseSubPageName.details && <ExerciseDetailsPage exercise={currentExercise} />}
       </div>
@@ -566,18 +704,23 @@ function FilterableExerciseTable({ exercises, bodyparts, onExerciseClick }: { ex
   )
 }
 
-function ExercisesPage({exercises, bodyparts, handleAddExerciseSets }: 
-  {exercises:ExerciseWithHistory[], bodyparts: string[], handleAddExerciseSets: any}){
+function ExercisesPage({exercises, bodyparts, handleUpdateExerciseSets }: 
+  {exercises:ExerciseWithHistory[], bodyparts: string[], handleUpdateExerciseSets: any}){
   const [selectedExercise, setSelectedExercise]  = useState<ExerciseWithHistory|null>(() => {
     let selectedExercise = null
     if (typeof window !== 'undefined') { 
       selectedExercise = localStorage.getItem("selectedExercise");
+      selectedExercise = selectedExercise == "null" ? null: selectedExercise 
     }
-    return selectedExercise ? JSON.parse(selectedExercise, mapReviver) : null;
+    if (selectedExercise){
+      return Deserializers.deserializeExerciseWithHistory(selectedExercise)
+     } else {
+      return null;
+    }
   });
 
   useEffect(() => {
-      localStorage.setItem("selectedExercise", JSON.stringify(selectedExercise, mapReplacer));
+      localStorage.setItem("selectedExercise", JSON.stringify(selectedExercise));
     }, [selectedExercise]);
 
   function resetSelectedExercise(){
@@ -587,7 +730,7 @@ function ExercisesPage({exercises, bodyparts, handleAddExerciseSets }:
   return(
     <>
     {selectedExercise === null && <FilterableExerciseTable exercises={exercises} bodyparts={bodyparts} onExerciseClick={setSelectedExercise}/>}  
-    {selectedExercise === null ? <></>: <ExercisePage exercise={selectedExercise} goBack={resetSelectedExercise} handleAddExerciseSets ={handleAddExerciseSets }/>} 
+    {selectedExercise === null ? <></>: <ExercisePage exercise={selectedExercise} goBack={resetSelectedExercise} handleUpdateExerciseSets ={handleUpdateExerciseSets }/>} 
     </>
   )
 }
@@ -673,10 +816,12 @@ function Content({currentPage, logout}:{currentPage: pageName, logout: any}){
       .catch(error => console.error(error));
   }, []);
 
-  function handleAddExerciseSets(exercise_id: string, newExerciseSets: ExerciseSet[]){
+  function handleUpdateExerciseSets(exercise_id: string, newExerciseSets: ExerciseSet[]){
     const newExercises = exercises.map(exercise => {
       if (exercise.id === exercise_id){
-        return {...exercise, sets: [...exercise.sets, ...newExerciseSets]};
+        const newExercise = exercise.clone();
+        newExercise.sets = newExerciseSets
+        return newExercise;
       }
       return exercise;
     })
@@ -687,7 +832,7 @@ function Content({currentPage, logout}:{currentPage: pageName, logout: any}){
     <div className={"absolute p-5 "} >
     {currentPage === pageName.profile && <ProfilePage  logout={logout}/>}
     {currentPage === pageName.workout && <WorkoutPage  />}
-    {currentPage === pageName.exercises &&  <ExercisesPage exercises={exercises} bodyparts={bodyparts} handleAddExerciseSets ={handleAddExerciseSets}/> }
+    {currentPage === pageName.exercises &&  <ExercisesPage exercises={exercises} bodyparts={bodyparts} handleUpdateExerciseSets = {handleUpdateExerciseSets}/> }
     {currentPage === pageName.stats &&  <StatsPage /> }
     {currentPage === pageName.competition &&  <CompetitionPage /> }
     </div>
