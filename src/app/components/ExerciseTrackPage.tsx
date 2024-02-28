@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 
 import { Config } from "../config"
-import { ExerciseSet, Records, ExerciseSetInProgress, ExerciseWithHistory, Deserializers } from "../classes"
+import { ExerciseSet, Records, ExerciseSetInProgress, ExerciseWithHistory } from "../classes"
 
 
 function recordsByTotalReps(exerciseSets: ExerciseSet[]): Map<number, Records> {
@@ -31,7 +31,7 @@ export function ExerciseTrackPage({ exercise, handleAddExerciseSets }: { exercis
     }
     if (savedSets) {
       const parsedSets: any[] = JSON.parse(savedSets);
-      return parsedSets.map((set) => Deserializers.deserializeExerciseSetInProgress(JSON.stringify(set)))
+      return parsedSets.map((set) => ExerciseSetInProgress.deserialize(JSON.stringify(set)))
     } else {
       return [new ExerciseSetInProgress()];
     }

@@ -30,6 +30,16 @@ export class ExerciseSet {
     )
   }
 
+  static deserialize(data: string){
+    const parsedData = JSON.parse(data)
+    return new ExerciseSet(parsedData.id,
+      parsedData.time,
+      parseFloat(parsedData.weight),
+      parseInt(parsedData.reps),
+      parseInt(parsedData.rir),
+      parsedData.wilksScore)
+  }
+
 }
 
 
@@ -42,6 +52,15 @@ export class ExerciseSetInProgress {
     this.weight = weight;
     this.reps = reps;
     this.rir = rir
+  }
+
+  static deserialize(data: string){
+    const parsedData = JSON.parse(data);
+    return new ExerciseSetInProgress(
+      parsedData.weight,
+      parsedData.reps,
+      parsedData.rir
+    );
   }
 }
 
@@ -95,31 +114,10 @@ export class ExerciseWithHistory {
       setsCopy
     );
   }
-}
 
-export class Deserializers {
-  public static deserializeExerciseSet(data: string) {
-    const parsedData = JSON.parse(data)
-    return new ExerciseSet(parsedData.id,
-      parsedData.time,
-      parseFloat(parsedData.weight),
-      parseInt(parsedData.reps),
-      parseInt(parsedData.rir),
-      parsedData.wilksScore)
-  }
-
-  public static deserializeExerciseSetInProgress(data: string) {
+  static deserialize(data: string){
     const parsedData = JSON.parse(data);
-    return new ExerciseSetInProgress(
-      parsedData.weight,
-      parsedData.reps,
-      parsedData.rir
-    );
-  }
-
-  public static deserializeExerciseWithHistory(data: string): ExerciseWithHistory {
-    const parsedData = JSON.parse(data);
-    const sets = parsedData.sets.map((set: any) => Deserializers.deserializeExerciseSet(JSON.stringify(set)));
+    const sets = parsedData.sets.map((set: any) => ExerciseSet.deserialize(JSON.stringify(set)));
     return new ExerciseWithHistory(
       parsedData.id,
       parsedData.name,

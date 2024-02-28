@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 
-import { ExerciseWithHistory, Deserializers } from "../classes"
+import { ExerciseWithHistory } from "../classes"
 
 import { FilterableExerciseTable } from "./FilterableExerciseTable"
 import { ExercisePage } from "./ExercisePage"
@@ -16,7 +16,7 @@ export function ExercisesPage({ exercises, bodyparts, handleUpdateExerciseSets }
       selectedExercise = selectedExercise == "null" ? null : selectedExercise
     }
     if (selectedExercise) {
-      return Deserializers.deserializeExerciseWithHistory(selectedExercise)
+      return ExerciseWithHistory.deserialize(selectedExercise)
     } else {
       return null;
     }
