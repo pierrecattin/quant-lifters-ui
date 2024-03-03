@@ -143,7 +143,7 @@ function Content({ currentPage, logout }: { currentPage: pageName, logout: any }
   }
 
   return (
-    <div className={"absolute p-5 "} >
+    <div className={"absolute p-3 w-full"} >
       {currentPage === pageName.profile && <ProfilePage logout={logout} />}
       {currentPage === pageName.workout && <WorkoutPage />}
       {currentPage === pageName.exercises && <ExercisesPage exercises={exercises} bodyparts={bodyparts} handleUpdateExerciseSets={handleUpdateExerciseSets} />}

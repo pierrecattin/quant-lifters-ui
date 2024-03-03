@@ -30,7 +30,7 @@ export class ExerciseSet {
     )
   }
 
-  static deserialize(data: string){
+  static deserialize(data: string) {
     const parsedData = JSON.parse(data)
     return new ExerciseSet(parsedData.id,
       parsedData.time,
@@ -54,7 +54,7 @@ export class ExerciseSetInProgress {
     this.rir = rir
   }
 
-  static deserialize(data: string){
+  static deserialize(data: string) {
     const parsedData = JSON.parse(data);
     return new ExerciseSetInProgress(
       parsedData.weight,
@@ -115,7 +115,7 @@ export class ExerciseWithHistory {
     );
   }
 
-  static deserialize(data: string){
+  static deserialize(data: string) {
     const parsedData = JSON.parse(data);
     const sets = parsedData.sets.map((set: any) => ExerciseSet.deserialize(JSON.stringify(set)));
     return new ExerciseWithHistory(
@@ -128,5 +128,52 @@ export class ExerciseWithHistory {
       parsedData.sharedWith,
       sets
     );
+  }
+}
+
+export class WorkoutTemplate {
+  id: string;
+  name: string;
+  plannedExercises: PlannedExercise[];
+
+  constructor(id: string, name: string, plannedExercises: PlannedExercise[]) {
+    this.id = id;
+    this.name = name;
+    this.plannedExercises = plannedExercises;
+  }
+}
+
+export class PlannedExercise {
+  id: string;
+  name: string;
+  plannedSets: PlannedExerciseSet[];
+
+  constructor(id: string, name: string, plannedSets: PlannedExerciseSet[]) {
+    this.id = id;
+    this.name = name;
+    this.plannedSets = plannedSets;
+  }
+}
+
+class ExerciseSetTarget {
+  reps: number;
+  weight?: number;
+  intensity?: number;
+
+  constructor(reps: number, weight?: number, intensity?: number) {
+    this.reps = reps;
+    this.weight = weight;
+    this.intensity = intensity;
+  }
+
+}
+
+class PlannedExerciseSet {
+  restTimeinSec?: number;
+  target: ExerciseSetTarget;
+
+  constructor(target: ExerciseSetTarget, restTimeinSec?: number) {
+    this.target = target;
+    this.restTimeinSec = restTimeinSec;
   }
 }
