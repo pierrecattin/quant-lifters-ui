@@ -135,45 +135,112 @@ export class WorkoutTemplate {
   id: string;
   name: string;
   plannedExercises: PlannedExercise[];
+  is_archived: boolean;
 
-  constructor(id: string, name: string, plannedExercises: PlannedExercise[]) {
+  constructor(id: string, name: string, plannedExercises: PlannedExercise[], is_archived=false) {
     this.id = id;
     this.name = name;
     this.plannedExercises = plannedExercises;
+    this.is_archived = is_archived;
+  }
+  
+  archive(){
+    this.is_archived = true
+    return this
+  }
+
+  unarchive(){
+    this.is_archived = false
+    return this
+  }
+
+  clone(): WorkoutTemplate {
+    return new WorkoutTemplate(this.id,
+      this.name,
+      this.plannedExercises.map(p => p.clone()))
   }
 }
 
 export class PlannedExercise {
   id: string;
   name: string;
-  plannedSets: PlannedExerciseSet[];
+  plannedExerciseSets: PlannedExerciseSet[];
 
-  constructor(id: string, name: string, plannedSets: PlannedExerciseSet[]) {
+  constructor(id: string, name: string, plannedExerciseSets: PlannedExerciseSet[]) {
     this.id = id;
     this.name = name;
-    this.plannedSets = plannedSets;
+    this.plannedExerciseSets = plannedExerciseSets;
+  }
+
+  clone(): PlannedExercise{
+    return new PlannedExercise(
+      this.id,
+      this.name,
+      this.plannedExerciseSets.map(p => p.clone())
+    )
   }
 }
 
-class ExerciseSetTarget {
-  reps: number;
-  weight?: number;
-  intensity?: number;
-
-  constructor(reps: number, weight?: number, intensity?: number) {
-    this.reps = reps;
-    this.weight = weight;
-    this.intensity = intensity;
-  }
-
-}
-
-class PlannedExerciseSet {
+export class PlannedExerciseSet {
+  target: {
+    reps?: number;
+    weight?: number;
+    intensity?: number;
+    rir?: number;
+  };
   restTimeinSec?: number;
-  target: ExerciseSetTarget;
 
-  constructor(target: ExerciseSetTarget, restTimeinSec?: number) {
-    this.target = target;
+  constructor(restTimeinSec?: number) {
+    this.target = {};
     this.restTimeinSec = restTimeinSec;
   }
+
+  withRepsAndIntensity(reps: number, intensity: number) {
+    this.target.reps = reps;
+    this.target.intensity = intensity;
+    return this;
+  }
+
+  withRepsAndWeight(reps: number, weight: number) {
+    this.target.reps = reps;
+    this.target.weight = weight;
+    return this;
+  }
+
+  withRirAndIntensity(rir: number, intensity: number) {
+    this.target.rir = rir;
+    this.target.intensity = intensity;
+    return this;
+  }
+
+  withRirAndWeight(rir: number, weight: number) {
+    this.target.rir = rir;
+    this.target.weight = weight;
+    return this;
+  }
+
+  withRepsAndRir(reps: number, rir: number) {
+    this.target.reps = reps;
+    this.target.rir = rir;
+    return this;
+  }
+
+  withRepsOnly(reps: number) {
+    this.target.reps = reps;
+    return this;
+  }
+
+  fillImpliedTargetItems(){
+    alert("TODO: fillImpliedTargetItems")
+  }
+
+  private setTarget(target: { reps?: number; weight?: number; intensity?: number; rir?: number }) {
+    this.target = { ...target };
+    return this; 
+  }
+  
+  clone(): PlannedExerciseSet {
+    return new PlannedExerciseSet(this.restTimeinSec).setTarget(this.target);
+  }
+
 }

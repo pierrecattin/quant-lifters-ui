@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { Config } from "../config"
 import { LoginOrSignupPage } from "./LoginOrSignupPage"
 import { pageName } from "../enums"
-import { ExerciseSet, ExerciseWithHistory } from "../classes"
+import { ExerciseSet, ExerciseWithHistory, PlannedExercise, WorkoutTemplate, PlannedExerciseSet } from "../classes"
 
 import { ProfilePage } from "./ProfilePage"
 import { WorkoutPage } from "./WorkoutPage"
@@ -81,6 +81,7 @@ export function HomePage() {
 function Content({ currentPage, logout }: { currentPage: pageName, logout: any }) {
   const [exercises, setExercises] = useState<ExerciseWithHistory[]>([]);
   const [bodyparts, setBodyparts] = useState<string[]>([]);
+  const [workoutTemplates, setWorkoutTemplates] = useState<WorkoutTemplate[]>([]);
 
   function flattenBodyparts(bodypartsJson: any[]) {
     return (
@@ -128,6 +129,19 @@ function Content({ currentPage, logout }: { currentPage: pageName, logout: any }
       .then(response => response.json())
       .then(json => fillExercises(json.exercises))
       .catch(error => console.error(error));
+
+    // TODO: get from backend
+    const p1 = new PlannedExercise("1", "Bench",
+      [(new PlannedExerciseSet(90)).withRepsAndWeight(12, 100),
+        (new PlannedExerciseSet(90)).withRepsAndWeight(10, 100)])
+    const p2 = new PlannedExercise("2", "Skullcrusher",
+      [new PlannedExerciseSet(90).withRirAndIntensity(2, 0.8),
+        new PlannedExerciseSet(90).withRirAndIntensity(0, 0.8)])
+    const t1 = new WorkoutTemplate("1", "Push day", [p1, p2])
+    const t2 = t1.clone()
+    const t3 = t1.clone().archive()
+    const t4 = t1.clone().archive()
+    setWorkoutTemplates([t1, t2, t3, t4])
   }, []);
 
   function handleUpdateExerciseSets(exercise_id: string, newExerciseSets: ExerciseSet[]) {
@@ -145,7 +159,7 @@ function Content({ currentPage, logout }: { currentPage: pageName, logout: any }
   return (
     <div className={"absolute p-3 w-full"} >
       {currentPage === pageName.profile && <ProfilePage logout={logout} />}
-      {currentPage === pageName.workout && <WorkoutPage />}
+      {currentPage === pageName.workout && <WorkoutPage workoutTemplates = {workoutTemplates}/>}
       {currentPage === pageName.exercises && <ExercisesPage exercises={exercises} bodyparts={bodyparts} handleUpdateExerciseSets={handleUpdateExerciseSets} />}
       {currentPage === pageName.stats && <StatsPage />}
       {currentPage === pageName.competition && <CompetitionPage />}

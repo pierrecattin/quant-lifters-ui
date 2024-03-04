@@ -7,8 +7,9 @@ import { WorkoutCreatorPage } from "./WorkoutCreatorPage"
 import { QuickWorkoutPage } from "./QuickWorkoutPage"
 import { WorkoutTemplatesPage } from "./WorkoutTemplatesPage"
 
+import { WorkoutTemplate } from "../classes"
 
-export function WorkoutPage() {
+export function WorkoutPage({ workoutTemplates }: { workoutTemplates: WorkoutTemplate[] }) {
   enum workoutSubPageName {
     home = "Home",
     create = "Create",
@@ -40,8 +41,12 @@ export function WorkoutPage() {
   return (
     <>
       <div className="w-full">
-      {currentWorkoutSubpage === workoutSubPageName.home &&
-        <WorkoutTemplatesPage showCreate={showCreate} showHistory={showHistory} showQuickWorkout={showQuickWorkout}/>}
+        {currentWorkoutSubpage === workoutSubPageName.home &&
+          <WorkoutTemplatesPage workoutTemplates={workoutTemplates}
+            showCreate={showCreate}
+            showHistory={showHistory}
+            showQuickWorkout={showQuickWorkout}
+            showTrack={showTrack} />}
         {currentWorkoutSubpage === workoutSubPageName.create && <WorkoutCreatorPage showHome={showHome} />}
         {currentWorkoutSubpage === workoutSubPageName.track && <WorkoutTrackPage showHome={showHome} />}
         {currentWorkoutSubpage === workoutSubPageName.history && <WorkoutHistoryPage showHome={showHome} />}
