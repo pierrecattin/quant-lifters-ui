@@ -83,9 +83,10 @@ export class ExerciseWithHistory {
   createdBy: string;
   sharedWith: string[];
   sets: ExerciseSet[];
+  exerciseFamily: string; //temporary to not break the current UI. exerciseFamily should become a class and bodyparts should move over
 
   constructor(id: string, name: string, primaryBodyparts: string[], secondaryBodyparts: string[], isCustom: boolean,
-    createdBy: string, sharedWith: string[], sets: ExerciseSet[]) {
+    createdBy: string, sharedWith: string[], sets: ExerciseSet[], exerciseFamily: string) {
     this.id = id;
     this.name = name;
     this.primaryBodyparts = primaryBodyparts;
@@ -94,6 +95,7 @@ export class ExerciseWithHistory {
     this.createdBy = createdBy;
     this.sharedWith = sharedWith;
     this.sets = sets;
+    this.exerciseFamily = exerciseFamily;
   }
 
   clone(): ExerciseWithHistory {
@@ -111,7 +113,8 @@ export class ExerciseWithHistory {
       this.isCustom,
       this.createdBy,
       sharedWithCopy,
-      setsCopy
+      setsCopy,
+      this.exerciseFamily
     );
   }
 
@@ -126,7 +129,8 @@ export class ExerciseWithHistory {
       parsedData.isCustom,
       parsedData.createdBy,
       parsedData.sharedWith,
-      sets
+      sets,
+      parsedData.exerciseFamily
     );
   }
 }

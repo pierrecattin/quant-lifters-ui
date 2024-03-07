@@ -101,12 +101,13 @@ function Content({ currentPage, logout }: { currentPage: pageName, logout: any }
 
       const newExercise = new ExerciseWithHistory(exercise.id,
         exercise.name,
-        flattenBodyparts(exercise.primary_bodyparts),
-        flattenBodyparts(exercise.secondary_bodyparts),
+        flattenBodyparts(exercise.exercise_family.primary_bodyparts),
+        flattenBodyparts(exercise.exercise_family.secondary_bodyparts),
         exercise.is_custom,
         exercise.created_by,
         exercise.shared_with,
-        exerciseSets)
+        exerciseSets,
+        exercise.exercise_family.name)
       exercisesToSave.push(newExercise)
     });
     setExercises(exercisesToSave);
