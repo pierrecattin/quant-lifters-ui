@@ -25,6 +25,7 @@ export function WorkoutTemplatesPage({ workoutTemplates, showCreate, showHistory
           Quick Workout
         </button>
       </div>
+      <h3 className="text-lg font-semibold mt-5">Active templates</h3>
       <WorkoutTemplatesBoxes workoutTemplates={workoutTemplates.filter(t => !t.is_archived)} isArchive={false} showTrack={showTrack} />
       <h3 className="text-lg font-semibold mt-5">Archived templates</h3>
       <WorkoutTemplatesBoxes workoutTemplates={workoutTemplates.filter(t => t.is_archived)} isArchive={true} showTrack={showTrack} />
@@ -36,23 +37,26 @@ function WorkoutTemplatesBoxes({ workoutTemplates, isArchive, showTrack }:
   { workoutTemplates: WorkoutTemplate[], isArchive: boolean, showTrack: any }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
+  // Prevent event propagation to stop triggering showTrack when menu button is clicked
+  const handleMenuClick = (e:any) => {
+    e.stopPropagation();
+    setIsDropdownOpen(!isDropdownOpen);
+    alert("TODO")
+  };
+
   return (
-    <div className="mt-6 mb-11 grid gap-4">
+    <div className="mt-2 mb-11 grid gap-4">
       {workoutTemplates.map((template, index) => (
-        <div className="border border-gray-200 bg-slate-800 rounded-lg p-4 shadow-lg shadow-black text-left relative" key={index}>
-          {!isArchive && 
-          <div className="flex justify-center">
-          <button className="text-black text-lg font-semibold rounded-lg border border-black shadow-lg shadow-black bg-slate-300 py-2 px-3 hover:bg-white" 
-          onClick={() => showTrack(template.id)} >
-            {template.name}
-          </button>
+        <div className={`border border-gray-200 bg-slate-800 rounded-lg p-4 shadow-lg shadow-black text-left relative ${isArchive ? "" : "cursor-pointer"}`}
+        key={index}
+        onClick={isArchive ? undefined : () => showTrack(template.id)}>
+          <div className="text-lg font-semibold ">
+            <span style={isArchive ? { opacity: "0.5" } : {}}>{template.name} </span>
           </div>
-          }
-          {isArchive && <div className="text-lg font-semibold " >
-            {template.name}
+          <div>
+            <span className="opacity-50">Last performed TODO days ago</span>
           </div>
-          }
-          <button className="absolute top-2 right-2" onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
+          <button className="absolute top-2 right-2 p-3 " onClick={handleMenuClick}>
             <Image
               src="/icons/menu.svg"
               alt="Menu"
