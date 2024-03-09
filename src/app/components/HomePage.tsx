@@ -142,6 +142,10 @@ function Content({ currentPage, logout }: { currentPage: pageName, logout: any }
     const t2 = t1.clone()
     const t3 = t1.clone().archive()
     const t4 = t1.clone().archive()
+    t1.id = "1"
+    t2.id = "2"
+    t3.id = "3"
+    t4.id = "4"
     setWorkoutTemplates([t1, t2, t3, t4])
   }, []);
 

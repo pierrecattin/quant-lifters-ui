@@ -33,38 +33,51 @@ export function WorkoutTemplatesPage({ workoutTemplates, showCreate, showHistory
   )
 }
 
+
 function WorkoutTemplatesBoxes({ workoutTemplates, isArchive, showTrack }:
   { workoutTemplates: WorkoutTemplate[], isArchive: boolean, showTrack: any }) {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [openDropdownTemplateId, setOpenDropdownTemplateId] = useState<string|null>(null);
 
-  // Prevent event propagation to stop triggering showTrack when menu button is clicked
-  const handleMenuClick = (e:any) => {
-    e.stopPropagation();
-    setIsDropdownOpen(!isDropdownOpen);
-    alert("TODO")
+  const handleDropdownOpen = (templateId: string) => {
+    if(templateId === openDropdownTemplateId){
+      setOpenDropdownTemplateId(null);
+    } else {
+      
+      setOpenDropdownTemplateId(templateId);
+    }
   };
+
+  const handleMenuClick = (e: any, option: string) => {
+    e.stopPropagation();
+    alert ("TODO "+ option + "; templateId:" + openDropdownTemplateId);
+  }
 
   return (
     <div className="mt-2 mb-11 grid gap-4">
-      {workoutTemplates.map((template, index) => (
-        <div className={`border border-gray-200 bg-slate-800 rounded-lg p-4 shadow-lg shadow-black text-left relative ${isArchive ? "" : "cursor-pointer"}`}
-        key={index}
-        onClick={isArchive ? undefined : () => showTrack(template.id)}>
-          <div className="text-lg font-semibold ">
-            <span style={isArchive ? { opacity: "0.5" } : {}}>{template.name} </span>
-          </div>
-          <div>
-            <span className="opacity-50">Last performed TODO days ago</span>
-          </div>
-          <button className="absolute top-2 right-2 p-3 " onClick={handleMenuClick}>
-            <Image
-              src="/icons/menu.svg"
-              alt="Menu"
-              width={24}
-              height={24}
-            />
-          </button>
-          <ul style={isArchive ? { opacity: "0.5" } : {}}>
+      {workoutTemplates.map((template, index) => {
+        const menuOptions = isArchive
+          ? ["Unarchive", "Share", "Delete"]
+          : ["Edit", "Rename", "Duplicate", "Share", "Archive", "Delete"];
+
+        return (
+          <div className={`border border-gray-200 bg-slate-800 rounded-lg p-4 shadow-lg shadow-black text-left relative ${isArchive ? "" : "cursor-pointer"}`}
+          key={index}
+          onClick={isArchive ? undefined : () => showTrack(template.id)}>
+            <div className="text-lg font-semibold ">
+              <span style={isArchive ? { opacity: "0.5" } : {}}>{template.name}</span>
+            </div>
+            <div>
+              <span className="opacity-50">Last performed TODO days ago</span>
+            </div>
+            <button className="absolute top-2 right-2 p-3" onClick={(e) => { e.stopPropagation(); handleDropdownOpen(template.id); }}>
+              <Image
+                src="/icons/menu.svg"
+                alt="Menu"
+                width={24}
+                height={24}
+              />
+            </button>
+            <ul style={isArchive ? { opacity: "0.5" } : {}}>
             {template.plannedExercises.map((exercise, index) => (
               <li key={index} className="mt-1">
                 <strong>{exercise.name}</strong>
@@ -82,8 +95,16 @@ function WorkoutTemplatesBoxes({ workoutTemplates, isArchive, showTrack }:
               </li>
             ))}
           </ul>
-        </div>
-      ))}
+            {openDropdownTemplateId === template.id && (
+              <ul className="absolute right-2 top-10 mt-1 bg-black shadow-lg rounded-lg z-10">
+                {menuOptions.map((option, idx) => (
+                  <li key={idx} className="px-4 py-2 rounded-lg hover:bg-gray-100 hover:text-black cursor-pointer" onClick={(e:any) => handleMenuClick(e, option)}>{option}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        );
+      })}
     </div>
   )
 }
