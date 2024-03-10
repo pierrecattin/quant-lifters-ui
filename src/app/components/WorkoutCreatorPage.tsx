@@ -60,11 +60,12 @@ export function WorkoutCreatorPage({ showHome, exercises, bodyparts }: { showHom
             SAVE
           </button>
         </div>
-        {plannedExercises.map((plannedSets, index) => <ExerciseBox exerciseIndex={index} plannedSets={plannedSets} updatePlannedSets={updatePlannedSets} />)}
+        {plannedExercises.map((plannedSets, index) => 
+        <ExerciseBox key={index} exerciseIndex={index} plannedSets={plannedSets} updatePlannedSets={updatePlannedSets} />)}
         <div className="flex justify-center">
           <button
             onClick={showExerciseSelector}
-            className="rounded-lg mt-5 mb-12 px-3 py-2 bg-gray-800 border border-gray-100 hover:bg-gray-600">
+            className="rounded-lg mt-5 mb-12 px-3 py-2 bg-gray-800 border border-gray-100 hover:bg-gray-600 shadow-black shadow-lg">
             Add exercise
           </button>
         </div>
@@ -89,7 +90,7 @@ function ExerciseBox({ exerciseIndex, plannedSets, updatePlannedSets }:
     const newSets = [...plannedSets];
     const setToUpdate = newSets[setIndex];
     if (field == "intensity") {
-      setToUpdate.target.intensity = Number(value)/100;
+      setToUpdate.target.intensity = Number(value) / 100;
     } else if (field == "weight") {
       setToUpdate.target.weight = Number(value);
     } else if (field == "reps") {
@@ -115,7 +116,7 @@ function ExerciseBox({ exerciseIndex, plannedSets, updatePlannedSets }:
   }
 
   return (
-    <div key={exerciseIndex} className="my-4 border border-gray-200 bg-slate-800 rounded-lg p-4 shadow-lg shadow-black text-left relative " >
+    <div className="my-4 border border-gray-200 bg-slate-800 rounded-lg p-4 shadow-lg shadow-black text-left relative " >
       <div className="flex justify-between">
         <span className="text-lg">{plannedSets[0].exerciseName}</span>
         <span>
@@ -128,7 +129,7 @@ function ExerciseBox({ exerciseIndex, plannedSets, updatePlannedSets }:
         {plannedSets.map((plannedSet, index) => (
           <div key={index} className="flex items-center space-x-2">
             <span className="text-lg my-2">{index + 1}.</span>
-            {withWeight && <input
+            {withWeight && <div className="relative flex items-center"> <input
               type="number"
               step="0.25"
               min="0"
@@ -137,7 +138,9 @@ function ExerciseBox({ exerciseIndex, plannedSets, updatePlannedSets }:
               onChange={(e) => handleSetChange(index, 'weight', e.target.value)}
               placeholder="Weight"
               required
-            />}
+            />
+            <span className="absolute inset-y-0 right-1 flex items-center text-gray-100">kg</span>
+            </div>}
             {withIntensity && <div className="relative flex items-center"> <input
               type="number"
               step="5"
@@ -149,7 +152,7 @@ function ExerciseBox({ exerciseIndex, plannedSets, updatePlannedSets }:
               placeholder="Intensity"
               required
             />
-             <span className="absolute inset-y-0 right-1 flex items-center text-gray-100">%</span>
+              <span className="absolute inset-y-0 right-1 flex items-center text-gray-100">%</span>
             </div>}
             {withReps && <input
               type="number"
@@ -181,14 +184,14 @@ function ExerciseBox({ exerciseIndex, plannedSets, updatePlannedSets }:
               required
             />}
             {plannedSets.length > 1 && (
-              <button type="button" onClick={() => removeSet(index)} className="py-1 px-3 bg-red-800 text-white rounded-md hover:bg-red-900">
+              <button type="button" onClick={() => removeSet(index)} className="py-1 px-3 bg-red-800 text-white rounded-md hover:bg-red-900 shadow-black shadow-lg">
                 <span className="font-black">-</span>
               </button>
             )}
           </div>
         ))}
         <div className="flex justify-between ">
-          <button type="button" onClick={addSet} className="py-1 px-3 mx-3 mt-4 bg-green-500 text-white rounded-md hover:bg-green-700">
+          <button type="button" onClick={addSet} className="py-1 px-3 mx-3 mt-4 bg-green-500 text-white rounded-md hover:bg-green-700 shadow-black shadow-lg">
             <span className="font-black">+</span>
           </button>
           <button
@@ -262,7 +265,7 @@ function WeightIntensityToggle({ setWithWeight, setWithIntensity }: { setWithWei
         <path d={svgPath}
           stroke={mode === modes.none ? "#64748b" : "white"}
           fill="white"
-          stroke-width={mode === modes.intensity ? "0.1" : "15"} stroke-linecap="round" stroke-linejoin="round" />
+          strokeWidth={mode === modes.intensity ? "0.1" : "15"} strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     </button>
   )
@@ -314,12 +317,12 @@ function RepsRirToggle({ setWithReps, setWithRir }: { setWithReps: any, setWithR
         <svg width="2em" height="2em" viewBox="19 -100 30 120" xmlns="http://www.w3.org/2000/svg">
           <text stroke={mode === modes.none ? "#64748b" : "white"}
             fill={mode === modes.none ? "#64748b" : mode === modes.rir ? "black" : "white"}
-            font-size="120">#</text>
+            fontSize="120">#</text>
         </svg>}
       {mode === modes.both &&
         <svg width="2em" height="2em" viewBox="25 -80 30 120" xmlns="http://www.w3.org/2000/svg">
-          <text stroke="white" fill="white" font-size="70">#</text>
-          <text stroke="white" font-size="70"> &nbsp; #</text>
+          <text stroke="white" fill="white" fontSize="70">#</text>
+          <text stroke="white" fontSize="70"> &nbsp; #</text>
         </svg>}
     </button>
   )
@@ -340,7 +343,7 @@ function TimerToggle({ setWithTimer }: { setWithTimer: any }) {
       <svg width="2em" height="2em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M10 3H14M12 9V13L14 15M12 21C16.4183 21 20 17.4183 20 13C20 8.58172 16.4183 5 12 5C7.58172 5 4 8.58172 4 13C4 15.3894 5.04751 17.5341 6.70835 19"
           stroke={isToggled ? "white" : "#64748b"}
-          stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     </button>
   )
