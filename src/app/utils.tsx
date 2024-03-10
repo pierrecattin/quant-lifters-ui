@@ -14,3 +14,8 @@ export function recordsByTotalReps(exerciseSets: ExerciseSet[]): Map<number, Rec
   });
   return recordsByTotalReps;
 }
+
+export function getDaysBetweenDates(date1: Date, date2: Date): number {
+  const differenceInDays = (date1.getTime() - date2.getTime())/ (1000 * 3600 * 24);;
+  return differenceInDays > 0? Math.ceil(differenceInDays): Math.floor(differenceInDays); 
+}

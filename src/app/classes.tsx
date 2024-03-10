@@ -1,3 +1,5 @@
+import {getDaysBetweenDates} from "./utils"
+
 export class ExerciseSet {
   id: string
   time: Date;
@@ -139,29 +141,41 @@ export class WorkoutTemplate {
   id: string;
   name: string;
   plannedExercises: PlannedExercise[];
-  is_archived: boolean;
+  isArchived: boolean;
+  lastWorkoutDate: Date|null;
 
-  constructor(id: string, name: string, plannedExercises: PlannedExercise[], is_archived=false) {
+  constructor(id: string, name: string, plannedExercises: PlannedExercise[], isArchived=false, lastWorkoutDate: Date|null = null) {
     this.id = id;
     this.name = name;
     this.plannedExercises = plannedExercises;
-    this.is_archived = is_archived;
+    this.isArchived = isArchived;
+    this.lastWorkoutDate = lastWorkoutDate;
   }
   
+  getDaysSinceLastWorkout(){
+    if (this.lastWorkoutDate === null){
+      return null
+    } else {
+      return getDaysBetweenDates(new Date(), this.lastWorkoutDate);
+    }
+  }
+
   archive(){
-    this.is_archived = true
+    this.isArchived = true
     return this
   }
 
   unarchive(){
-    this.is_archived = false
+    this.isArchived = false
     return this
   }
 
   clone(): WorkoutTemplate {
-    return new WorkoutTemplate(this.id,
+    return new WorkoutTemplate("",
       this.name,
-      this.plannedExercises.map(p => p.clone()))
+      this.plannedExercises.map(p => p.clone()),
+      this.isArchived,
+      null)
   }
 }
 

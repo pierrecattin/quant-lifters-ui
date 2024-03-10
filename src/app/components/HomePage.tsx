@@ -132,16 +132,19 @@ function Content({ currentPage, logout }: { currentPage: pageName, logout: any }
       .catch(error => console.error(error));
 
     // TODO: get from backend
+    const date = new Date()
     const p1 = new PlannedExercise("1", "Bench",
       [(new PlannedExerciseSet(90)).withRepsAndWeight(12, 100),
         (new PlannedExerciseSet(90)).withRepsAndWeight(10, 100)])
     const p2 = new PlannedExercise("2", "Skullcrusher",
       [new PlannedExerciseSet(90).withRirAndIntensity(2, 0.8),
         new PlannedExerciseSet(90).withRirAndIntensity(0, 0.8)])
-    const t1 = new WorkoutTemplate("1", "Push day", [p1, p2])
+    const t1 = new WorkoutTemplate("1", "Push day", [p1, p2], false, new Date("2024-03-08"))
     const t2 = t1.clone()
     const t3 = t1.clone().archive()
+    t3.lastWorkoutDate = new Date("2024-02-01")
     const t4 = t1.clone().archive()
+    t4.lastWorkoutDate = new Date("2024-03-01")
     t1.id = "1"
     t2.id = "2"
     t3.id = "3"
