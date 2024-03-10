@@ -28,7 +28,7 @@ export function WorkoutTemplatesPage({ workoutTemplates, showCreate, showHistory
         </button>
       </div>
       <h3 className="text-lg font-semibold mt-5">Active templates</h3>
-      {activeTemplates.length === 0 && <span className="text-gray-300">You don't have any active template. Please create a template or start a quick workout.</span>}
+      {activeTemplates.length === 0 && <span className="text-gray-300">You don&apos;t have any active template. Please create a template or start a quick workout.</span>}
       <WorkoutTemplatesBoxes workoutTemplates={activeTemplates} isArchive={false} showTrack={showTrack} />
       <h3 className="text-lg font-semibold mt-5">Archived templates</h3>
       <WorkoutTemplatesBoxes workoutTemplates={archivedTemplates} isArchive={true} showTrack={showTrack} />
