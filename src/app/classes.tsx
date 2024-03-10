@@ -211,7 +211,7 @@ export class PlannedExerciseSet {
   };
 
 
-  constructor(exerciseId: string, exerciseName?:string,restTimeinSec?: number) {
+  constructor(exerciseId: string, exerciseName?:string, restTimeinSec?: number) {
     this.exerciseId=exerciseId;
     this.exerciseName=exerciseName;
     this.target = {};

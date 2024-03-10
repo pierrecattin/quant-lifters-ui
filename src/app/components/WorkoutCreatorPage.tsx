@@ -97,12 +97,14 @@ function ExerciseBox({ exerciseIndex, plannedSets, updatePlannedSets }:
       setToUpdate.target.reps = Number(value);
     } else if (field == "rir") {
       setToUpdate.target.rir = Number(value);
+    } else if (field == "restTimeinSec") {
+      setToUpdate.restTimeinSec = Number(value);
     }
     updatePlannedSets(exerciseIndex, newSets);
   };
 
   const addSet = () => {
-    updatePlannedSets(exerciseIndex, [...plannedSets, new PlannedExerciseSet(plannedSets[0].exerciseId)]);
+    updatePlannedSets(exerciseIndex, [...plannedSets, plannedSets[plannedSets.length-1].clone()]);
   };
 
   const removeSet = (index: number) => {
@@ -141,7 +143,9 @@ function ExerciseBox({ exerciseIndex, plannedSets, updatePlannedSets }:
             />
               <span className="absolute inset-y-0 right-1 flex items-center text-gray-100">kg</span>
             </div>}
-            {withIntensity && <div className="relative flex items-center"> <input
+            {withIntensity && 
+            <div className="relative flex items-center"> 
+            <input
               type="number"
               step="5"
               min="0"
@@ -174,17 +178,20 @@ function ExerciseBox({ exerciseIndex, plannedSets, updatePlannedSets }:
               placeholder="RiR"
               required
             />}
-            {withTimer && <input
-              style={{ width: "20%" }}
+            {withTimer && 
+            <div className="relative flex items-center"> 
+            <input
               type="number"
               step="10"
               min="0"
               className="w-20 p-1 border rounded-md  bg-gray-800"
-              value={plannedSet.restTimeinSec}
+              value={plannedSet.restTimeinSec || ""}
               onChange={(e) => handleSetChange(index, 'restTimeinSec', e.target.value)}
               placeholder="Rest"
               required
-            />}
+            />
+            <span className="absolute inset-y-0 right-1 flex items-center text-gray-100">s</span>
+            </div>}
             {plannedSets.length > 1 && (
               <button type="button" onClick={() => removeSet(index)} className="py-1 px-3 bg-red-800 text-white rounded-md hover:bg-red-900 shadow-black shadow-lg">
                 <span className="font-black">-</span>
