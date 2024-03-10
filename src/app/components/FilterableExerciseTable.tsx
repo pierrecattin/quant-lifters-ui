@@ -75,7 +75,7 @@ function ExerciseTable({ exercises, filterText, selectedBodyparts, onExerciseCli
   const exerciseButtons: JSX.Element[] = [];
   exercises.forEach((exercise) => {
     if (selectedBodyparts.length == 0 ||
-      selectedBodyparts.filter(x => exercise.primaryBodyparts.includes(x) || exercise.secondaryBodyparts.includes(x)).length > 0) {
+      selectedBodyparts.filter(x => exercise.primaryBodyparts.includes(x) || exercise.secondaryBodyparts.includes(x)).length == selectedBodyparts.length) {
       if (exercise.name.toLowerCase().includes(filterText.toLowerCase())) {
         exerciseButtons.push(
           <ExerciseButton exercise={exercise} key={exercise.name} onExerciseClick={onExerciseClick} />
@@ -94,7 +94,7 @@ function ExerciseTable({ exercises, filterText, selectedBodyparts, onExerciseCli
 function SearchBar({ filterText, onFilterChange }: { filterText: string, onFilterChange: any }) {
   return (
     <form className='m-1' >
-      <input className='text-gray-100 bg-gray-800 border border-neutral-500'
+      <input className='p-1 text-gray-100 bg-gray-800 border border-neutral-500'
         type="text"
         placeholder="Search exercises..."
         value={filterText}

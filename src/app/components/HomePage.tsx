@@ -132,13 +132,13 @@ function Content({ currentPage, logout }: { currentPage: pageName, logout: any }
       .catch(error => console.error(error));
 
     // TODO: get from backend
-    const date = new Date()
+    const pe1 =  new PlannedExerciseSet("1", "bench", 90)
+    pe1.setTarget({weight:100, reps:12})
+    const pe2 =  pe1.clone()
     const p1 = new PlannedExercise("1", "Bench",
-      [(new PlannedExerciseSet(90)).withRepsAndWeight(12, 100),
-        (new PlannedExerciseSet(90)).withRepsAndWeight(10, 100)])
+      [pe1, pe2])
     const p2 = new PlannedExercise("2", "Skullcrusher",
-      [new PlannedExerciseSet(90).withRirAndIntensity(2, 0.8),
-        new PlannedExerciseSet(90).withRirAndIntensity(0, 0.8)])
+      [pe1, pe2])
     const t1 = new WorkoutTemplate("1", "Push day", [p1, p2], false, new Date("2024-03-08"))
     const t2 = t1.clone()
     const t3 = t1.clone().archive()
@@ -167,7 +167,7 @@ function Content({ currentPage, logout }: { currentPage: pageName, logout: any }
   return (
     <div className={"absolute p-3 w-full"} >
       {currentPage === pageName.profile && <ProfilePage logout={logout} />}
-      {currentPage === pageName.workout && <WorkoutPage workoutTemplates = {workoutTemplates}/>}
+      {currentPage === pageName.workout && <WorkoutPage workoutTemplates = {workoutTemplates} exercises={exercises} bodyparts={bodyparts}/>}
       {currentPage === pageName.exercises && <ExercisesPage exercises={exercises} bodyparts={bodyparts} handleUpdateExerciseSets={handleUpdateExerciseSets} />}
       {currentPage === pageName.stats && <StatsPage />}
       {currentPage === pageName.competition && <CompetitionPage />}

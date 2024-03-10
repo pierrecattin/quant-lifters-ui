@@ -43,7 +43,7 @@ function compareTemplatesDates(t1: WorkoutTemplate, t2: WorkoutTemplate) {
   if (t2.getDaysSinceLastWorkout() == null) {
     return -1
   }
-  return Number(t1.getDaysSinceLastWorkout()) > Number(t2.getDaysSinceLastWorkout()) ? -1 : 1
+  return Number(t1.getDaysSinceLastWorkout()) > Number(t2.getDaysSinceLastWorkout()) ? 1 : -1
 }
 
 function WorkoutTemplatesBoxes({ workoutTemplates, isArchive, showTrack }:

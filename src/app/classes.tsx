@@ -46,11 +46,11 @@ export class ExerciseSet {
 
 
 export class ExerciseSetInProgress {
-  weight: string; // Using string to allow partially filled without using undefined, to prevent: https://medium.com/@kirichuk/why-react-component-is-changing-an-uncontrolled-input-to-be-controlled-1f19f9a1ef35
-  reps: string;
-  rir: string;
+  weight?: number; 
+  reps?: number;
+  rir?: number;
 
-  constructor(weight = "", reps = "", rir = "") {
+  constructor(weight?: number, reps?: number, rir?: number) {
     this.weight = weight;
     this.reps = reps;
     this.rir = rir
@@ -200,65 +200,35 @@ export class PlannedExercise {
 }
 
 export class PlannedExerciseSet {
+  exerciseName?: string;
+  exerciseId: string;
+  restTimeinSec?: number;
   target: {
     reps?: number;
     weight?: number;
     intensity?: number;
     rir?: number;
   };
-  restTimeinSec?: number;
 
-  constructor(restTimeinSec?: number) {
+
+  constructor(exerciseId: string, exerciseName?:string,restTimeinSec?: number) {
+    this.exerciseId=exerciseId;
+    this.exerciseName=exerciseName;
     this.target = {};
     this.restTimeinSec = restTimeinSec;
-  }
-
-  withRepsAndIntensity(reps: number, intensity: number) {
-    this.target.reps = reps;
-    this.target.intensity = intensity;
-    return this;
-  }
-
-  withRepsAndWeight(reps: number, weight: number) {
-    this.target.reps = reps;
-    this.target.weight = weight;
-    return this;
-  }
-
-  withRirAndIntensity(rir: number, intensity: number) {
-    this.target.rir = rir;
-    this.target.intensity = intensity;
-    return this;
-  }
-
-  withRirAndWeight(rir: number, weight: number) {
-    this.target.rir = rir;
-    this.target.weight = weight;
-    return this;
-  }
-
-  withRepsAndRir(reps: number, rir: number) {
-    this.target.reps = reps;
-    this.target.rir = rir;
-    return this;
-  }
-
-  withRepsOnly(reps: number) {
-    this.target.reps = reps;
-    return this;
   }
 
   fillImpliedTargetItems(){
     alert("TODO: fillImpliedTargetItems")
   }
 
-  private setTarget(target: { reps?: number; weight?: number; intensity?: number; rir?: number }) {
+  setTarget(target: { reps?: number; weight?: number; intensity?: number; rir?: number }) {
     this.target = { ...target };
     return this; 
   }
   
   clone(): PlannedExerciseSet {
-    return new PlannedExerciseSet(this.restTimeinSec).setTarget(this.target);
+    return new PlannedExerciseSet(this.exerciseId, this.exerciseName, this.restTimeinSec).setTarget(this.target);
   }
 
 }

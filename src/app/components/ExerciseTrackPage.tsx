@@ -99,7 +99,7 @@ export function ExerciseTrackPage({ exercise, handleAddExerciseSets }: { exercis
             step="0.25"
             min="0"
             className="w-20 p-1 border rounded-md text-gray-100 bg-gray-800"
-            value={set.weight}
+            value={set.weight || ""}
             onChange={(e) => handleSetChange(index, 'weight', e.target.value)}
             placeholder="Weight"
             required
@@ -108,7 +108,7 @@ export function ExerciseTrackPage({ exercise, handleAddExerciseSets }: { exercis
             type="number"
             min="1"
             className="w-20 p-1 border rounded-md text-gray-100 bg-gray-800 "
-            value={set.reps}
+            value={set.reps || ""}
             onChange={(e) => handleSetChange(index, 'reps', e.target.value)}
             placeholder="Reps"
             required
@@ -117,7 +117,7 @@ export function ExerciseTrackPage({ exercise, handleAddExerciseSets }: { exercis
             type="number"
             min="0"
             className="w-20 p-1 border rounded-md  bg-gray-800"
-            value={set.rir}
+            value={set.rir || ""}
             onChange={(e) => handleSetChange(index, 'rir', e.target.value)}
             placeholder="RiR"
             required
@@ -127,7 +127,7 @@ export function ExerciseTrackPage({ exercise, handleAddExerciseSets }: { exercis
               <span className="font-black">-</span>
             </button>
           )}
-          {set.weight != "" && set.reps != "" && set.rir != "" && recordsByTotalReps(exercise.sets).has(Number(set.reps) + Number(set.rir)) && (
+          {set.weight != null && set.reps != null && set.rir != null && recordsByTotalReps(exercise.sets).has(Number(set.reps) + Number(set.rir)) && (
             <span>{parseFloat((Number(set.weight) / recordsByTotalReps(exercise.sets).get(Number(set.reps) + Number(set.rir))!.weight.valueOf() * 100).toPrecision(3))}% of PR</span>
           )}
         </div>
