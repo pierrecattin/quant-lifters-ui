@@ -12,8 +12,8 @@
 /.next/
 
 
-/public/*.map
-/public/*.js
+public/*.map
+public/*.js
 
 # misc
 .DS_Store
@@ -23,6 +23,8 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+yarn.lock
 
 
 

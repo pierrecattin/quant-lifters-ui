@@ -16,6 +16,10 @@ export function recordsByTotalReps(exerciseSets: ExerciseSet[]): Map<number, Rec
 }
 
 export function getDaysBetweenDates(date1: Date, date2: Date): number {
-  const differenceInDays = (date1.getTime() - date2.getTime())/ (1000 * 3600 * 24);;
-  return differenceInDays > 0? Math.ceil(differenceInDays): Math.floor(differenceInDays); 
+  // Create new dates normalized to midnight to ignore time of day
+  const normalizedDate1 = new Date(date1.getFullYear(), date1.getMonth(), date1.getDate());
+  const normalizedDate2 = new Date(date2.getFullYear(), date2.getMonth(), date2.getDate());
+
+  const differenceInDays = (normalizedDate1.getTime() - normalizedDate2.getTime()) / (1000 * 3600 * 24);
+  return Math.round(differenceInDays); 
 }
