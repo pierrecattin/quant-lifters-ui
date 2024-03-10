@@ -43,16 +43,16 @@ export function WorkoutCreatorPage({ showHome, exercises, bodyparts }: { showHom
     <>{!showExercisesTable &&
       <div>
         <div className="flex justify-between shadow-black shadow-lg px-4 py-2 rounded-lg">
-          <button onClick={showHome} className="px-2">
+          <button onClick={showHome}>
             <Image
               src="/icons/cross.svg"
-              alt="Menu"
+              alt="Exit"
               width={24}
               height={24}
             />
           </button>
-          <input className="bg-gray-900 text-lg text-white px-3 py-2"
-            placeholder="Enter a template name"
+          <input className="bg-gray-900 text-white px-1 py-2"
+            placeholder="New template"
             onChange={(e) => setTemplateTitle(e.target.value)}></input>
           <button
             onClick={handleSave}
@@ -60,8 +60,8 @@ export function WorkoutCreatorPage({ showHome, exercises, bodyparts }: { showHom
             SAVE
           </button>
         </div>
-        {plannedExercises.map((plannedSets, index) => 
-        <ExerciseBox key={index} exerciseIndex={index} plannedSets={plannedSets} updatePlannedSets={updatePlannedSets} />)}
+        {plannedExercises.map((plannedSets, index) =>
+          <ExerciseBox key={index} exerciseIndex={index} plannedSets={plannedSets} updatePlannedSets={updatePlannedSets} />)}
         <div className="flex justify-center">
           <button
             onClick={showExerciseSelector}
@@ -90,7 +90,7 @@ function ExerciseBox({ exerciseIndex, plannedSets, updatePlannedSets }:
     const newSets = [...plannedSets];
     const setToUpdate = newSets[setIndex];
     if (field == "intensity") {
-      setToUpdate.target.intensity = Number(value) / 100;
+      setToUpdate.target.intensity = Number(value);
     } else if (field == "weight") {
       setToUpdate.target.weight = Number(value);
     } else if (field == "reps") {
@@ -116,16 +116,16 @@ function ExerciseBox({ exerciseIndex, plannedSets, updatePlannedSets }:
   }
 
   return (
-    <div className="my-4 border border-gray-200 bg-slate-800 rounded-lg p-4 shadow-lg shadow-black text-left relative " >
+    <div className="my-4 border border-gray-200 bg-slate-800 rounded-lg p-2 shadow-lg shadow-black text-left relative " >
       <div className="flex justify-between">
-        <span className="text-lg">{plannedSets[0].exerciseName}</span>
+        <span>{plannedSets[0].exerciseName}</span>
         <span>
-          <TimerToggle setWithTimer={setWithTimer} />
           <WeightIntensityToggle setWithWeight={setWithWeight} setWithIntensity={setWithIntensity} />
           <RepsRirToggle setWithReps={setWithReps} setWithRir={setWithRir} />
+          <TimerToggle setWithTimer={setWithTimer} />
         </span>
       </div>
-      <form className="mt-2 space-y-2">
+      <form className="mt-2 space-y-2 text-sm">
         {plannedSets.map((plannedSet, index) => (
           <div key={index} className="flex items-center space-x-2">
             <span className="text-lg my-2">{index + 1}.</span>
@@ -139,7 +139,7 @@ function ExerciseBox({ exerciseIndex, plannedSets, updatePlannedSets }:
               placeholder="Weight"
               required
             />
-            <span className="absolute inset-y-0 right-1 flex items-center text-gray-100">kg</span>
+              <span className="absolute inset-y-0 right-1 flex items-center text-gray-100">kg</span>
             </div>}
             {withIntensity && <div className="relative flex items-center"> <input
               type="number"
@@ -155,6 +155,7 @@ function ExerciseBox({ exerciseIndex, plannedSets, updatePlannedSets }:
               <span className="absolute inset-y-0 right-1 flex items-center text-gray-100">%</span>
             </div>}
             {withReps && <input
+              style={{ width: "20%" }}
               type="number"
               min="1"
               className="w-20 p-1 border rounded-md text-gray-100 bg-gray-800 "
@@ -164,6 +165,7 @@ function ExerciseBox({ exerciseIndex, plannedSets, updatePlannedSets }:
               required
             />}
             {withRir && <input
+              style={{ width: "20%" }}
               type="number"
               min="0"
               className="w-20 p-1 border rounded-md  bg-gray-800"
@@ -173,7 +175,7 @@ function ExerciseBox({ exerciseIndex, plannedSets, updatePlannedSets }:
               required
             />}
             {withTimer && <input
-              style={{ width: "15%" }}
+              style={{ width: "20%" }}
               type="number"
               step="10"
               min="0"
@@ -259,9 +261,9 @@ function WeightIntensityToggle({ setWithWeight, setWithIntensity }: { setWithWei
   }
 
   return (
-    <button className={`rounded-full mx-2 p-1 shadow-lg shadow-black ${mode === modes.none ? "bg-slate-900" : "bg-slate-500"}`}
+    <button className={`rounded-full mx-1 p-1 shadow-lg shadow-black ${mode === modes.none ? "bg-slate-900" : "bg-slate-500"}`}
       onClick={handleClick}>
-      <svg width="2em" height="2em" viewBox={mode === modes.intensity ? "-2.5 0 30 24" : "-15 0 500 443"} xmlns="http://www.w3.org/2000/svg">
+      <svg width="1.5em" height="1.5em" viewBox={mode === modes.intensity ? "-2.5 0 30 24" : "-15 0 500 443"} xmlns="http://www.w3.org/2000/svg">
         <path d={svgPath}
           stroke={mode === modes.none ? "#64748b" : "white"}
           fill="white"
@@ -311,16 +313,16 @@ function RepsRirToggle({ setWithReps, setWithRir }: { setWithReps: any, setWithR
   }
 
   return (
-    <button className={`rounded-full mx-2 p-1 shadow-lg shadow-black ${mode === modes.none ? "bg-slate-900" : "bg-slate-500"}`}
+    <button className={`rounded-full mx-1 p-1 shadow-lg shadow-black ${mode === modes.none ? "bg-slate-900" : "bg-slate-500"}`}
       onClick={handleClick}>
       {mode != modes.both &&
-        <svg width="2em" height="2em" viewBox="19 -100 30 120" xmlns="http://www.w3.org/2000/svg">
+        <svg width="1.5em" height="1.5em" viewBox="19 -100 30 120" xmlns="http://www.w3.org/2000/svg">
           <text stroke={mode === modes.none ? "#64748b" : "white"}
             fill={mode === modes.none ? "#64748b" : mode === modes.rir ? "black" : "white"}
             fontSize="120">#</text>
         </svg>}
       {mode === modes.both &&
-        <svg width="2em" height="2em" viewBox="25 -80 30 120" xmlns="http://www.w3.org/2000/svg">
+        <svg width="1.5em" height="1.5em" viewBox="25 -80 30 120" xmlns="http://www.w3.org/2000/svg">
           <text stroke="white" fill="white" fontSize="70">#</text>
           <text stroke="white" fontSize="70"> &nbsp; #</text>
         </svg>}
@@ -338,9 +340,9 @@ function TimerToggle({ setWithTimer }: { setWithTimer: any }) {
   }
 
   return (
-    <button className={`rounded-full mx-2 p-1 shadow-lg shadow-black ${isToggled ? "bg-slate-500" : "bg-slate-900"}`}
+    <button className={`rounded-full mx-1 p-1 shadow-lg shadow-black ${isToggled ? "bg-slate-500" : "bg-slate-900"}`}
       onClick={handleClick}>
-      <svg width="2em" height="2em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg width="1.5em" height="1.5em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M10 3H14M12 9V13L14 15M12 21C16.4183 21 20 17.4183 20 13C20 8.58172 16.4183 5 12 5C7.58172 5 4 8.58172 4 13C4 15.3894 5.04751 17.5341 6.70835 19"
           stroke={isToggled ? "white" : "#64748b"}
           strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
