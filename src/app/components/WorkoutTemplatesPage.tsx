@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { WorkoutTemplate } from "../classes"
 
@@ -49,12 +49,25 @@ function compareTemplatesDates(t1: WorkoutTemplate, t2: WorkoutTemplate) {
 function WorkoutTemplatesBoxes({ workoutTemplates, isArchive, showTrack }:
   { workoutTemplates: WorkoutTemplate[], isArchive: boolean, showTrack: any }) {
   const [openDropdownTemplateId, setOpenDropdownTemplateId] = useState<string | null>(null);
+  const boxesRef = useRef<HTMLDivElement>(null);
 
-  const handleDropdownOpen = (templateId: string) => {
-    if (templateId === openDropdownTemplateId) {
+  const handleClickOutsideDropdown = (event: MouseEvent) => {
+    if (boxesRef.current && !boxesRef.current.contains(event.target as Node)) {
+      setOpenDropdownTemplateId(null);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutsideDropdown);
+    return () => document.removeEventListener("mousedown", handleClickOutsideDropdown);
+  }, []);
+
+
+  const handleMenuToggle = (e: any, templateId: string) => {
+    e.stopPropagation();
+    if (templateId === openDropdownTemplateId ) {
       setOpenDropdownTemplateId(null);
     } else {
-
       setOpenDropdownTemplateId(templateId);
     }
   };
@@ -65,15 +78,15 @@ function WorkoutTemplatesBoxes({ workoutTemplates, isArchive, showTrack }:
   }
 
   return (
-    <div className="mt-2 mb-11 grid gap-4">
+    <div className="mt-2 mb-11 grid gap-4" ref={boxesRef}>
       {workoutTemplates.sort(compareTemplatesDates).map((template, index) => {
         const menuOptions = isArchive
           ? ["Unarchive", "Share", "Delete"]
           : ["Edit", "Rename", "Duplicate", "Share", "Archive", "Delete"];
 
         return (
-          <div className={`border border-gray-200 bg-slate-800 rounded-lg p-4 shadow-lg shadow-black text-left relative ${isArchive ? "" : "cursor-pointer"}`}
-            key={index}
+          <div className={`border border-gray-200 bg-slate-800 rounded-lg p-4 shadow-lg shadow-black text-left relative ${isArchive ? "" : "cursor-pointer"}`}   
+          key={index}
             onClick={isArchive ? undefined : () => showTrack(template.id)}>
             <div className="text-lg font-semibold ">
               <span style={isArchive ? { opacity: "0.5" } : {}}>{template.name}</span>
@@ -81,14 +94,23 @@ function WorkoutTemplatesBoxes({ workoutTemplates, isArchive, showTrack }:
             <div>
               <span className="opacity-50">{template.getDaysSinceLastWorkout() === null ? "" : `Last performed ${template.getDaysSinceLastWorkout()} days ago`}</span>
             </div>
-            <button className="absolute top-2 right-2 p-3" onClick={(e) => { e.stopPropagation(); handleDropdownOpen(template.id); }}>
-              <Image
-                src="/icons/menu.svg"
-                alt="Menu"
-                width={24}
-                height={24}
-              />
-            </button>
+            <span >
+              <button className="absolute top-2 right-2 p-3" onClick={(e) => {handleMenuToggle(e, template.id); }}>
+                <Image
+                  src="/icons/menu.svg"
+                  alt="Menu"
+                  width={24}
+                  height={24}
+                />
+              </button>
+              {openDropdownTemplateId === template.id &&
+                <div className="absolute  flex  flex-col right-2 top-10  w-40 mt-1 bg-black border border-gray-800  shadow-lg rounded-lg z-10">
+                  {menuOptions.map((option, idx) => (
+                    <button key={idx} className="px-4 py-2 text-left rounded-lg hover:bg-gray-100 hover:text-black"
+                      onClick={(e: any) => handleMenuClick(e, option)}>{option}</button>
+                  ))}
+                </div>}
+            </span>
             <ul style={isArchive ? { opacity: "0.5" } : {}}>
               {template.plannedExercises.map((exercise, index) => (
                 <li key={index} className="mt-1">
@@ -107,13 +129,6 @@ function WorkoutTemplatesBoxes({ workoutTemplates, isArchive, showTrack }:
                 </li>
               ))}
             </ul>
-            {openDropdownTemplateId === template.id && (
-              <ul className="absolute right-2 top-10 mt-1 bg-black shadow-lg rounded-lg z-10">
-                {menuOptions.map((option, idx) => (
-                  <li key={idx} className="px-4 py-2 rounded-lg hover:bg-gray-100 hover:text-black cursor-pointer" onClick={(e: any) => handleMenuClick(e, option)}>{option}</li>
-                ))}
-              </ul>
-            )}
           </div>
         );
       })}

@@ -107,19 +107,19 @@ export function ExercisePage({ exercise, goBack, handleUpdateExerciseSets }:
               />
             </button>
             {isDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md py-1 z-50">
+              <div className="absolute right-0 mt-2 w-48 bg-black text-white border border-gray-800 shadow-lg rounded-lg z-50">
                 <button
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                  className="block px-4 py-2 text-sm hover:bg-gray-100 hover:text-black w-full text-left rounded-lg"
                   onClick={onMenuClick}>
                   Edit
                 </button>
                 <button
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                  className="block px-4 py-2 text-sm  hover:bg-gray-100 hover:text-black w-full text-left rounded-lg"
                   onClick={onMenuClick}>
                   Delete
                 </button>
                 <button
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                  className="block px-4 py-2 text-sm  hover:bg-gray-100 hover:text-black w-full text-left rounded-lg"
                   onClick={onMenuClick}>
                   Share
                 </button>
