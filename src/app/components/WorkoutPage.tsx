@@ -39,6 +39,12 @@ export function WorkoutPage({ workoutTemplates, exercises, bodyparts }:
     setCurrentWorkoutSubpage(workoutSubPageName.track)
   }
 
+  function getExercisesOfTemplate(template:WorkoutTemplate, exercises:ExerciseWithHistory[]){
+    const excercisesFilteredInOrder =  template.plannedExercises.map(exerciseTemplate => 
+      exercises.filter(exercise => exercise.id == exerciseTemplate.id)[0])
+    return excercisesFilteredInOrder
+  }
+
   return (
     <>
       <div className="w-full">
@@ -49,7 +55,7 @@ export function WorkoutPage({ workoutTemplates, exercises, bodyparts }:
             showQuickWorkout={showQuickWorkout}
             showTrack={showTrack} />}
         {currentWorkoutSubpage === workoutSubPageName.create && <WorkoutCreatorPage showHome={showHome} exercises={exercises} bodyparts={bodyparts} />}
-        {currentWorkoutSubpage === workoutSubPageName.track && <WorkoutTrackPage discard={showHome} workoutTemplate={templateToTrack as WorkoutTemplate} />}
+        {currentWorkoutSubpage === workoutSubPageName.track && <WorkoutTrackPage discard={showHome} workoutTemplate={templateToTrack as WorkoutTemplate} exercises={getExercisesOfTemplate(templateToTrack as WorkoutTemplate, exercises)}/>}
         {currentWorkoutSubpage === workoutSubPageName.history && <WorkoutHistoryPage showHome={showHome} />}
         {currentWorkoutSubpage === workoutSubPageName.quickworkout && <QuickWorkoutPage showHome={showHome} />}
       </div>

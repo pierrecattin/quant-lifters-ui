@@ -56,6 +56,19 @@ export class ExerciseSetInProgress {
     this.rir = rir
   }
 
+  clone(){
+    return new ExerciseSetInProgress(this.weight, this.reps, this.rir)
+  }
+
+  cloneAndUpdate(field: string, value: number|undefined) {
+    return new  ExerciseSetInProgress(
+      field === 'weight' ? value : this.weight,
+      field === 'reps' ? value : this.reps,
+      field === 'rir' ? value : this.rir
+    );
+
+  }
+
   static deserialize(data: string) {
     const parsedData = JSON.parse(data);
     return new ExerciseSetInProgress(
@@ -85,7 +98,7 @@ export class ExerciseWithHistory {
   createdBy: string;
   sharedWith: string[];
   sets: ExerciseSet[];
-  exerciseFamily: string; //temporary to not break the current UI. exerciseFamily should become a class and bodyparts should move over
+  exerciseFamily: string; // TODO temporary to not break the current UI. exerciseFamily should become a class and bodyparts should move over
 
   constructor(id: string, name: string, primaryBodyparts: string[], secondaryBodyparts: string[], isCustom: boolean,
     createdBy: string, sharedWith: string[], sets: ExerciseSet[], exerciseFamily: string) {
@@ -218,10 +231,6 @@ export class PlannedExerciseSet {
     this.restTimeinSec = restTimeinSec;
   }
 
-  fillImpliedTargetItems(){
-    alert("TODO: fillImpliedTargetItems")
-  }
-
   setTarget(target: { reps?: number; weight?: number; intensity?: number; rir?: number }) {
     this.target = { ...target };
     return this; 
@@ -229,6 +238,11 @@ export class PlannedExerciseSet {
   
   clone(): PlannedExerciseSet {
     return new PlannedExerciseSet(this.exerciseId, this.exerciseName, this.restTimeinSec).setTarget(this.target);
+  }
+
+  toExerciseSetInProgress(){
+    // TODO: fill implied target items
+    return new ExerciseSetInProgress(this.target?.weight, this.target?.reps, this.target?.rir)
   }
 
 }

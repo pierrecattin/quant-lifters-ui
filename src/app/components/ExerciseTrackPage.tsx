@@ -3,24 +3,9 @@
 import { useState, useEffect } from "react";
 
 import { Config } from "../config"
-import { ExerciseSet, Records, ExerciseSetInProgress, ExerciseWithHistory } from "../classes"
+import { ExerciseSet, ExerciseSetInProgress, ExerciseWithHistory } from "../classes"
 
-
-function recordsByTotalReps(exerciseSets: ExerciseSet[]): Map<number, Records> {
-  let recordsByTotalReps = new Map<number, Records>();
-  exerciseSets.forEach(set => {
-    const currentRecord = recordsByTotalReps.get(set.reps + set.rir);
-    if (currentRecord === undefined) {
-      recordsByTotalReps.set(set.reps + set.rir, new Records(set.weight, set.wilks));
-    }
-    else {
-      const newRecord = new Records(Math.max(set.weight, currentRecord!.weight.valueOf()), Math.max(set.wilks, currentRecord!.wilks.valueOf()));
-      recordsByTotalReps.set(set.reps + set.rir, newRecord);
-    }
-  });
-  return recordsByTotalReps;
-}
-
+import { ExerciseSetTracker } from "./ExerciseSetTracker"
 
 export function ExerciseTrackPage({ exercise, handleAddExerciseSets }: { exercise: ExerciseWithHistory, handleAddExerciseSets: any }) {
   const storageKey = "SetInProgress_" + exercise.id
@@ -42,17 +27,17 @@ export function ExerciseTrackPage({ exercise, handleAddExerciseSets }: { exercis
     sessionStorage.setItem(storageKey, JSON.stringify(sets));
   }, [sets]);
 
-  const handleSetChange = (index: number, field: string, value: string) => {
+  const handleSetChange = (index: number, field: string, value: number|undefined) => {
     const newSets = [...sets];
-    newSets[index] = { ...newSets[index], [field]: value };
+    newSets[index] = newSets[index].cloneAndUpdate(field, value);
     setSets(newSets);
   };
 
-  const addSet = () => {
+  const handleSetAdd = () => {
     setSets([...sets, new ExerciseSetInProgress()]);
   };
 
-  const removeSet = (index: number) => {
+  const handleSetRemoval = (index: number) => {
     const newSets = [...sets];
     newSets.splice(index, 1);
     setSets(newSets);
@@ -91,52 +76,14 @@ export function ExerciseTrackPage({ exercise, handleAddExerciseSets }: { exercis
 
   return (
     <form onSubmit={handleSubmit} className="mt-2 space-y-2">
-      {sets.map((set, index) => (
-        <div key={index} className="flex items-center space-x-2">
-          <span className="text-lg my-2">{index + 1}.</span>
-          <input
-            type="number"
-            step="0.25"
-            min="0"
-            className="w-20 p-1 border rounded-md text-gray-100 bg-gray-800"
-            value={set.weight || ""}
-            onChange={(e) => handleSetChange(index, 'weight', e.target.value)}
-            placeholder="Weight"
-            required
-          />
-          <input
-            type="number"
-            min="1"
-            className="w-20 p-1 border rounded-md text-gray-100 bg-gray-800 "
-            value={set.reps || ""}
-            onChange={(e) => handleSetChange(index, 'reps', e.target.value)}
-            placeholder="Reps"
-            required
-          />
-          <input
-            type="number"
-            min="0"
-            className="w-20 p-1 border rounded-md  bg-gray-800"
-            value={set.rir || ""}
-            onChange={(e) => handleSetChange(index, 'rir', e.target.value)}
-            placeholder="RiR"
-            required
-          />
-          {sets.length > 1 && (
-            <button type="button" onClick={() => removeSet(index)} className="py-1 px-3 bg-red-800 text-white rounded-md">
-              <span className="font-black">-</span>
-            </button>
-          )}
-          {set.weight != null && set.reps != null && set.rir != null && recordsByTotalReps(exercise.sets).has(Number(set.reps) + Number(set.rir)) && (
-            <span>{parseFloat((Number(set.weight) / recordsByTotalReps(exercise.sets).get(Number(set.reps) + Number(set.rir))!.weight.valueOf() * 100).toPrecision(3))}% of PR</span>
-          )}
-        </div>
+      {sets.map((_, index) => (
+        <ExerciseSetTracker key={index} exerciseSetsInProgress={sets} setIndex={index} exerciseWithHistory={exercise} handleSetChange={handleSetChange} handleSetRemoval={handleSetRemoval}/>
       ))}
       <div className="flex space-x-2 my-6">
-        <button type="button" onClick={addSet} className="py-1 px-3 mx-3 my-4 bg-green-500 text-white rounded-md">
+        <button type="button" onClick={handleSetAdd} className="py-1 px-3 mx-3 my-4 bg-green-800 text-white rounded-md border border-gray-950 shadow-black shadow-lg">
           <span className="font-black">+</span>
         </button>
-        <button type="submit" className="p-1 bg-purple-900 text-white rounded-md my-4 px-5">
+        <button type="submit" className="p-1 bg-purple-900 text-white rounded-md my-4 px-5 border border-gray-950 shadow-black shadow-lg">
           Save
         </button>
       </div>

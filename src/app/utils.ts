@@ -23,3 +23,8 @@ export function getDaysBetweenDates(date1: Date, date2: Date): number {
   const differenceInDays = (normalizedDate1.getTime() - normalizedDate2.getTime()) / (1000 * 3600 * 24);
   return Math.round(differenceInDays); 
 }
+
+
+export function stringToNumberOrUndefined(s:string){
+  return( s==="" ? undefined: Number(s))
+}
