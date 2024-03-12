@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 
 import { Config } from "../config"
 import { LoginOrSignupPage } from "./LoginOrSignupPage"
-import { pageName } from "../enums.ts"
+import { pageName } from "../enums"
 import { ExerciseSet, ExerciseWithHistory, PlannedExercise, WorkoutTemplate, PlannedExerciseSet } from "../classes"
 
 import { ProfilePage } from "./ProfilePage"
