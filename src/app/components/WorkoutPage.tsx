@@ -20,6 +20,7 @@ export function WorkoutPage({ workoutTemplates, exercises, bodyparts }:
   }
 
   const [currentWorkoutSubpage, setCurrentWorkoutSubpage] = useState(workoutSubPageName.home);
+  const [templateToTrack, setTemplateToTrack] = useState<WorkoutTemplate|null>(null);
 
   function showHome() {
     setCurrentWorkoutSubpage(workoutSubPageName.home)
@@ -33,11 +34,10 @@ export function WorkoutPage({ workoutTemplates, exercises, bodyparts }:
   function showQuickWorkout() {
     setCurrentWorkoutSubpage(workoutSubPageName.quickworkout)
   }
-  function showTrack() {
+  function showTrack(template:WorkoutTemplate) {
+    setTemplateToTrack(template)
     setCurrentWorkoutSubpage(workoutSubPageName.track)
   }
-
-
 
   return (
     <>
@@ -49,7 +49,7 @@ export function WorkoutPage({ workoutTemplates, exercises, bodyparts }:
             showQuickWorkout={showQuickWorkout}
             showTrack={showTrack} />}
         {currentWorkoutSubpage === workoutSubPageName.create && <WorkoutCreatorPage showHome={showHome} exercises={exercises} bodyparts={bodyparts} />}
-        {currentWorkoutSubpage === workoutSubPageName.track && <WorkoutTrackPage showHome={showHome} />}
+        {currentWorkoutSubpage === workoutSubPageName.track && <WorkoutTrackPage discard={showHome} workoutTemplate={templateToTrack as WorkoutTemplate} />}
         {currentWorkoutSubpage === workoutSubPageName.history && <WorkoutHistoryPage showHome={showHome} />}
         {currentWorkoutSubpage === workoutSubPageName.quickworkout && <QuickWorkoutPage showHome={showHome} />}
       </div>

@@ -87,7 +87,7 @@ function WorkoutTemplatesBoxes({ workoutTemplates, isArchive, showTrack }:
         return (
           <div className={`border border-gray-200 bg-slate-800 rounded-lg p-4 shadow-lg shadow-black text-left relative ${isArchive ? "" : "cursor-pointer"}`}   
           key={index}
-            onClick={isArchive ? undefined : () => showTrack(template.id)}>
+            onClick={isArchive ? undefined : () => showTrack(template)}>
             <div className="text-lg font-semibold ">
               <span style={isArchive ? { opacity: "0.5" } : {}}>{template.name}</span>
             </div>
