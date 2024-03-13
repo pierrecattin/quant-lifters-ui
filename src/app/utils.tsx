@@ -26,5 +26,6 @@ export function getDaysBetweenDates(date1: Date, date2: Date): number {
 
 
 export function stringToNumberOrUndefined(s:string){
-  return( s==="" ? undefined: Number(s))
+  const converted =  s==="" ? undefined: Number(s)
+  return(converted)
 }

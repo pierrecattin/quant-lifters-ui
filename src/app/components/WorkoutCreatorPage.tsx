@@ -290,7 +290,6 @@ function RepsRirToggle({ setWithReps, setWithRir }: { setWithReps: any, setWithR
   const [mode, setMode] = useState(modes.reps);
 
   const handleClick = () => {
-    console.log(mode)
     switch (mode) {
       case modes.reps: {
         setMode(modes.rir)

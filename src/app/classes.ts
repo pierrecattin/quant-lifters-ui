@@ -49,24 +49,22 @@ export class ExerciseSetInProgress {
   weight?: number; 
   reps?: number;
   rir?: number;
+  markedComplete: boolean
 
-  constructor(weight?: number, reps?: number, rir?: number) {
+  constructor(weight?: number, reps?: number, rir?: number, markedComplete=false) {
     this.weight = weight;
     this.reps = reps;
     this.rir = rir
-  }
-
-  clone(){
-    return new ExerciseSetInProgress(this.weight, this.reps, this.rir)
+    this.markedComplete=markedComplete
   }
 
   cloneAndUpdate(field: string, value: number|undefined) {
     return new  ExerciseSetInProgress(
       field === 'weight' ? value : this.weight,
       field === 'reps' ? value : this.reps,
-      field === 'rir' ? value : this.rir
+      field === 'rir' ? value : this.rir,
+      false
     );
-
   }
 
   static deserialize(data: string) {

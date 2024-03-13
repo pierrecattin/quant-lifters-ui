@@ -22,7 +22,7 @@ export function WorkoutTrackPage({ workoutTemplate, exercises, discard }:
 
   const handleSetChange = (index: number, field: string, value: number | undefined) => {
     const newSets = [...setsInProgressPerExercise];
-    newSets[currentExerciseIdx][index] = newSets[currentExerciseIdx][index].cloneAndUpdate(field, Number(value));
+    newSets[currentExerciseIdx][index] = newSets[currentExerciseIdx][index].cloneAndUpdate(field, value);
     setSetsInProgressPerExercise(newSets);
   };
 
