@@ -8,7 +8,7 @@ import { ExerciseSet, ExerciseSetInProgress, ExerciseWithHistory } from "../clas
 import { ExerciseSetTracker } from "./ExerciseSetTracker"
 
 export function ExerciseTrackPage({ exercise, handleAddExerciseSets }: { exercise: ExerciseWithHistory, handleAddExerciseSets: any }) {
-  const storageKey = "SetInProgress_" + exercise.id
+  const storageKey = "setInProgress_" + exercise.id
   const [sets, setSets] = useState<ExerciseSetInProgress[]>(() => {
     let savedSets = null
     if (typeof window !== 'undefined') {

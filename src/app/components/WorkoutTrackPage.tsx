@@ -2,16 +2,36 @@
 import { WorkoutTemplate, ExerciseSet, ExerciseSetInProgress, ExerciseWithHistory } from "../classes"
 import { ExerciseSetTracker } from "./ExerciseSetTracker"
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-export function WorkoutTrackPage({ workoutTemplate, exercises, discard }:
-  { workoutTemplate: WorkoutTemplate, exercises: ExerciseWithHistory[], discard: any }) {
-
-  const [setsInProgressPerExercise, setSetsInProgressPerExercise] = useState<ExerciseSetInProgress[][]>(
-    workoutTemplate.plannedExercises.map((plannedExercise) =>
-      plannedExercise.plannedExerciseSets.map((plannedExerciseSet) => plannedExerciseSet.toExerciseSetInProgress())) // Pre-populate with template
-  )
+export function WorkoutTrackPage({ workoutTemplate, exercises, showHome }:
+  { workoutTemplate: WorkoutTemplate, exercises: ExerciseWithHistory[], showHome: any }) {
   const [currentExerciseIdx, setCurrentExerciseIdx] = useState(0);
+  const [setsInProgressPerExercise, setSetsInProgressPerExercise] = useState<ExerciseSetInProgress[][]>(() => {
+    // get from localstorage if a workout is in progress
+    if (typeof window !== 'undefined') {
+      const workoutInProgress = localStorage.getItem("workoutInProgress")
+      if (workoutInProgress != null) {
+        const parsedWorkout: any[][] = JSON.parse(workoutInProgress)
+        const setsInProgress = parsedWorkout.map(setsOfExercise =>
+          setsOfExercise.map(set =>
+            ExerciseSetInProgress.deserialize(JSON.stringify(set))
+          )
+        )
+        return setsInProgress
+      }
+    }
+    // Else pre-populate with template
+    const setsFromTemplate = workoutTemplate.plannedExercises.map((plannedExercise) =>
+      plannedExercise.plannedExerciseSets.map((plannedExerciseSet) => plannedExerciseSet.toExerciseSetInProgress()))
+    return setsFromTemplate
+  })
+
+
+  useEffect(() => {
+    localStorage.setItem("workoutInProgress", JSON.stringify(setsInProgressPerExercise));
+  }, [setsInProgressPerExercise]);
+
 
   function nextExercise() {
     setCurrentExerciseIdx(Math.min(currentExerciseIdx + 1, workoutTemplate.plannedExercises.length - 1))
@@ -38,6 +58,10 @@ export function WorkoutTrackPage({ workoutTemplate, exercises, discard }:
     setSetsInProgressPerExercise(newSets);
   };
 
+  const discard = () => {
+    localStorage.removeItem("workoutInProgress")
+    showHome()
+  }
 
   return (
     <>

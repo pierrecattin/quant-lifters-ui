@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { WorkoutTrackPage } from "./WorkoutTrackPage"
 import { WorkoutHistoryPage } from "./WorkoutHistoryPage"
@@ -9,8 +9,8 @@ import { WorkoutTemplatesPage } from "./WorkoutTemplatesPage"
 
 import { WorkoutTemplate, ExerciseWithHistory } from "../classes"
 
-export function WorkoutPage({ workoutTemplates, exercises, bodyparts }: 
-  { workoutTemplates: WorkoutTemplate[], exercises: ExerciseWithHistory[], bodyparts:string[] }) {
+export function WorkoutPage({ workoutTemplates, exercises, bodyparts }:
+  { workoutTemplates: WorkoutTemplate[], exercises: ExerciseWithHistory[], bodyparts: string[] }) {
   enum workoutSubPageName {
     home = "Home",
     create = "Create",
@@ -19,10 +19,27 @@ export function WorkoutPage({ workoutTemplates, exercises, bodyparts }:
     track = "Track",
   }
 
-  const [currentWorkoutSubpage, setCurrentWorkoutSubpage] = useState(workoutSubPageName.home);
-  const [templateToTrack, setTemplateToTrack] = useState<WorkoutTemplate|null>(null);
+  const [templateToTrack, setTemplateToTrack] = useState<WorkoutTemplate | null>(() => {
+    if (typeof window !== 'undefined') {
+      const workoutTemplateStored = localStorage.getItem("workoutTemplateInProgress")
+      if (workoutTemplateStored != null) {
+        const template = WorkoutTemplate.deserialize(workoutTemplateStored)
+        return template
+      }
+    }
+    return null
+  });
+
+  const [currentWorkoutSubpage, setCurrentWorkoutSubpage] = useState(
+    templateToTrack === null ? workoutSubPageName.home : workoutSubPageName.track
+  );
+
+  useEffect(() => {
+    localStorage.setItem("workoutTemplateInProgress", JSON.stringify(templateToTrack));
+  }, [templateToTrack]);
 
   function showHome() {
+    localStorage.removeItem("workoutTemplateInProgress")
     setCurrentWorkoutSubpage(workoutSubPageName.home)
   }
   function showCreate() {
@@ -34,13 +51,13 @@ export function WorkoutPage({ workoutTemplates, exercises, bodyparts }:
   function showQuickWorkout() {
     setCurrentWorkoutSubpage(workoutSubPageName.quickworkout)
   }
-  function showTrack(template:WorkoutTemplate) {
+  function showTrack(template: WorkoutTemplate) {
     setTemplateToTrack(template)
     setCurrentWorkoutSubpage(workoutSubPageName.track)
   }
 
-  function getExercisesOfTemplate(template:WorkoutTemplate, exercises:ExerciseWithHistory[]){
-    const excercisesFilteredInOrder =  template.plannedExercises.map(exerciseTemplate => 
+  function getExercisesOfTemplate(template: WorkoutTemplate, exercises: ExerciseWithHistory[]) {
+    const excercisesFilteredInOrder = template.plannedExercises.map(exerciseTemplate =>
       exercises.filter(exercise => exercise.id == exerciseTemplate.id)[0])
     return excercisesFilteredInOrder
   }
@@ -55,7 +72,7 @@ export function WorkoutPage({ workoutTemplates, exercises, bodyparts }:
             showQuickWorkout={showQuickWorkout}
             showTrack={showTrack} />}
         {currentWorkoutSubpage === workoutSubPageName.create && <WorkoutCreatorPage showHome={showHome} exercises={exercises} bodyparts={bodyparts} />}
-        {currentWorkoutSubpage === workoutSubPageName.track && <WorkoutTrackPage discard={showHome} workoutTemplate={templateToTrack as WorkoutTemplate} exercises={getExercisesOfTemplate(templateToTrack as WorkoutTemplate, exercises)}/>}
+        {currentWorkoutSubpage === workoutSubPageName.track && <WorkoutTrackPage showHome={showHome} workoutTemplate={templateToTrack as WorkoutTemplate} exercises={getExercisesOfTemplate(templateToTrack as WorkoutTemplate, exercises)} />}
         {currentWorkoutSubpage === workoutSubPageName.history && <WorkoutHistoryPage showHome={showHome} />}
         {currentWorkoutSubpage === workoutSubPageName.quickworkout && <QuickWorkoutPage showHome={showHome} />}
       </div>

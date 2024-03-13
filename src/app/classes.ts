@@ -32,14 +32,16 @@ export class ExerciseSet {
     )
   }
 
-  static deserialize(data: string) {
-    const parsedData = JSON.parse(data)
-    return new ExerciseSet(parsedData.id,
+  static deserialize(data: string): ExerciseSet {
+    const parsedData = JSON.parse(data);
+    return new ExerciseSet(
+      parsedData.id,
       parsedData.time,
       parseFloat(parsedData.weight),
-      parseInt(parsedData.reps),
-      parseInt(parsedData.rir),
-      parsedData.wilksScore)
+      parseInt(parsedData.reps, 10),
+      parseInt(parsedData.rir, 10),
+      parseFloat(parsedData.wilks)
+    );
   }
 
 }
@@ -194,6 +196,18 @@ export class WorkoutTemplate {
       this.isArchived,
       null)
   }
+
+  static deserialize(data: string): WorkoutTemplate {
+    const parsedData = JSON.parse(data);
+    const plannedExercises = parsedData.plannedExercises.map((pe: any) => PlannedExercise.deserialize(JSON.stringify(pe)));
+    return new WorkoutTemplate(
+      parsedData.id,
+      parsedData.name,
+      plannedExercises,
+      parsedData.isArchived,
+      parsedData.lastWorkoutDate ? new Date(parsedData.lastWorkoutDate) : null
+    );
+  }
 }
 
 export class PlannedExercise {
@@ -213,6 +227,16 @@ export class PlannedExercise {
       this.name,
       this.plannedExerciseSets.map(p => p.clone())
     )
+  }
+
+  static deserialize(data: string): PlannedExercise {
+    const parsedData = JSON.parse(data);
+    const plannedExerciseSets = parsedData.plannedExerciseSets.map((pes: any) => PlannedExerciseSet.deserialize(JSON.stringify(pes)));
+    return new PlannedExercise(
+      parsedData.id,
+      parsedData.name,
+      plannedExerciseSets
+    );
   }
 }
 
@@ -247,6 +271,13 @@ export class PlannedExerciseSet {
   toExerciseSetInProgress(){
     // TODO: fill implied target items
     return new ExerciseSetInProgress(this.target?.weight, this.target?.reps, this.target?.rir)
+  }
+
+  static deserialize(data: string): PlannedExerciseSet {
+    const parsedData = JSON.parse(data);
+    const set = new PlannedExerciseSet(parsedData.exerciseId, parsedData.exerciseName, parsedData.restTimeinSec);
+    set.setTarget(parsedData.target);
+    return set;
   }
 
 }
