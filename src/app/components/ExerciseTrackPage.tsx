@@ -75,12 +75,12 @@ export function ExerciseTrackPage({ exercise, handleAddExerciseSets }: { exercis
   };
 
   return (
-    <form onSubmit={handleSubmit} className="mt-2 space-y-2">
+    <form onSubmit={handleSubmit} className="mt-2 space-y-2 pr-6">
       {sets.map((_, index) => (
         <ExerciseSetTracker key={index} exerciseSetsInProgress={sets} setIndex={index} exerciseWithHistory={exercise} handleSetChange={handleSetChange} handleSetRemoval={handleSetRemoval}/>
       ))}
       <div className="flex space-x-2 my-6">
-        <button type="button" onClick={handleSetAdd} className="py-1 px-3 mx-3 my-4 bg-green-800 text-white rounded-md border border-gray-950 shadow-black shadow-lg">
+        <button type="button" onClick={handleSetAdd} className="py-1 px-3 mx-3 my-4 bg-green-700 text-white rounded-md border border-gray-950 shadow-black shadow-lg">
           <span className="font-black">+</span>
         </button>
         <button type="submit" className="p-1 bg-purple-900 text-white rounded-md my-4 px-5 border border-gray-950 shadow-black shadow-lg">

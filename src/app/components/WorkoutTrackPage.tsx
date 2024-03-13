@@ -58,7 +58,7 @@ export function WorkoutTrackPage({ workoutTemplate, exercises, discard }:
           Next
         </button>
       </div>
-      <div className="mt-3">
+      <div className="mt-3 space-y-2">
         {setsInProgressPerExercise[currentExerciseIdx].map((_, index) => (
           <ExerciseSetTracker key={index} exerciseSetsInProgress={setsInProgressPerExercise[currentExerciseIdx]}
             setIndex={index} exerciseWithHistory={exercises[currentExerciseIdx]} handleSetChange={handleSetChange} handleSetRemoval={handleSetRemoval} />

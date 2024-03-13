@@ -54,8 +54,8 @@ export function ExerciseSetTracker({ exerciseSetsInProgress, setIndex, exerciseW
           />
           <button
             type="button"
-            className={`py-1 px-2 rounded-lg border border-black 
-          ${isMarkedComplete ? 'bg-green-600' : 'bg-gray-400'}
+            className={`py-1 px-2 rounded-lg border border-black shadow-black shadow-lg  
+          ${isMarkedComplete ? 'bg-green-700' : 'bg-gray-400'}
           ${isFullyPopulated ? 'text-white' : 'text-gray-400'}
           `}
             onClick={toggleSetComplete}
