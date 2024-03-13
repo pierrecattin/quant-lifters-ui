@@ -1,20 +1,13 @@
 
 "use client";
 
-import { useState } from "react";
-import { ExerciseSet, Records, ExerciseSetInProgress, ExerciseWithHistory } from "../classes"
+import { ExerciseSetInProgress, ExerciseWithHistory } from "../classes"
 import { recordsByTotalReps, stringToNumberOrUndefined } from "../utils"
 
 export function ExerciseSetTracker({ exerciseSetsInProgress, setIndex, exerciseWithHistory, handleSetChange, handleSetRemoval }:
   { exerciseSetsInProgress: ExerciseSetInProgress[], setIndex: number, exerciseWithHistory: ExerciseWithHistory, handleSetChange: any, handleSetRemoval: any }) {
   const set = exerciseSetsInProgress[setIndex];
-  const [isMarkedComplete, setIsMarkedComplete] = useState(set.markedComplete)
   let isFullyPopulated = set.weight !== undefined && set.reps !== undefined && set.rir !== undefined;
-
-  function toggleSetComplete() {
-    set.markedComplete = !set.markedComplete;
-    setIsMarkedComplete(set.markedComplete);
-  }
 
   return (
     <>
@@ -25,40 +18,40 @@ export function ExerciseSetTracker({ exerciseSetsInProgress, setIndex, exerciseW
             type="number"
             step="0.05"
             min="0"
-            className={`p-1 border rounded-md text-gray-100 w-1/6 ${isMarkedComplete ? 'bg-gray-600' : 'bg-gray-800'}`}
+            className={`p-1 border rounded-md text-gray-100 w-1/6 ${set.markedComplete ? 'bg-gray-600' : 'bg-gray-800'}`}
             value={set.weight === undefined ? "" : set.weight}
             onChange={(e) => handleSetChange(setIndex, 'weight', stringToNumberOrUndefined(e.target.value))}
             placeholder="Weight"
             required
-            readOnly={isMarkedComplete}
+            readOnly={set.markedComplete}
           />
           <input
             type="number"
             min="1"
-            className={`p-1 border rounded-md text-gray-100 w-1/6 ${isMarkedComplete ? 'bg-gray-600' : 'bg-gray-800'}`}
+            className={`p-1 border rounded-md text-gray-100 w-1/6 ${set.markedComplete ? 'bg-gray-600' : 'bg-gray-800'}`}
             value={set.reps === undefined ? "" : set.reps}
             onChange={(e) => handleSetChange(setIndex, 'reps', stringToNumberOrUndefined(e.target.value))}
             placeholder="Reps"
             required
-            readOnly={isMarkedComplete}
+            readOnly={set.markedComplete}
           />
           <input
             type="number"
             min="0"
-            className={`p-1 border rounded-md w-1/6 ${isMarkedComplete ? 'bg-gray-600' : 'bg-gray-800'}`}
+            className={`p-1 border rounded-md w-1/6 ${set.markedComplete ? 'bg-gray-600' : 'bg-gray-800'}`}
             value={set.rir === undefined ? "" : set.rir}
             onChange={(e) => handleSetChange(setIndex, 'rir', stringToNumberOrUndefined(e.target.value))}
             placeholder="RiR"
             required
-            readOnly={isMarkedComplete}
+            readOnly={set.markedComplete}
           />
           <button
             type="button"
             className={`py-1 px-2 rounded-lg border border-black shadow-black shadow-lg  
-          ${isMarkedComplete ? 'bg-green-700' : 'bg-gray-400'}
+          ${set.markedComplete ? 'bg-green-700' : 'bg-gray-400'}
           ${isFullyPopulated ? 'text-white' : 'text-gray-400'}
           `}
-            onClick={toggleSetComplete}
+            onClick={() => handleSetChange(setIndex, 'markedComplete', !set.markedComplete)}
             disabled={!isFullyPopulated}
           >
             ✓

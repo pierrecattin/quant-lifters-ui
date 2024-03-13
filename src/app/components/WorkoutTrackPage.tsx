@@ -9,7 +9,7 @@ export function WorkoutTrackPage({ workoutTemplate, exercises, discard }:
 
   const [setsInProgressPerExercise, setSetsInProgressPerExercise] = useState<ExerciseSetInProgress[][]>(
     workoutTemplate.plannedExercises.map((plannedExercise) =>
-      plannedExercise.plannedExerciseSets.map((plannedExerciseSet) => plannedExerciseSet.toExerciseSetInProgress()))
+      plannedExercise.plannedExerciseSets.map((plannedExerciseSet) => plannedExerciseSet.toExerciseSetInProgress())) // Pre-populate with template
   )
   const [currentExerciseIdx, setCurrentExerciseIdx] = useState(0);
 

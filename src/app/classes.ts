@@ -58,13 +58,18 @@ export class ExerciseSetInProgress {
     this.markedComplete=markedComplete
   }
 
-  cloneAndUpdate(field: string, value: number|undefined) {
-    return new  ExerciseSetInProgress(
-      field === 'weight' ? value : this.weight,
-      field === 'reps' ? value : this.reps,
-      field === 'rir' ? value : this.rir,
-      false
-    );
+  cloneAndUpdate(field: string, value: number | boolean | undefined) {
+    if (field === 'markedComplete') {
+      const markedCompleteValue = Boolean(value);
+      return new ExerciseSetInProgress(this.weight, this.reps, this.rir, markedCompleteValue);
+    } else {
+      return new ExerciseSetInProgress(
+        field === 'weight' ? value as number : this.weight,
+        field === 'reps' ? value as number : this.reps,
+        field === 'rir' ? value as number : this.rir,
+        this.markedComplete
+      );
+    }
   }
 
   static deserialize(data: string) {
@@ -72,7 +77,8 @@ export class ExerciseSetInProgress {
     return new ExerciseSetInProgress(
       parsedData.weight,
       parsedData.reps,
-      parsedData.rir
+      parsedData.rir,
+      parsedData.markedComplete
     );
   }
 }
