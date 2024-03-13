@@ -26,7 +26,8 @@ export function WorkoutTrackPage({ workoutTemplate, exercises, showHome }:
       plannedExercise.plannedExerciseSets.map((plannedExerciseSet) => plannedExerciseSet.toExerciseSetInProgress()))
     return setsFromTemplate
   })
-
+  const [showCompleteWorkoutModal, setShowCompleteWorkoutModal] = useState(false);
+  const [showDiscardWorkoutModal, setShowDiscardWorkoutModal] = useState(false);
 
   useEffect(() => {
     localStorage.setItem("workoutInProgress", JSON.stringify(setsInProgressPerExercise));
@@ -63,9 +64,15 @@ export function WorkoutTrackPage({ workoutTemplate, exercises, showHome }:
     showHome()
   }
 
+  const submitWorkout = () => {
+    alert("TODO: submit workout endpoint");
+    setShowCompleteWorkoutModal(false);
+    discard();
+  };
+
   return (
     <>
-      <div className="flex justify-between items-center shadow-black shadow-lg px-4 py-2 rounded-lg">
+      <div className="flex justify-between items-center shadow-black shadow-lg p-2 rounded-lg">
         <button
           onClick={previousExercise}
           className={`transition-opacity duration-300 text-xs text-gray-100 ${currentExerciseIdx > 0 ? 'opacity-100' : 'opacity-0 cursor-default'}`}
@@ -94,14 +101,60 @@ export function WorkoutTrackPage({ workoutTemplate, exercises, showHome }:
 
       <div className="flex pt-10 justify-center items-end">
         <button
-          className="rounded-lg my-4 mx-2 px-2 py-1 bg-blue-950 border border-gray-950 shadow-black shadow-lg  text-white">
+          className="rounded-lg my-4 mx-2 px-2 py-1 bg-blue-950  border border-gray-950 shadow-black shadow-lg  text-white"
+          onClick={()=> alert("TODO: add exercise after current exercise")}>
           Add exercise
         </button>
+        <button className="rounded-lg my-4 mx-2 px-2 py-1 bg-green-950  border border-gray-950 shadow-black shadow-lg  text-white"
+          onClick={() => setShowCompleteWorkoutModal(true)}>
+          Complete workout
+        </button>
         <button className="rounded-lg my-4 mx-2 px-2 py-1 bg-red-950 border border-gray-950 shadow-black shadow-lg  text-white"
-          onClick={discard}>
+          onClick={() => setShowDiscardWorkoutModal(true)}>
           Discard workout
         </button>
       </div>
+      {showCompleteWorkoutModal &&
+        <ConfirmSubmissionModal
+          setsInProgressPerExercise={setsInProgressPerExercise}
+          onCancel={() => setShowCompleteWorkoutModal(false)}
+          onConfirm={submitWorkout}
+        />}
+      {showDiscardWorkoutModal &&
+        <ConfirmDiscardModal
+          onCancel={() => setShowDiscardWorkoutModal(false)}
+          onConfirm={discard}
+        />
+      }
     </>
   )
+}
+
+
+function ConfirmSubmissionModal({ setsInProgressPerExercise, onCancel, onConfirm }: { setsInProgressPerExercise: ExerciseSetInProgress[][], onCancel: any, onConfirm: any }) {
+  const anyIncompleteSets = setsInProgressPerExercise.some(exerciseSets =>
+    exerciseSets.some(exerciseSet => !exerciseSet.markedComplete));
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center">
+      <div className="bg-gray-800 p-4 rounded-lg mx-5">
+        <p>Are you sure you want to submit your workout? It cannot be edited after submission (but this feature will come soon 🙂)</p>
+        {anyIncompleteSets && <p className="font-black my-3">Some sets are not marked complete and will be discarded.</p>}
+        <button className="bg-green-950 p-2 rounded-lg m-4 shadow-black shadow-lg" onClick={onConfirm}>Yes, submit</button>
+        <button className="bg-gray-950 p-2 rounded-lg m-4 shadow-black shadow-lg" onClick={onCancel}>No, go back</button>
+      </div>
+    </div>
+  );
+}
+
+function ConfirmDiscardModal({ onCancel, onConfirm }: { onCancel: any, onConfirm: any }) {
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center">
+      <div className="bg-gray-800 p-4 rounded-lg mx-5">
+        <p>Are you sure you want to discard your workout? This cannot be undone.</p>
+        <button className="bg-red-950 p-2 rounded-lg m-4 shadow-black shadow-lg" onClick={onConfirm}>Yes, discard</button>
+        <button className="bg-gray-950 p-2 rounded-lg m-4 shadow-black shadow-lg" onClick={onCancel}>No, go back</button>
+      </div>
+    </div>
+  );
 }
