@@ -7,7 +7,20 @@ import { recordsByTotalReps, stringToNumberOrUndefined } from "../utils"
 export function ExerciseSetTracker({ exerciseSetsInProgress, setIndex, exerciseWithHistory, handleSetChange, handleSetRemoval }:
   { exerciseSetsInProgress: ExerciseSetInProgress[], setIndex: number, exerciseWithHistory: ExerciseWithHistory, handleSetChange: any, handleSetRemoval: any }) {
   const set = exerciseSetsInProgress[setIndex];
-  let isFullyPopulated = set.weight !== undefined && set.reps !== undefined && set.rir !== undefined;
+
+  function toggleSetComplete() {
+    if (!set.markedComplete) {
+      if (set.weight === undefined) {
+        handleSetChange(setIndex, 'weight', 0)
+        set.weight = 0
+      }
+      if (set.rir === undefined) {
+        handleSetChange(setIndex, 'rir', 0)
+        set.rir = 0
+      }
+    }
+    handleSetChange(setIndex, 'markedComplete', !set.markedComplete)
+  }
 
   return (
     <>
@@ -49,10 +62,10 @@ export function ExerciseSetTracker({ exerciseSetsInProgress, setIndex, exerciseW
             type="button"
             className={`py-1 px-2 rounded-lg border border-black shadow-black shadow-lg  
           ${set.markedComplete ? 'bg-green-700' : 'bg-gray-400'}
-          ${isFullyPopulated ? 'text-white' : 'text-gray-400'}
+          ${set.reps === undefined ? 'text-gray-400' : 'text-white'}
           `}
-            onClick={() => handleSetChange(setIndex, 'markedComplete', !set.markedComplete)}
-            disabled={!isFullyPopulated}
+            onClick={toggleSetComplete}
+            disabled={set.reps === undefined}
           >
             ✓
           </button>
@@ -78,6 +91,7 @@ function PercentageOfRecord({ setInProgress, exerciseHistory }: { setInProgress:
     setInProgress.weight != undefined &&
     setInProgress.reps != undefined &&
     setInProgress.rir != undefined &&
+    exerciseHistory.sets !== undefined &&
     exerciseHistory.sets.length > 0 &&
     recordsByTotalReps(exerciseHistory.sets).get(Number(setInProgress.reps) + Number(setInProgress.rir)) != undefined
 
