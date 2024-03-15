@@ -125,7 +125,7 @@ export function WorkoutTrackPage({ workoutTemplate, exercises, showHome }:
               "Some sets are not marked complete and will be discarded." : "")}
           yesVerb="submit"
           noVerb="go back"
-          yesColor="bg-red-950" />
+          yesColor="bg-green-950" />
       }
       {showDiscardWorkoutModal &&
         <YesNoModal
@@ -135,7 +135,7 @@ export function WorkoutTrackPage({ workoutTemplate, exercises, showHome }:
           warning=""
           yesVerb="discard"
           noVerb="go back"
-          yesColor="bg-green-950" />
+          yesColor="bg-red-950" />
       }
     </>
   )
