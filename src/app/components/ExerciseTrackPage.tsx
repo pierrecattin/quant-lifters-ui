@@ -6,9 +6,15 @@ import { Config } from "../config"
 import { ExerciseSet, ExerciseSetInProgress, ExerciseWithHistory } from "../classes"
 
 import { ExerciseSetTracker } from "./ExerciseSetTracker"
+import { InfoModal } from "./InfoModal"
+import { LoadingModal } from "./LoadingModal"
 
 export function ExerciseTrackPage({ exercise, handleAddExerciseSets }: { exercise: ExerciseWithHistory, handleAddExerciseSets: any }) {
-  const storageKey = "setInProgress_" + exercise.id
+  const storageKey = "setInProgress_" + exercise.id;
+  const [showLoadingModal, setShowLoadingModal] = useState(false);
+  const [showInfoModal, setShowInfoModal] = useState(false);
+  const [infoModalMessage, setInfoModalMessage] = useState("");
+
   const [sets, setSets] = useState<ExerciseSetInProgress[]>(() => {
     let savedSets = null
     if (typeof window !== 'undefined') {
@@ -27,7 +33,7 @@ export function ExerciseTrackPage({ exercise, handleAddExerciseSets }: { exercis
     sessionStorage.setItem(storageKey, JSON.stringify(sets));
   }, [sets]);
 
-  const handleSetChange = (index: number, field: string, value: number|undefined) => {
+  const handleSetChange = (index: number, field: string, value: number | undefined) => {
     const newSets = [...sets];
     newSets[index] = newSets[index].cloneAndUpdate(field, value);
     setSets(newSets);
@@ -44,6 +50,7 @@ export function ExerciseTrackPage({ exercise, handleAddExerciseSets }: { exercis
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
+    setShowLoadingModal(true)
     const time = new Date().toISOString();
     const body = {
       "exercise_id": exercise.id,
@@ -59,9 +66,10 @@ export function ExerciseTrackPage({ exercise, handleAddExerciseSets }: { exercis
       credentials: 'include',
       body: JSON.stringify(body),
     });
-
+    setShowLoadingModal(false)
     if (response.ok) {
-      alert("Set saved.")
+      setInfoModalMessage("Set saved.");
+      setShowInfoModal(true)
       const setsJson: any[] = await response.json()
       // Store new sets in react state so that it's available without having to fetch from the backend
       const completedExerciseSets = setsJson.map(exerciseSet =>
@@ -70,23 +78,31 @@ export function ExerciseTrackPage({ exercise, handleAddExerciseSets }: { exercis
       handleAddExerciseSets(completedExerciseSets)
       setSets([new ExerciseSetInProgress()]);
     } else {
-      alert('Failed to save sets');
+      setInfoModalMessage("Failed to save sets. Check your connection and retry later.");
+      setShowInfoModal(true)
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="mt-2 space-y-2 pr-6">
-      {sets.map((_, index) => (
-        <ExerciseSetTracker key={index} exerciseSetsInProgress={sets} setIndex={index} exerciseWithHistory={exercise} handleSetChange={handleSetChange} handleSetRemoval={handleSetRemoval}/>
-      ))}
-      <div className="flex space-x-2 my-6">
-        <button type="button" onClick={handleSetAdd} className="py-1 px-3 mx-3 my-4 bg-green-700 text-white rounded-md border border-gray-950 shadow-black shadow-lg">
-          <span className="font-black">+</span>
-        </button>
-        <button type="submit" className="p-1 bg-purple-900 text-white rounded-md my-4 px-5 border border-gray-950 shadow-black shadow-lg">
-          Save
-        </button>
-      </div>
-    </form>
+    <>
+      <form onSubmit={handleSubmit} className="mt-2 space-y-2 pr-6">
+        {sets.map((_, index) => (
+          <ExerciseSetTracker key={index} exerciseSetsInProgress={sets} setIndex={index} exerciseWithHistory={exercise} handleSetChange={handleSetChange} handleSetRemoval={handleSetRemoval} />
+        ))}
+        <div className="flex space-x-2 my-6">
+          <button type="button" onClick={handleSetAdd} className="py-1 px-3 mx-3 my-4 bg-green-700 text-white rounded-md border border-gray-950 shadow-black shadow-lg">
+            <span className="font-black">+</span>
+          </button>
+          <button type="submit" className="p-1 bg-purple-900 text-white rounded-md my-4 px-5 border border-gray-950 shadow-black shadow-lg">
+            Save
+          </button>
+        </div>
+      </form>
+      {showLoadingModal &&
+        <LoadingModal message="Saving sets..." />
+      }
+      {showInfoModal &&
+        <InfoModal message={infoModalMessage} onClose={() => setShowInfoModal(false)} />
+      }</>
   );
 }

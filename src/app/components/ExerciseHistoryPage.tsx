@@ -5,10 +5,16 @@ import Image from "next/image";
 
 import { Config } from "../config"
 import { ExerciseSet } from "../classes"
+import { LoadingModal } from "./LoadingModal";
+import { InfoModal } from "./InfoModal";
+import { YesNoModal } from "./YesNoModal";
+import { warn } from "console";
 
 export function ExerciseHistoryPage({ exerciseSets, handleDeleteExerciseSets }: { exerciseSets: ExerciseSet[], handleDeleteExerciseSets: any }) {
-    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [dayToDelete, setDayToDelete] = useState('');
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showErrorModal, setShowErrorModal] = useState(false);
+    const [showLoadingModal, setShowLoadingModal] = useState(false);
 
     const setsByDay = new Map<string, ExerciseSet[]>();
     exerciseSets.forEach(exerciseSet => {
@@ -22,8 +28,10 @@ export function ExerciseHistoryPage({ exerciseSets, handleDeleteExerciseSets }: 
     const daysSorted = Array.from(setsByDay.keys()).sort((a, b) => new Date(a) < new Date(b) ? 1 : -1);
 
     const handleDeleteConfirm = async () => {
+        setShowDeleteModal(false);
         const setsIds = setsByDay.get(dayToDelete)?.map(set => set.id);
         if (setsIds) {
+            setShowLoadingModal(true)
             const response = await fetch(`${Config.backendUrl}deleteexercisesets`, {
                 method: 'POST',
                 headers: {
@@ -32,6 +40,7 @@ export function ExerciseHistoryPage({ exerciseSets, handleDeleteExerciseSets }: 
                 credentials: 'include',
                 body: JSON.stringify({ ids: setsIds }),
             });
+            setShowLoadingModal(false);
 
             if (response.ok) {
                 handleDeleteExerciseSets(setsIds)
@@ -39,18 +48,15 @@ export function ExerciseHistoryPage({ exerciseSets, handleDeleteExerciseSets }: 
                 alert('Failed to delete sets.');
             }
         }
-
-        setIsDeleteModalOpen(false);
     };
 
     const deleteSetsOfDay = (day: string) => {
         setDayToDelete(day);
-        setIsDeleteModalOpen(true);
+        setShowDeleteModal(true);
     };
 
     return (
         <div className="h-screen overflow-y-scroll pb-96 mt-1">
-            <ConfirmDeleteSetsOfDay isOpen={isDeleteModalOpen} day={dayToDelete} onClose={() => setIsDeleteModalOpen(false)} onConfirm={handleDeleteConfirm} />
             {setsByDay.size > 0 && (
                 <div className="me-12">
                     {daysSorted.map(day => {
@@ -82,24 +88,27 @@ export function ExerciseHistoryPage({ exerciseSets, handleDeleteExerciseSets }: 
                     })}
                 </div>
             )}
-            {setsByDay.size === 0 && (
-                <span className="text-gray-200 mx-5">Not performed yet </span>)}
-        </div>
-    );
-}
-
-function ConfirmDeleteSetsOfDay({ isOpen, day, onClose, onConfirm }: { day: string, isOpen: boolean, onClose: any, onConfirm: any }) {
-    if (!isOpen) return null;
-
-    return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-            <div className="bg-white p-10 rounded-lg text-black">
-                <p className="m-5">Are you sure you want to delete the sets of {day}?</p>
-                <div className="flex justify-end space-x-2">
-                    <button onClick={onClose} className="bg-gray-900 rounded-lg text-white p-4">Cancel</button>
-                    <button onClick={onConfirm} className="bg-red-950 rounded-lg text-white p-4">Confirm</button>
-                </div>
-            </div>
+            {
+                setsByDay.size === 0 && (
+                    <span className="text-gray-200 mx-5">Not performed yet </span>)}
+            {
+                showDeleteModal && <YesNoModal 
+                message={`Are you sure you want to delete the sets of ${dayToDelete}? This cannot be undone.`}
+                warning="" 
+                onNo={() => setShowDeleteModal(false)} 
+                onYes={handleDeleteConfirm}
+                yesVerb="delete"
+                noVerb="go back" 
+                yesColor="bg-red-950 "/>
+            }
+            {
+                showLoadingModal &&
+                <LoadingModal message="Deleting sets..." />
+            }
+            {
+                showErrorModal &&
+                <InfoModal message="Failed to delete sets. Check your connection and try again later." onClose={() => setShowErrorModal(false)} />
+            }
         </div>
     );
 }

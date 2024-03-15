@@ -1,6 +1,7 @@
 "use client";
 import { WorkoutTemplate, ExerciseSet, ExerciseSetInProgress, ExerciseWithHistory } from "../classes"
 import { ExerciseSetTracker } from "./ExerciseSetTracker"
+import { YesNoModal } from "./YesNoModal"
 
 import { useState, useEffect } from "react";
 
@@ -102,7 +103,7 @@ export function WorkoutTrackPage({ workoutTemplate, exercises, showHome }:
       <div className="flex pt-10 justify-center items-end">
         <button
           className="rounded-lg my-4 mx-2 px-2 py-1 bg-blue-950  border border-gray-950 shadow-black shadow-lg  text-white"
-          onClick={()=> alert("TODO: add exercise after current exercise")}>
+          onClick={() => alert("TODO: add exercise after current exercise")}>
           Add exercise
         </button>
         <button className="rounded-lg my-4 mx-2 px-2 py-1 bg-green-950  border border-gray-950 shadow-black shadow-lg  text-white"
@@ -115,46 +116,27 @@ export function WorkoutTrackPage({ workoutTemplate, exercises, showHome }:
         </button>
       </div>
       {showCompleteWorkoutModal &&
-        <ConfirmSubmissionModal
-          setsInProgressPerExercise={setsInProgressPerExercise}
-          onCancel={() => setShowCompleteWorkoutModal(false)}
-          onConfirm={submitWorkout}
-        />}
+        <YesNoModal
+          onYes={submitWorkout}
+          onNo={() => setShowCompleteWorkoutModal(false)}
+          message="Are you sure you want to submit your workout? It cannot be edited after submission (but this feature will come soon 🙂)"
+          warning={
+            (setsInProgressPerExercise.some(exerciseSets => exerciseSets.some(exerciseSet => !exerciseSet.markedComplete)) ?
+              "Some sets are not marked complete and will be discarded." : "")}
+          yesVerb="submit"
+          noVerb="go back"
+          yesColor="bg-red-950" />
+      }
       {showDiscardWorkoutModal &&
-        <ConfirmDiscardModal
-          onCancel={() => setShowDiscardWorkoutModal(false)}
-          onConfirm={discard}
-        />
+        <YesNoModal
+          onYes={discard}
+          onNo={() => setShowDiscardWorkoutModal(false)}
+          message="Are you sure you want to discard your workout? This cannot be undone."
+          warning=""
+          yesVerb="discard"
+          noVerb="go back"
+          yesColor="bg-green-950" />
       }
     </>
   )
-}
-
-
-function ConfirmSubmissionModal({ setsInProgressPerExercise, onCancel, onConfirm }: { setsInProgressPerExercise: ExerciseSetInProgress[][], onCancel: any, onConfirm: any }) {
-  const anyIncompleteSets = setsInProgressPerExercise.some(exerciseSets =>
-    exerciseSets.some(exerciseSet => !exerciseSet.markedComplete));
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center">
-      <div className="bg-gray-800 p-4 rounded-lg mx-5">
-        <p>Are you sure you want to submit your workout? It cannot be edited after submission (but this feature will come soon 🙂)</p>
-        {anyIncompleteSets && <p className="font-black my-3">Some sets are not marked complete and will be discarded.</p>}
-        <button className="bg-green-950 p-2 rounded-lg m-4 shadow-black shadow-lg" onClick={onConfirm}>Yes, submit</button>
-        <button className="bg-gray-950 p-2 rounded-lg m-4 shadow-black shadow-lg" onClick={onCancel}>No, go back</button>
-      </div>
-    </div>
-  );
-}
-
-function ConfirmDiscardModal({ onCancel, onConfirm }: { onCancel: any, onConfirm: any }) {
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center">
-      <div className="bg-gray-800 p-4 rounded-lg mx-5">
-        <p>Are you sure you want to discard your workout? This cannot be undone.</p>
-        <button className="bg-red-950 p-2 rounded-lg m-4 shadow-black shadow-lg" onClick={onConfirm}>Yes, discard</button>
-        <button className="bg-gray-950 p-2 rounded-lg m-4 shadow-black shadow-lg" onClick={onCancel}>No, go back</button>
-      </div>
-    </div>
-  );
 }
