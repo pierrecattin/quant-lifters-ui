@@ -21,8 +21,8 @@ export function WorkoutPage({ workoutTemplates, exercises, bodyparts }:
 
   const [templateToTrack, setTemplateToTrack] = useState<WorkoutTemplate | null>(() => {
     if (typeof window !== 'undefined') {
-      const workoutTemplateStored = localStorage.getItem("workoutTemplateInProgress")
-      if (workoutTemplateStored != null) {
+      let workoutTemplateStored = localStorage.getItem("workoutTemplateInProgress")
+      if (workoutTemplateStored !== null && workoutTemplateStored !== "null") { // !== "null" is to to handle legacy bug workoutTemplateInProgress = "null" in localstorage. This cannot happen anymore, but might still be stored in some ppl's phones. can be removed after every user refreshed.
         const template = WorkoutTemplate.deserialize(workoutTemplateStored)
         return template
       }
@@ -35,11 +35,15 @@ export function WorkoutPage({ workoutTemplates, exercises, bodyparts }:
   );
 
   useEffect(() => {
-    localStorage.setItem("workoutTemplateInProgress", JSON.stringify(templateToTrack));
+    if(templateToTrack === null){
+      localStorage.removeItem("workoutTemplateInProgress")
+    } else {
+      localStorage.setItem("workoutTemplateInProgress", JSON.stringify(templateToTrack));
+    } 
   }, [templateToTrack]);
 
   function showHome() {
-    localStorage.removeItem("workoutTemplateInProgress")
+    setTemplateToTrack(null)
     setCurrentWorkoutSubpage(workoutSubPageName.home)
   }
   function showCreate() {

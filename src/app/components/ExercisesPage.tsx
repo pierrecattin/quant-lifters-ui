@@ -13,9 +13,8 @@ export function ExercisesPage({ exercises, bodyparts, handleUpdateExerciseSets }
     let selectedExercise = null
     if (typeof window !== 'undefined') {
       selectedExercise = sessionStorage.getItem("selectedExercise");
-      selectedExercise = selectedExercise == "null" ? null : selectedExercise
     }
-    if (selectedExercise) {
+    if (selectedExercise !== null) {
       return ExerciseWithHistory.deserialize(selectedExercise)
     } else {
       return null;
@@ -23,7 +22,11 @@ export function ExercisesPage({ exercises, bodyparts, handleUpdateExerciseSets }
   });
 
   useEffect(() => {
-    sessionStorage.setItem("selectedExercise", JSON.stringify(selectedExercise));
+     if(selectedExercise === null){ 
+      sessionStorage.removeItem("selectedExercise")
+     } else {
+      sessionStorage.setItem("selectedExercise", JSON.stringify(selectedExercise));
+    }
   }, [selectedExercise]);
 
   function resetSelectedExercise() {
