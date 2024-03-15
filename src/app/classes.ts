@@ -119,6 +119,17 @@ export class ExerciseWithHistory {
     this.exerciseFamily = exerciseFamily;
   }
 
+  get daysSinceLastTimePerformed(): number | null {
+    if (this.sets.length === 0) {
+      return null; 
+    }
+
+    const sortedSets = this.sets.sort((a, b) => b.time.getTime() - a.time.getTime());
+    const lastPerformedTime = sortedSets[0].time; 
+
+    return getDaysBetweenDates(new Date(), lastPerformedTime);
+  }
+
   clone(): ExerciseWithHistory {
     // Create a deep copy for complex types to avoid shared references
     const primaryBodypartsCopy = [...this.primaryBodyparts];

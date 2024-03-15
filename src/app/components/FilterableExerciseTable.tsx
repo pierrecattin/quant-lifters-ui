@@ -18,7 +18,7 @@ export function FilterableExerciseTable({ exercises, bodyparts, onExerciseClick 
 
   }
   const bodypartButtons: JSX.Element[] = [];
-  bodyparts.forEach((bodypart) => {
+  bodyparts.sort().forEach((bodypart) => {
     bodypartButtons.push(
       <BodypartButton name={bodypart} onToggleBodypart={addOrRemoveBodypart} key={bodypart} />
     )
@@ -43,14 +43,15 @@ function ExerciseButton({ exercise, onExerciseClick }: { exercise: ExerciseWithH
   }
   return (
     <button
-      className="group m-1 rounded-lg border border-gray-500 px-5 py-4 transition-colors bg-gray-900 hover:border-red-700 hover:bg-neutral-800/50"
+      className="group m-1 rounded-lg border border-gray-500 p-2 bg-gray-900 hover:border-red-700 hover:bg-neutral-800/50 shadow-lg shadow-black"
       onClick={click}>
-      <h2 className={`mb-3 text-2xl font-semibold`}>
-        {exercise.name}{" "}
-        <span className="inline-block transition-transform group-hover:translate-x-2 motion-reduce:transform-none">
-          -&gt;
-        </span>
+      <h2 className={`text-lg`}>
+        {exercise.name}
       </h2>
+      {exercise.daysSinceLastTimePerformed !== null &&
+        <p className="mt-1 text-sm opacity-50">
+          Done {exercise.daysSinceLastTimePerformed} days ago
+        </p>}
     </button>
   );
 }
@@ -64,7 +65,7 @@ function BodypartButton({ name, onToggleBodypart }: { name: string, onToggleBody
   }
   const className = isSelected ? 'bg-gray-100 text-gray-900 border-blue-200' : 'bg-gray-900 text-gray-100 border-neutral-500'
   return (
-    <button className={'rounded-[5px] m-1 p-1 border ' + className} onClick={toggle}>
+    <button className={'rounded-[5px] m-1 p-1 border shadow-lg shadow-black ' + className} onClick={toggle}>
       {name}
     </button>
   )
@@ -72,21 +73,27 @@ function BodypartButton({ name, onToggleBodypart }: { name: string, onToggleBody
 
 function ExerciseTable({ exercises, filterText, selectedBodyparts, onExerciseClick }:
   { exercises: ExerciseWithHistory[], filterText: string, selectedBodyparts: string[], onExerciseClick: any }) {
-  const exerciseButtons: JSX.Element[] = [];
-  exercises.forEach((exercise) => {
+  const exercisesFilteredAndSorted = exercises.filter(exercise => {
     if (selectedBodyparts.length == 0 ||
       selectedBodyparts.filter(x => exercise.primaryBodyparts.includes(x) || exercise.secondaryBodyparts.includes(x)).length == selectedBodyparts.length) {
       if (exercise.name.toLowerCase().includes(filterText.toLowerCase())) {
-        exerciseButtons.push(
-          <ExerciseButton exercise={exercise} key={exercise.name} onExerciseClick={onExerciseClick} />
-        );
+        return true;
       }
     }
-  });
+    return false;
+  }).sort((e1, e2) => {
+    if (e1.daysSinceLastTimePerformed === null) return 1; 
+    if (e2.daysSinceLastTimePerformed === null) return -1;
+  
+    return Number(e2.daysSinceLastTimePerformed) - Number(e1.daysSinceLastTimePerformed);
+  })
+  
 
   return (
-    <div className="mb-32 grid lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-      {exerciseButtons}
+    <div className="mb-32 grid lg:max-w-5xl lg:w-full grid-cols-2 lg:mb-0 lg:grid-cols-4 lg:text-left">
+      {exercisesFilteredAndSorted.map(exercise =>
+        <ExerciseButton exercise={exercise} key={exercise.name} onExerciseClick={onExerciseClick} />
+      )}
     </div>
   );
 }
@@ -94,7 +101,7 @@ function ExerciseTable({ exercises, filterText, selectedBodyparts, onExerciseCli
 function SearchBar({ filterText, onFilterChange }: { filterText: string, onFilterChange: any }) {
   return (
     <form className='m-1' >
-      <input className='p-1 text-gray-100 bg-gray-800 border border-neutral-500'
+      <input className='p-1 text-gray-100 bg-gray-800 border border-neutral-500 rounded-lg'
         type="text"
         placeholder="Search exercises..."
         value={filterText}
