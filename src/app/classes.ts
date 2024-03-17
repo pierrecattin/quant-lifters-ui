@@ -1,20 +1,51 @@
-import {getDaysBetweenDates} from "./utils"
+import { getDaysBetweenDates } from "./utils"
 
-export class ExerciseSet {
+export class NameAndId {
+  name: string
   id: string
-  time: Date;
+
+  constructor(name: string, id: string) {
+    this.name = name
+    this.id = id
+  }
+
+  clone() {
+    return new NameAndId(this.name, this.id)
+  }
+
+  static deserialize(data: string): NameAndId {
+    const parsedData = JSON.parse(data);
+    return new NameAndId(
+      parsedData.name,
+      parsedData.id
+    )
+  }
+}
+
+abstract class BaseExerciseSet {
+  id: string;
   weight: number;
   reps: number;
   rir: number;
   wilks: number;
 
-  constructor(id: string, time: Date | string, weight: number, reps: number, rir: number, wilks: number) {
-    this.id = id
-    this.time = (typeof time === 'string') ? new Date(time) : time;
+  constructor(id: string, weight: number, reps: number, rir: number, wilks: number) {
+    this.id = id;
     this.weight = weight;
     this.reps = reps;
     this.rir = rir;
     this.wilks = wilks;
+  }
+
+  abstract clone(): BaseExerciseSet;
+}
+
+export class ExerciseSetForExerciseLog extends BaseExerciseSet {
+  time: Date;
+
+  constructor(id: string, time: Date | string, weight: number, reps: number, rir: number, wilks: number) {
+    super(id, weight, reps, rir, wilks);
+    this.time = (typeof time === 'string') ? new Date(time) : time;
   }
 
   getTimeAsString() {
@@ -22,19 +53,19 @@ export class ExerciseSet {
   }
 
   clone() {
-    return new ExerciseSet(
+    return new ExerciseSetForExerciseLog(
       this.id,
       this.time,
       this.weight,
       this.reps,
       this.rir,
       this.wilks
-    )
+    );
   }
 
-  static deserialize(data: string): ExerciseSet {
+  static deserialize(data: string): ExerciseSetForExerciseLog {
     const parsedData = JSON.parse(data);
-    return new ExerciseSet(
+    return new ExerciseSetForExerciseLog(
       parsedData.id,
       parsedData.time,
       parseFloat(parsedData.weight),
@@ -43,21 +74,51 @@ export class ExerciseSet {
       parseFloat(parsedData.wilks)
     );
   }
-
 }
 
+export class ExerciseSetForWorkoutLog extends BaseExerciseSet {
+  exercise: NameAndId;
+
+  constructor(id: string, exercise: NameAndId, weight: number, reps: number, rir: number, wilks: number) {
+    super(id, weight, reps, rir, wilks);
+    this.exercise = exercise;
+  }
+
+  clone() {
+    return new ExerciseSetForWorkoutLog(
+      this.id,
+      this.exercise.clone(),
+      this.weight,
+      this.reps,
+      this.rir,
+      this.wilks
+    );
+  }
+
+  static deserialize(data: string): ExerciseSetForWorkoutLog {
+    const parsedData = JSON.parse(data);
+    return new ExerciseSetForWorkoutLog(
+      parsedData.id,
+      NameAndId.deserialize(JSON.stringify(parsedData.exercise)),
+      parseFloat(parsedData.weight),
+      parseInt(parsedData.reps, 10),
+      parseInt(parsedData.rir, 10),
+      parseFloat(parsedData.wilks)
+    );
+  }
+}
 
 export class ExerciseSetInProgress {
-  weight?: number; 
+  weight?: number;
   reps?: number;
   rir?: number;
   markedComplete: boolean
 
-  constructor(weight?: number, reps?: number, rir?: number, markedComplete=false) {
+  constructor(weight?: number, reps?: number, rir?: number, markedComplete = false) {
     this.weight = weight;
     this.reps = reps;
     this.rir = rir
-    this.markedComplete=markedComplete
+    this.markedComplete = markedComplete
   }
 
   cloneAndUpdate(field: string, value: number | boolean | undefined) {
@@ -103,11 +164,11 @@ export class ExerciseWithHistory {
   isCustom: boolean;
   createdBy: string;
   sharedWith: string[];
-  sets: ExerciseSet[];
+  sets: ExerciseSetForExerciseLog[];
   exerciseFamily: string; // TODO temporary to not break the current UI. exerciseFamily should become a class and bodyparts should move over
 
   constructor(id: string, name: string, primaryBodyparts: string[], secondaryBodyparts: string[], isCustom: boolean,
-    createdBy: string, sharedWith: string[], sets: ExerciseSet[], exerciseFamily: string) {
+    createdBy: string, sharedWith: string[], sets: ExerciseSetForExerciseLog[], exerciseFamily: string) {
     this.id = id;
     this.name = name;
     this.primaryBodyparts = primaryBodyparts;
@@ -121,11 +182,11 @@ export class ExerciseWithHistory {
 
   get daysSinceLastTimePerformed(): number | null {
     if (this.sets.length === 0) {
-      return null; 
+      return null;
     }
 
     const sortedSets = this.sets.sort((a, b) => b.time.getTime() - a.time.getTime());
-    const lastPerformedTime = sortedSets[0].time; 
+    const lastPerformedTime = sortedSets[0].time;
 
     return getDaysBetweenDates(new Date(), lastPerformedTime);
   }
@@ -152,7 +213,7 @@ export class ExerciseWithHistory {
 
   static deserialize(data: string) {
     const parsedData = JSON.parse(data);
-    const sets = parsedData.sets.map((set: any) => ExerciseSet.deserialize(JSON.stringify(set)));
+    const sets = parsedData.sets.map((set: any) => ExerciseSetForExerciseLog.deserialize(JSON.stringify(set)));
     return new ExerciseWithHistory(
       parsedData.id,
       parsedData.name,
@@ -172,30 +233,30 @@ export class WorkoutTemplate {
   name: string;
   plannedExercises: PlannedExercise[];
   isArchived: boolean;
-  lastWorkoutDate: Date|null;
+  lastWorkoutDate: Date | null;
 
-  constructor(id: string, name: string, plannedExercises: PlannedExercise[], isArchived=false, lastWorkoutDate: Date|null = null) {
+  constructor(id: string, name: string, plannedExercises: PlannedExercise[], isArchived = false, lastWorkoutDate: Date | null = null) {
     this.id = id;
     this.name = name;
     this.plannedExercises = plannedExercises;
     this.isArchived = isArchived;
     this.lastWorkoutDate = lastWorkoutDate;
   }
-  
-  getDaysSinceLastWorkout(){
-    if (this.lastWorkoutDate === null){
+
+  getDaysSinceLastWorkout() {
+    if (this.lastWorkoutDate === null) {
       return null
     } else {
       return getDaysBetweenDates(new Date(), this.lastWorkoutDate);
     }
   }
 
-  archive(){
+  archive() {
     this.isArchived = true
     return this
   }
 
-  unarchive(){
+  unarchive() {
     this.isArchived = false
     return this
   }
@@ -221,6 +282,31 @@ export class WorkoutTemplate {
   }
 }
 
+export class Workout {
+  id: string;
+  start_time: Date;
+  sets: ExerciseSetForWorkoutLog[];
+
+  constructor(id: string, start_time: Date, sets: ExerciseSetForWorkoutLog[]) {
+    this.id = id;
+    this.start_time = start_time;
+    this.sets = sets;
+  }
+
+  clone(): Workout {
+    const setsClone = this.sets.map(set => set.clone());    
+    return new Workout(this.id, this.start_time, setsClone);
+  }
+
+  static deserialize(data: string): Workout {
+    const parsedData = JSON.parse(data);
+    const startTimeDeserialized = new Date(parsedData.start_time);
+    const setsDeserialized = parsedData.sets.map((setData: string) => ExerciseSetForWorkoutLog.deserialize(JSON.stringify(setData)));    
+    return new Workout(parsedData.id, startTimeDeserialized, setsDeserialized);
+  }
+}
+
+
 export class PlannedExercise {
   id: string;
   name: string;
@@ -232,7 +318,7 @@ export class PlannedExercise {
     this.plannedExerciseSets = plannedExerciseSets;
   }
 
-  clone(): PlannedExercise{
+  clone(): PlannedExercise {
     return new PlannedExercise(
       this.id,
       this.name,
@@ -263,23 +349,23 @@ export class PlannedExerciseSet {
   };
 
 
-  constructor(exerciseId: string, exerciseName?:string, restTimeinSec?: number) {
-    this.exerciseId=exerciseId;
-    this.exerciseName=exerciseName;
+  constructor(exerciseId: string, exerciseName?: string, restTimeinSec?: number) {
+    this.exerciseId = exerciseId;
+    this.exerciseName = exerciseName;
     this.target = {};
     this.restTimeinSec = restTimeinSec;
   }
 
   setTarget(target: { reps?: number; weight?: number; intensity?: number; rir?: number }) {
     this.target = { ...target };
-    return this; 
+    return this;
   }
-  
+
   clone(): PlannedExerciseSet {
     return new PlannedExerciseSet(this.exerciseId, this.exerciseName, this.restTimeinSec).setTarget(this.target);
   }
 
-  toExerciseSetInProgress(){
+  toExerciseSetInProgress() {
     // TODO: fill implied target items
     return new ExerciseSetInProgress(this.target?.weight, this.target?.reps, this.target?.rir)
   }

@@ -1,6 +1,6 @@
-import { ExerciseSet, Records } from "./classes"
+import { ExerciseSetForExerciseLog, Records } from "./classes"
 
-export function recordsByTotalReps(exerciseSets: ExerciseSet[]): Map<number, Records> {
+export function recordsByTotalReps(exerciseSets: ExerciseSetForExerciseLog[]): Map<number, Records> {
   let recordsByTotalReps = new Map<number, Records>();
   exerciseSets.forEach(set => {
     const currentRecord = recordsByTotalReps.get(set.reps + set.rir);

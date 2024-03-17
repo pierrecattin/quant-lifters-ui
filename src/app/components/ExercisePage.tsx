@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 
-import { ExerciseSet, ExerciseWithHistory } from "../classes"
+import { ExerciseSetForExerciseLog, ExerciseWithHistory } from "../classes"
 
 import { ExerciseTrackPage } from "./ExerciseTrackPage"
 import { ExerciseHistoryPage } from "./ExerciseHistoryPage"
@@ -36,7 +36,7 @@ export function ExercisePage({ exercise, goBack, handleUpdateExerciseSets }:
     return () => document.removeEventListener("mousedown", handleClickOutsideDropdown);
   }, []);
 
-  function handleAddExerciseSets(newSets: ExerciseSet[]) {
+  function handleAddExerciseSets(newSets: ExerciseSetForExerciseLog[]) {
     const updatedSets = [...currentExercise.sets, ...newSets];
     const updatedExercise = currentExercise.clone();
     updatedExercise.sets = updatedSets;

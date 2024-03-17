@@ -85,7 +85,7 @@ function ExerciseTable({ exercises, filterText, selectedBodyparts, onExerciseCli
     if (e1.daysSinceLastTimePerformed === null) return 1; 
     if (e2.daysSinceLastTimePerformed === null) return -1;
   
-    return Number(e2.daysSinceLastTimePerformed) - Number(e1.daysSinceLastTimePerformed);
+    return Number(e1.daysSinceLastTimePerformed) - Number(e2.daysSinceLastTimePerformed);
   })
   
 

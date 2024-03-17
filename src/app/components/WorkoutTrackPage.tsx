@@ -1,5 +1,5 @@
 "use client";
-import { WorkoutTemplate, ExerciseSet, ExerciseSetInProgress, ExerciseWithHistory } from "../classes"
+import { WorkoutTemplate, ExerciseSetForExerciseLog, ExerciseSetInProgress, ExerciseWithHistory } from "../classes"
 import { ExerciseSetTracker } from "./ExerciseSetTracker"
 import { YesNoModal } from "./YesNoModal"
 

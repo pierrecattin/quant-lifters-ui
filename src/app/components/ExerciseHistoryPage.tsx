@@ -4,19 +4,18 @@ import { useState } from "react";
 import Image from "next/image";
 
 import { Config } from "../config"
-import { ExerciseSet } from "../classes"
+import { ExerciseSetForExerciseLog } from "../classes"
 import { LoadingModal } from "./LoadingModal";
 import { InfoModal } from "./InfoModal";
 import { YesNoModal } from "./YesNoModal";
-import { warn } from "console";
 
-export function ExerciseHistoryPage({ exerciseSets, handleDeleteExerciseSets }: { exerciseSets: ExerciseSet[], handleDeleteExerciseSets: any }) {
+export function ExerciseHistoryPage({ exerciseSets, handleDeleteExerciseSets }: { exerciseSets: ExerciseSetForExerciseLog[], handleDeleteExerciseSets: any }) {
     const [dayToDelete, setDayToDelete] = useState('');
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showErrorModal, setShowErrorModal] = useState(false);
     const [showLoadingModal, setShowLoadingModal] = useState(false);
 
-    const setsByDay = new Map<string, ExerciseSet[]>();
+    const setsByDay = new Map<string, ExerciseSetForExerciseLog[]>();
     exerciseSets.forEach(exerciseSet => {
         const date = exerciseSet.getTimeAsString();
         if (!setsByDay.get(date)) {
@@ -79,7 +78,7 @@ export function ExerciseHistoryPage({ exerciseSets, handleDeleteExerciseSets }: 
                                 <div>
                                     {daySets.map((set, index) => (
                                         <div key={index} className="">
-                                            <span>{set.reps} x {1 * set.weight}kg with {set.rir} RiR - Wilks: {1 * set.wilks}</span>
+                                            <span>{set.reps} x {1 * set.weight}kg with {set.rir}</span>
                                         </div>
                                     ))}
                                 </div>

@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { Config } from "../config"
 import { LoginOrSignupPage } from "./LoginOrSignupPage"
 import { pageName } from "../enums"
-import { ExerciseSet, ExerciseWithHistory, PlannedExercise, WorkoutTemplate, PlannedExerciseSet } from "../classes"
+import { ExerciseSetForExerciseLog, ExerciseSetForWorkoutLog, Workout, ExerciseWithHistory, PlannedExercise, WorkoutTemplate, PlannedExerciseSet } from "../classes"
 
 import { ProfilePage } from "./ProfilePage"
 import { WorkoutPage } from "./WorkoutPage"
@@ -82,6 +82,7 @@ function Content({ currentPage, logout }: { currentPage: pageName, logout: any }
   const [exercises, setExercises] = useState<ExerciseWithHistory[]>([]);
   const [bodyparts, setBodyparts] = useState<string[]>([]);
   const [workoutTemplates, setWorkoutTemplates] = useState<WorkoutTemplate[]>([]);
+  const [workoutLog, setWorkoutLog] = useState<Workout[]>([]);
 
   function flattenBodyparts(bodypartsJson: any[]) {
     return (
@@ -92,10 +93,10 @@ function Content({ currentPage, logout }: { currentPage: pageName, logout: any }
   function fillExercises(exercisesJson: any[]) {
     let exercisesToSave: ExerciseWithHistory[] = []
     exercisesJson.forEach(exercise => {
-      let exerciseSets: ExerciseSet[] = []
+      let exerciseSets: ExerciseSetForExerciseLog[] = []
       const exerciseSetsRaw: any[] = exercise.sets
       exerciseSetsRaw.forEach(s => {
-        const exerciseSet = new ExerciseSet(s.id, new Date(s.workout.start_time), s.weight, s.reps, s.rir, s.wilksScore)
+        const exerciseSet = new ExerciseSetForExerciseLog(s.id, new Date(s.workout.start_time), s.weight, s.reps, s.rir, s.wilksScore)
         exerciseSets.push(exerciseSet)
       })
 
@@ -112,6 +113,12 @@ function Content({ currentPage, logout }: { currentPage: pageName, logout: any }
     });
     setExercises(exercisesToSave);
   }
+
+  function fillWorkoutLog(workoutlogJson: any[]){
+    const workoutLogToSave =  workoutlogJson.map(w => Workout.deserialize(JSON.stringify(w)))
+    setWorkoutLog(workoutLogToSave);
+  }
+
 
   useEffect(() => {
     fetch(`${Config.backendUrl}allbodyparts`, {
@@ -130,6 +137,14 @@ function Content({ currentPage, logout }: { currentPage: pageName, logout: any }
       .then(response => response.json())
       .then(json => fillExercises(json.exercises))
       .catch(error => console.error(error));
+
+      fetch(`${Config.backendUrl}workoutslog`, {
+        method: 'GET',
+        credentials: 'include',
+      })
+        .then(response => response.json())
+        .then(json => fillWorkoutLog(json.workouts))
+        .catch(error => console.error(error));
 
     // TODO: get from backend
     const pe1 =  new PlannedExerciseSet("1", "bench", 90)
@@ -152,7 +167,7 @@ function Content({ currentPage, logout }: { currentPage: pageName, logout: any }
     setWorkoutTemplates([t1, t2, t3, t4])
   }, []);
 
-  function handleUpdateExerciseSets(exercise_id: string, newExerciseSets: ExerciseSet[]) {
+  function handleUpdateExerciseSets(exercise_id: string, newExerciseSets: ExerciseSetForExerciseLog[]) {
     const newExercises = exercises.map(exercise => {
       if (exercise.id === exercise_id) {
         const newExercise = exercise.clone();
@@ -167,7 +182,7 @@ function Content({ currentPage, logout }: { currentPage: pageName, logout: any }
   return (
     <div className={"absolute p-3 w-full"} >
       {currentPage === pageName.profile && <ProfilePage logout={logout} />}
-      {currentPage === pageName.workout && <WorkoutPage workoutTemplates = {workoutTemplates} exercises={exercises} bodyparts={bodyparts}/>}
+      {currentPage === pageName.workout && <WorkoutPage workoutTemplates = {workoutTemplates} workoutLog = {workoutLog} exercises={exercises} bodyparts={bodyparts}/>}
       {currentPage === pageName.exercises && <ExercisesPage exercises={exercises} bodyparts={bodyparts} handleUpdateExerciseSets={handleUpdateExerciseSets} />}
       {currentPage === pageName.stats && <StatsPage />}
       {currentPage === pageName.competition && <CompetitionPage />}

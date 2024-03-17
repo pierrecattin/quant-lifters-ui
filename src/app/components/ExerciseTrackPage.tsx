@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 
 import { Config } from "../config"
-import { ExerciseSet, ExerciseSetInProgress, ExerciseWithHistory } from "../classes"
+import { ExerciseSetForExerciseLog, ExerciseSetInProgress, ExerciseWithHistory } from "../classes"
 
 import { ExerciseSetTracker } from "./ExerciseSetTracker"
 import { InfoModal } from "./InfoModal"
@@ -73,7 +73,7 @@ export function ExerciseTrackPage({ exercise, handleAddExerciseSets }: { exercis
       const setsJson: any[] = await response.json()
       // Store new sets in react state so that it's available without having to fetch from the backend
       const completedExerciseSets = setsJson.map(exerciseSet =>
-        new ExerciseSet(exerciseSet.id, time, parseFloat(exerciseSet.weight), parseInt(exerciseSet.reps), parseInt(exerciseSet.rir), exerciseSet.wilksScore)
+        new ExerciseSetForExerciseLog(exerciseSet.id, time, parseFloat(exerciseSet.weight), parseInt(exerciseSet.reps), parseInt(exerciseSet.rir), exerciseSet.wilksScore)
       );
       handleAddExerciseSets(completedExerciseSets)
       setSets([new ExerciseSetInProgress()]);
