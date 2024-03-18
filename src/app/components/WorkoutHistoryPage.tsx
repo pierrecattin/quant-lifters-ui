@@ -12,7 +12,9 @@ export function WorkoutHistoryPage({ showHome, workoutLog }: { showHome: any, wo
         <h1 className="text-xl font-bold">Workout History</h1>
       </div>
       <section className="mt-3 pb-96 space-y-4">
-        {workoutLog.map(workout => (
+        {workoutLog.sort((a, b) =>
+          a.start_time > b.start_time ? -1 : 1
+        ).map(workout => (
           <article key={workout.id} className="bg-gray-800 border border-gray-200 rounded-lg p-4">
             <header className="text-lg font-semibold mb-2">
               {new Date(workout.start_time).toLocaleDateString("en-US", {
