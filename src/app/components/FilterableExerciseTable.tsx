@@ -1,9 +1,14 @@
 "use client";
 
+import Image from "next/image";
+
 import { useState } from "react";
 import { ExerciseWithHistory } from "../classes"
 
+import { ExerciseCreatorPage } from "./ExerciseCreatorPage"
+
 export function FilterableExerciseTable({ exercises, bodyparts, onExerciseClick }: { exercises: ExerciseWithHistory[], bodyparts: string[], onExerciseClick: any }) {
+  const [currentSubPage, setCurrentSubpage] = useState("list")
   const [filterText, setFilterText] = useState('');
   const [selectedBodyparts, setSelectedBodyparts] = useState<string[]>([])
 
@@ -15,8 +20,8 @@ export function FilterableExerciseTable({ exercises, bodyparts, onExerciseClick 
       newBodyparts = newBodyparts.filter(x => x != bodypart)
     }
     setSelectedBodyparts(newBodyparts)
-
   }
+
   const bodypartButtons: JSX.Element[] = [];
   bodyparts.sort().forEach((bodypart) => {
     bodypartButtons.push(
@@ -25,15 +30,34 @@ export function FilterableExerciseTable({ exercises, bodyparts, onExerciseClick 
   });
 
   return (
-    <div>
-      <SearchBar filterText={filterText} onFilterChange={setFilterText} />
-      {bodypartButtons}
-      <ExerciseTable
-        exercises={exercises}
-        filterText={filterText}
-        selectedBodyparts={selectedBodyparts}
-        onExerciseClick={onExerciseClick} />
-    </div>
+    <>
+      {currentSubPage === "list" &&
+        <div>
+          <div className="flex justify-between items-center">
+            <SearchBar filterText={filterText} onFilterChange={setFilterText} />
+            {/* <button
+              className="ml-3 h-10 w-10 flex justify-center items-center rounded-full bg-green-950 border border-green-800 shadow-black shadow-lg text-white text-xl hover:bg-green-800"
+              onClick={() => setCurrentSubpage("create")}>
+              <Image
+                src="icons/plus.svg"
+                alt="Add"
+                width={20}
+                height={20}
+              />
+            </button> */}
+          </div>
+          {bodypartButtons}
+          <ExerciseTable
+            exercises={exercises}
+            filterText={filterText}
+            selectedBodyparts={selectedBodyparts}
+            onExerciseClick={onExerciseClick} />
+        </div>
+      }
+      {currentSubPage === "create" &&
+        <ExerciseCreatorPage goBack={() => setCurrentSubpage("list")} bodyparts={bodyparts} />
+      }
+    </>
   )
 }
 
@@ -82,12 +106,12 @@ function ExerciseTable({ exercises, filterText, selectedBodyparts, onExerciseCli
     }
     return false;
   }).sort((e1, e2) => {
-    if (e1.daysSinceLastTimePerformed === null) return 1; 
+    if (e1.daysSinceLastTimePerformed === null) return 1;
     if (e2.daysSinceLastTimePerformed === null) return -1;
-  
+
     return Number(e1.daysSinceLastTimePerformed) - Number(e2.daysSinceLastTimePerformed);
   })
-  
+
 
   return (
     <div className="mb-32 grid lg:max-w-5xl lg:w-full grid-cols-2 lg:mb-0 lg:grid-cols-4 lg:text-left">
