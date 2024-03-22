@@ -11,7 +11,7 @@ import { ProfilePage } from "./ProfilePage"
 import { WorkoutPage } from "./WorkoutPage"
 import { ExercisesPage } from "./ExercisesPage"
 import { StatsPage } from "./StatsPage"
-import { CompetitionPage } from "./CompetitionPage"
+import { LeaderboardPage } from "./LeaderboardPage"
 
 export function HomePage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -202,7 +202,7 @@ return (
     {currentPage === pageName.workout && <WorkoutPage workoutTemplates={workoutTemplates} workoutLog={workoutLog} exerciseFamilies={exerciseFamilies} bodyparts={bodyparts} />}
     {currentPage === pageName.exercises && <ExercisesPage exerciseFamilies={exerciseFamilies} bodyparts={bodyparts} handleUpdateExerciseSets={handleUpdateExerciseSets} />}
     {currentPage === pageName.stats && <StatsPage />}
-    {currentPage === pageName.competition && <CompetitionPage />}
+    {currentPage === pageName.competition && <LeaderboardPage exerciseFamilies={exerciseFamilies} bodyparts={bodyparts}/>}
   </div>
 )
 }
