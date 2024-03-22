@@ -3,9 +3,9 @@ import { useState } from "react";
 import Image from "next/image";
 
 import { FilterableExerciseTable } from "./FilterableExerciseTable"
-import { WorkoutTemplate, ExerciseWithHistory, PlannedExerciseSet } from "../classes"
+import { WorkoutTemplate, ExerciseWithHistory, ExerciseFamily, PlannedExerciseSet } from "../classes"
 
-export function WorkoutCreatorPage({ showHome, exercises, bodyparts }: { showHome: any, exercises: ExerciseWithHistory[], bodyparts: string[] }) {
+export function WorkoutCreatorPage({ showHome, exerciseFamilies, bodyparts }: { showHome: any, exerciseFamilies: ExerciseFamily[], bodyparts: string[] }) {
   const [templateTitle, setTemplateTitle] = useState("");
   const [plannedExercises, setPlannedExercises] = useState<PlannedExerciseSet[][]>([]);
   const [showExercisesTable, setShowExercisesTable] = useState(false);
@@ -72,7 +72,7 @@ export function WorkoutCreatorPage({ showHome, exercises, bodyparts }: { showHom
       </div>
     }
       {showExercisesTable &&
-        <FilterableExerciseTable exercises={exercises} bodyparts={bodyparts} onExerciseClick={selectExercise} />}
+        <FilterableExerciseTable exerciseFamilies={exerciseFamilies} bodyparts={bodyparts} onExerciseClick={selectExercise} />}
     </>
   )
 }

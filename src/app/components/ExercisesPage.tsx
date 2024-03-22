@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from "react";
 
-import { ExerciseWithHistory } from "../classes"
+import { ExerciseWithHistory, ExerciseFamily } from "../classes"
 
 import { FilterableExerciseTable } from "./FilterableExerciseTable"
 import { ExercisePage } from "./ExercisePage"
 
-export function ExercisesPage({ exercises, bodyparts, handleUpdateExerciseSets }:
-  { exercises: ExerciseWithHistory[], bodyparts: string[], handleUpdateExerciseSets: any }) {
+export function ExercisesPage({ exerciseFamilies, bodyparts, handleUpdateExerciseSets }:
+  { exerciseFamilies: ExerciseFamily[], bodyparts: string[], handleUpdateExerciseSets: any }) {
   const [selectedExercise, setSelectedExercise] = useState<ExerciseWithHistory | null>(() => {
     let selectedExercise = null
     if (typeof window !== 'undefined') {
@@ -35,7 +35,7 @@ export function ExercisesPage({ exercises, bodyparts, handleUpdateExerciseSets }
 
   return (
     <>
-      {selectedExercise === null && <FilterableExerciseTable exercises={exercises} bodyparts={bodyparts} onExerciseClick={setSelectedExercise} />}
+      {selectedExercise === null && <FilterableExerciseTable exerciseFamilies={exerciseFamilies} bodyparts={bodyparts} onExerciseClick={setSelectedExercise} />}
       {selectedExercise === null ? <></> : <ExercisePage exercise={selectedExercise} goBack={resetSelectedExercise} handleUpdateExerciseSets={handleUpdateExerciseSets} />}
     </>
   )

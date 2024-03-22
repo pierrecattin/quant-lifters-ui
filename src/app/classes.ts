@@ -159,55 +159,48 @@ export class Records {
 export class ExerciseWithHistory {
   id: string;
   name: string;
-  primaryBodyparts: string[];
-  secondaryBodyparts: string[];
   isCustom: boolean;
   createdBy: string;
   sharedWith: string[];
   sets: ExerciseSetForExerciseLog[];
-  exerciseFamily: string; // TODO temporary to not break the current UI. exerciseFamily should become a class and bodyparts should move over
 
-  constructor(id: string, name: string, primaryBodyparts: string[], secondaryBodyparts: string[], isCustom: boolean,
-    createdBy: string, sharedWith: string[], sets: ExerciseSetForExerciseLog[], exerciseFamily: string) {
+
+  constructor(id: string, name: string, isCustom: boolean,
+    createdBy: string, sharedWith: string[], sets: ExerciseSetForExerciseLog[]) {
     this.id = id;
     this.name = name;
-    this.primaryBodyparts = primaryBodyparts;
-    this.secondaryBodyparts = secondaryBodyparts;
     this.isCustom = isCustom;
     this.createdBy = createdBy;
     this.sharedWith = sharedWith;
     this.sets = sets;
-    this.exerciseFamily = exerciseFamily;
   }
 
   get daysSinceLastTimePerformed(): number | null {
     if (this.sets.length === 0) {
       return null;
     }
+    let mostRecentTime = this.sets[0].time;
+    for (const set of this.sets) {
+      if (set.time > mostRecentTime) {
+        mostRecentTime = set.time;
+      }
+    }
 
-    const sortedSets = this.sets.sort((a, b) => b.time.getTime() - a.time.getTime());
-    const lastPerformedTime = sortedSets[0].time;
-
-    return getDaysBetweenDates(new Date(), lastPerformedTime);
+    return getDaysBetweenDates(new Date(), mostRecentTime);
   }
 
   clone(): ExerciseWithHistory {
     // Create a deep copy for complex types to avoid shared references
-    const primaryBodypartsCopy = [...this.primaryBodyparts];
-    const secondaryBodypartsCopy = [...this.secondaryBodyparts];
     const sharedWithCopy = [...this.sharedWith];
     const setsCopy = this.sets.map(set => set.clone());
 
     return new ExerciseWithHistory(
       this.id,
       this.name,
-      primaryBodypartsCopy,
-      secondaryBodypartsCopy,
       this.isCustom,
       this.createdBy,
       sharedWithCopy,
       setsCopy,
-      this.exerciseFamily
     );
   }
 
@@ -217,16 +210,92 @@ export class ExerciseWithHistory {
     return new ExerciseWithHistory(
       parsedData.id,
       parsedData.name,
+      parsedData.isCustom,
+      parsedData.createdBy,
+      parsedData.sharedWith,
+      sets,
+    );
+  }
+}
+
+export class ExerciseFamily {
+  id: string;
+  name: string;
+  primaryBodyparts: string[];
+  secondaryBodyparts: string[];
+  isCustom: boolean;
+  createdBy: string;
+  sharedWith: string[];
+  exercises: ExerciseWithHistory[];
+
+  constructor(id: string, name: string, primaryBodyparts: string[], secondaryBodyparts: string[], isCustom: boolean,
+    createdBy: string, sharedWith: string[], exercises: ExerciseWithHistory[]) {
+    this.id = id;
+    this.name = name;
+    this.primaryBodyparts = primaryBodyparts;
+    this.secondaryBodyparts = secondaryBodyparts;
+    this.isCustom = isCustom;
+    this.createdBy = createdBy;
+    this.sharedWith = sharedWith;
+    this.exercises = exercises;
+  }
+
+
+  get daysSinceLastTimePerformed(): number | null {
+    let mostRecentTime: Date | null = null;
+
+    for (const exercise of this.exercises) {
+      if (exercise.sets.length === 0) continue;
+
+      for (const set of exercise.sets) {
+        if (!mostRecentTime || set.time > mostRecentTime) {
+          mostRecentTime = set.time;
+        }
+      }
+    }
+
+    if (mostRecentTime === null) {
+      return null;
+    } else {
+      return getDaysBetweenDates(new Date(), mostRecentTime);
+    }
+  }
+
+  clone(): ExerciseFamily {
+    // Create a deep copy for complex types to avoid shared references
+    const primaryBodypartsCopy = [...this.primaryBodyparts];
+    const secondaryBodypartsCopy = [...this.secondaryBodyparts];
+    const sharedWithCopy = [...this.sharedWith];
+    const exercisesCopy = this.exercises.map(exercise => exercise.clone());
+
+    return new ExerciseFamily(
+      this.id,
+      this.name,
+      primaryBodypartsCopy,
+      secondaryBodypartsCopy,
+      this.isCustom,
+      this.createdBy,
+      sharedWithCopy,
+      exercisesCopy,
+    );
+  }
+
+  static deserialize(data: string) {
+    const parsedData = JSON.parse(data);
+    const exercises = parsedData.exercises.map((exercise: any) => ExerciseWithHistory.deserialize(JSON.stringify(exercise)));
+    return new ExerciseFamily(
+      parsedData.id,
+      parsedData.name,
       parsedData.primaryBodyparts,
       parsedData.secondaryBodyparts,
       parsedData.isCustom,
       parsedData.createdBy,
       parsedData.sharedWith,
-      sets,
-      parsedData.exerciseFamily
+      exercises,
     );
   }
 }
+
 
 export class WorkoutTemplate {
   id: string;
@@ -294,14 +363,14 @@ export class Workout {
   }
 
   clone(): Workout {
-    const setsClone = this.sets.map(set => set.clone());    
+    const setsClone = this.sets.map(set => set.clone());
     return new Workout(this.id, this.start_time, setsClone);
   }
 
   static deserialize(data: string): Workout {
     const parsedData = JSON.parse(data);
     const startTimeDeserialized = new Date(parsedData.start_time);
-    const setsDeserialized = parsedData.sets.map((setData: string) => ExerciseSetForWorkoutLog.deserialize(JSON.stringify(setData)));    
+    const setsDeserialized = parsedData.sets.map((setData: string) => ExerciseSetForWorkoutLog.deserialize(JSON.stringify(setData)));
     return new Workout(parsedData.id, startTimeDeserialized, setsDeserialized);
   }
 }

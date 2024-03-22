@@ -92,7 +92,7 @@ function WorkoutTemplatesBoxes({ workoutTemplates, isArchive, showTrack }:
               <span style={isArchive ? { opacity: "0.5" } : {}}>{template.name}</span>
             </div>
             <div>
-              <span className="opacity-50">{template.getDaysSinceLastWorkout() === null ? "" : `Last performed ${template.getDaysSinceLastWorkout()} days ago`}</span>
+              <span className="opacity-50">{template.getDaysSinceLastWorkout() === null ? "" : `Done ${template.getDaysSinceLastWorkout()} days ago`}</span>
             </div>
             <span >
               <button className="absolute top-2 right-2 p-3" onClick={(e) => {handleMenuToggle(e, template.id); }}>

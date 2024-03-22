@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { Config } from "../config"
 import { LoginOrSignupPage } from "./LoginOrSignupPage"
 import { pageName } from "../enums"
-import { ExerciseSetForExerciseLog, ExerciseSetForWorkoutLog, Workout, ExerciseWithHistory, PlannedExercise, WorkoutTemplate, PlannedExerciseSet } from "../classes"
+import { ExerciseSetForExerciseLog, ExerciseSetForWorkoutLog, Workout, ExerciseWithHistory, PlannedExercise, WorkoutTemplate, PlannedExerciseSet, ExerciseFamily } from "../classes"
 
 import { ProfilePage } from "./ProfilePage"
 import { WorkoutPage } from "./WorkoutPage"
@@ -79,7 +79,7 @@ export function HomePage() {
 }
 
 function Content({ currentPage, logout }: { currentPage: pageName, logout: any }) {
-  const [exercises, setExercises] = useState<ExerciseWithHistory[]>([]);
+  const [exerciseFamilies, setExerciseFamilies] = useState<ExerciseFamily[]>([]);
   const [bodyparts, setBodyparts] = useState<string[]>([]);
   const [workoutTemplates, setWorkoutTemplates] = useState<WorkoutTemplate[]>([]);
   const [workoutLog, setWorkoutLog] = useState<Workout[]>([]);
@@ -90,32 +90,44 @@ function Content({ currentPage, logout }: { currentPage: pageName, logout: any }
     )
   }
 
-  function fillExercises(exercisesJson: any[]) {
-    let exercisesToSave: ExerciseWithHistory[] = []
-    exercisesJson.forEach(exercise => {
-      let exerciseSets: ExerciseSetForExerciseLog[] = []
-      const exerciseSetsRaw: any[] = exercise.sets
-      exerciseSetsRaw.forEach(s => {
-        const exerciseSet = new ExerciseSetForExerciseLog(s.id, new Date(s.workout.start_time), s.weight, s.reps, s.rir, s.wilksScore)
-        exerciseSets.push(exerciseSet)
-      })
+  function fillExerciseFamilies(exercisesFamilyJson: any[]) {
+    let exerciseFamiliesToSave: ExerciseFamily[] = []
+    exercisesFamilyJson.forEach(exerciseFamilyJson => {
+      let exercises: ExerciseWithHistory[] = []
+      exerciseFamilyJson.exercises.forEach((exerciseJson: any) => {
+        let exerciseSets: ExerciseSetForExerciseLog[] = []
+        const exerciseSetsRaw: any[] = exerciseJson.sets
+        exerciseSetsRaw.forEach(s => {
+          const exerciseSet = new ExerciseSetForExerciseLog(s.id, new Date(s.workout.start_time), s.weight, s.reps, s.rir, s.wilksScore)
+          exerciseSets.push(exerciseSet)
+        })
 
-      const newExercise = new ExerciseWithHistory(exercise.id,
-        exercise.name,
-        flattenBodyparts(exercise.exercise_family.primary_bodyparts),
-        flattenBodyparts(exercise.exercise_family.secondary_bodyparts),
-        exercise.is_custom,
-        exercise.created_by,
-        exercise.shared_with,
-        exerciseSets,
-        exercise.exercise_family.name)
-      exercisesToSave.push(newExercise)
+        const newExercise = new ExerciseWithHistory(exerciseJson.id,
+          exerciseJson.name,
+          exerciseJson.is_custom,
+          exerciseJson.created_by,
+          exerciseJson.shared_with,
+          exerciseSets)
+        exercises.push(newExercise)
+      });
+      const exerciseFamily = new ExerciseFamily(
+        exerciseFamilyJson.id,
+        exerciseFamilyJson.name,
+        flattenBodyparts(exerciseFamilyJson.primary_bodyparts),
+        flattenBodyparts(exerciseFamilyJson.secondary_bodyparts),
+        exerciseFamilyJson.is_custom,
+        exerciseFamilyJson.created_by,
+        exerciseFamilyJson.shared_with,
+        exercises
+      )
+      exerciseFamiliesToSave.push(exerciseFamily);
     });
-    setExercises(exercisesToSave);
+
+    setExerciseFamilies(exerciseFamiliesToSave);
   }
 
-  function fillWorkoutLog(workoutlogJson: any[]){
-    const workoutLogToSave =  workoutlogJson.map(w => Workout.deserialize(JSON.stringify(w)))
+  function fillWorkoutLog(workoutlogJson: any[]) {
+    const workoutLogToSave = workoutlogJson.map(w => Workout.deserialize(JSON.stringify(w)))
     setWorkoutLog(workoutLogToSave);
   }
 
@@ -135,21 +147,21 @@ function Content({ currentPage, logout }: { currentPage: pageName, logout: any }
       credentials: 'include',
     })
       .then(response => response.json())
-      .then(json => fillExercises(json.exercises))
+      .then(json => fillExerciseFamilies(json.exercise_families))
       .catch(error => console.error(error));
 
-      fetch(`${Config.backendUrl}workoutslog`, {
-        method: 'GET',
-        credentials: 'include',
-      })
-        .then(response => response.json())
-        .then(json => fillWorkoutLog(json.workouts))
-        .catch(error => console.error(error));
+    fetch(`${Config.backendUrl}workoutslog`, {
+      method: 'GET',
+      credentials: 'include',
+    })
+      .then(response => response.json())
+      .then(json => fillWorkoutLog(json.workouts))
+      .catch(error => console.error(error));
 
     // TODO: get from backend
-    const pe1 =  new PlannedExerciseSet("1", "bench", 90)
-    pe1.setTarget({weight:100, reps:12})
-    const pe2 =  pe1.clone()
+    const pe1 = new PlannedExerciseSet("1", "bench", 90)
+    pe1.setTarget({ weight: 100, reps: 12 })
+    const pe2 = pe1.clone()
     const p1 = new PlannedExercise("1", "Bench",
       [pe1, pe2])
     const p2 = new PlannedExercise("2", "Skullcrusher",
@@ -167,27 +179,32 @@ function Content({ currentPage, logout }: { currentPage: pageName, logout: any }
     setWorkoutTemplates([t1, t2, t3, t4])
   }, []);
 
-  function handleUpdateExerciseSets(exercise_id: string, newExerciseSets: ExerciseSetForExerciseLog[]) {
-    const newExercises = exercises.map(exercise => {
-      if (exercise.id === exercise_id) {
-        const newExercise = exercise.clone();
-        newExercise.sets = newExerciseSets
-        return newExercise;
+  function handleUpdateExerciseSets(exerciseFamilyId: string, exerciseId: string, newExerciseSets: ExerciseSetForExerciseLog[]) {
+    const newExerciseFamilies = exerciseFamilies.map(exerciseFamily => {
+      if (exerciseFamily.id === exerciseFamilyId) {
+        exerciseFamily.exercises.map(exercise => {
+          if (exercise.id === exerciseId) {
+            const newExercise = exercise.clone();
+            newExercise.sets = newExerciseSets
+            return newExercise;
+          }
+          return exercise;
+        })
       }
-      return exercise;
+      return exerciseFamily
     })
-    setExercises(newExercises)
-  }
+  setExerciseFamilies(newExerciseFamilies)
+}
 
-  return (
-    <div className={"absolute p-3 w-full"} >
-      {currentPage === pageName.profile && <ProfilePage logout={logout} />}
-      {currentPage === pageName.workout && <WorkoutPage workoutTemplates = {workoutTemplates} workoutLog = {workoutLog} exercises={exercises} bodyparts={bodyparts}/>}
-      {currentPage === pageName.exercises && <ExercisesPage exercises={exercises} bodyparts={bodyparts} handleUpdateExerciseSets={handleUpdateExerciseSets} />}
-      {currentPage === pageName.stats && <StatsPage />}
-      {currentPage === pageName.competition && <CompetitionPage />}
-    </div>
-  )
+return (
+  <div className={"absolute p-3 w-full"} >
+    {currentPage === pageName.profile && <ProfilePage logout={logout} />}
+    {currentPage === pageName.workout && <WorkoutPage workoutTemplates={workoutTemplates} workoutLog={workoutLog} exerciseFamilies={exerciseFamilies} bodyparts={bodyparts} />}
+    {currentPage === pageName.exercises && <ExercisesPage exerciseFamilies={exerciseFamilies} bodyparts={bodyparts} handleUpdateExerciseSets={handleUpdateExerciseSets} />}
+    {currentPage === pageName.stats && <StatsPage />}
+    {currentPage === pageName.competition && <CompetitionPage />}
+  </div>
+)
 }
 
 function BottomNavBar({ currentPage, showProfile, showWorkout, showExercises, showStats, showCompetition }:

@@ -78,7 +78,7 @@ export function ExerciseHistoryPage({ exerciseSets, handleDeleteExerciseSets }: 
                                 <div>
                                     {daySets.map((set, index) => (
                                         <div key={index} className="">
-                                            <span>{set.reps} x {1 * set.weight}kg with {set.rir}</span>
+                                            <span>{set.reps} x {1 * set.weight}kg with {set.rir} RiR</span>
                                         </div>
                                     ))}
                                 </div>
@@ -89,7 +89,7 @@ export function ExerciseHistoryPage({ exerciseSets, handleDeleteExerciseSets }: 
             )}
             {
                 setsByDay.size === 0 && (
-                    <span className="text-gray-200 mx-5">Not performed yet </span>)}
+                    <span className="text-gray-200 mx-5">Not done yet </span>)}
             {
                 showDeleteModal && <YesNoModal 
                 message={`Are you sure you want to delete the sets of ${dayToDelete}? This cannot be undone.`}
