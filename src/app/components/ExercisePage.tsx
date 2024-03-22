@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 
-import { ExerciseSetForExerciseLog, ExerciseWithHistory } from "../classes"
+import { ExerciseSetForExerciseLog, ExerciseWithHistory, ExerciseFamily } from "../classes"
 
 import { ExerciseTrackPage } from "./ExerciseTrackPage"
 import { ExerciseHistoryPage } from "./ExerciseHistoryPage"
@@ -11,8 +11,8 @@ import { ExerciseRecordsPage } from "./ExerciseRecordsPage"
 import { ExerciseDetailsPage } from "./ExerciseDetailsPage"
 
 
-export function ExercisePage({ exercise, goBack, handleUpdateExerciseSets }:
-  { exercise: ExerciseWithHistory, goBack: any, handleUpdateExerciseSets: any }) {
+export function ExercisePage({ family, exercise, goBack, handleUpdateExerciseSets }:
+  { family: ExerciseFamily, exercise: ExerciseWithHistory, goBack: any, handleUpdateExerciseSets: any }) {
   enum exerciseSubPageName {
     track = "Track",
     history = "History",
@@ -143,7 +143,7 @@ export function ExercisePage({ exercise, goBack, handleUpdateExerciseSets }:
         {currentExerciseSubpage === exerciseSubPageName.track && <ExerciseTrackPage exercise={currentExercise} handleAddExerciseSets={handleAddExerciseSets} />}
         {currentExerciseSubpage === exerciseSubPageName.history && <ExerciseHistoryPage exerciseSets={currentExercise.sets} handleDeleteExerciseSets={handleDeleteExerciseSets} />}
         {currentExerciseSubpage === exerciseSubPageName.records && <ExerciseRecordsPage exercise={currentExercise} />}
-        {currentExerciseSubpage === exerciseSubPageName.details && <ExerciseDetailsPage exercise={currentExercise} />}
+        {currentExerciseSubpage === exerciseSubPageName.details && <ExerciseDetailsPage family={family} exercise={currentExercise} />}
       </div>
     </div>
   );

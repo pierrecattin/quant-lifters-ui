@@ -204,6 +204,17 @@ export class ExerciseWithHistory {
     );
   }
 
+  getFamily(exerciseFamilies: ExerciseFamily[]): ExerciseFamily{
+    for (const family of exerciseFamilies){
+      for (const e of family.exercises){
+        if (this.name == e.name){
+          return(family)
+        }
+      }
+    }
+    throw("Exercise not found in families list")
+  }
+
   static deserialize(data: string) {
     const parsedData = JSON.parse(data);
     const sets = parsedData.sets.map((set: any) => ExerciseSetForExerciseLog.deserialize(JSON.stringify(set)));
