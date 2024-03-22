@@ -60,9 +60,12 @@ export function WorkoutPage({ workoutTemplates, workoutLog, exerciseFamilies, bo
     setCurrentWorkoutSubpage(workoutSubPageName.track)
   }
 
-  function getExercisesOfTemplate(template: WorkoutTemplate, exercises: ExerciseWithHistory[]) {
+  function getExercisesOfTemplate(template: WorkoutTemplate, exerciseFamilies: ExerciseFamily[]) {
+    const allExercises = exerciseFamilies.reduce((allExercises, family) => {
+      return allExercises.concat(family.exercises);
+    }, [] as ExerciseWithHistory[]);
     const excercisesFilteredInOrder = template.plannedExercises.map(exerciseTemplate =>
-      exercises.filter(exercise => exercise.id == exerciseTemplate.id)[0])
+      allExercises.filter(exercise => exercise.id == exerciseTemplate.id)[0])
     return excercisesFilteredInOrder
   }
 
@@ -76,7 +79,7 @@ export function WorkoutPage({ workoutTemplates, workoutLog, exerciseFamilies, bo
             showQuickWorkout={showQuickWorkout}
             showTrack={showTrack} />}
         {currentWorkoutSubpage === workoutSubPageName.create && <WorkoutCreatorPage showHome={showHome} exerciseFamilies={exerciseFamilies} bodyparts={bodyparts} />}
-        {/* {currentWorkoutSubpage === workoutSubPageName.track && <WorkoutTrackPage showHome={showHome} workoutTemplate={templateToTrack as WorkoutTemplate} exercises={getExercisesOfTemplate(templateToTrack as WorkoutTemplate, exercises)} />} */}
+        {currentWorkoutSubpage === workoutSubPageName.track && <WorkoutTrackPage showHome={showHome} workoutTemplate={templateToTrack as WorkoutTemplate} exercises={getExercisesOfTemplate(templateToTrack as WorkoutTemplate, exerciseFamilies)} />}
         {currentWorkoutSubpage === workoutSubPageName.history && <WorkoutHistoryPage showHome={showHome} workoutLog={workoutLog} />}
         {currentWorkoutSubpage === workoutSubPageName.quickworkout && <QuickWorkoutPage showHome={showHome} />}
       </div>

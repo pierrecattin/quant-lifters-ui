@@ -64,7 +64,7 @@ function ExerciseFamilyBox({ family, onExerciseClick, filterText }: { family: Ex
   return (
     <div className="group m-1 rounded-lg border border-gray-500 p-2 bg-gray-900 shadow-lg shadow-black">
       <h2 className={`text-lg`}>{family.name}</h2>
-      <div className="grid lg:max-w-5xl lg:w-full grid-cols-1 lg:mb-0 lg:grid-cols-4 lg:text-left">
+      <div className="grid lg:max-w-5xl lg:w-full grid-cols-1 lg:mb-0 lg:text-left">
         {exercisesFilteredAndSorted.map(exercise => (
           <ExerciseButton item={exercise} key={exercise.id} onClick={() => onExerciseClick(exercise)} />
         ))}
