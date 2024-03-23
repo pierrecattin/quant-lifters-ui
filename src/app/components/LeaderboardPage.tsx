@@ -40,7 +40,7 @@ export function LeaderboardPage({ exerciseFamilies, bodyparts }:
 
   return (
     <>
-      <div className="absolute p-3 w-full">
+      <div className="absolute w-full">
         <div className="top-0">
           <div className="inset-x-0 flex justify-around items-center h-12  ">
             {pages.map((page) => (

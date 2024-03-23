@@ -21,7 +21,7 @@ export function ExerciseRecordsPage({ exercise }: { exercise: ExerciseWithHistor
                   Weight
                 </th>
                 <th scope="col" className="px-2 text-right">
-                  Wilks-agjusted Weight
+                  Wilks-adjusted Weight
                 </th>
               </tr>
             </thead>
