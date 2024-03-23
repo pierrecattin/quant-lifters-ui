@@ -72,7 +72,7 @@ export function WorkoutCreatorPage({ showHome, exerciseFamilies, bodyparts }: { 
       </div>
     }
       {showExercisesTable &&
-        <FilterableExerciseTable exerciseFamilies={exerciseFamilies} bodyparts={bodyparts} onExerciseClick={selectExercise} />}
+        <FilterableExerciseTable exerciseFamilies={exerciseFamilies} bodyparts={bodyparts} onExerciseClick={selectExercise} showAddButton={true}/>}
     </>
   )
 }

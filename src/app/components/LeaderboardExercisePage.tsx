@@ -39,7 +39,7 @@ export function LeaderboardExercisePage({ exerciseFamilies, bodyparts }:
 
   return (
     <>
-      {selectedExercise === null && <FilterableExerciseTable exerciseFamilies={exerciseFamilies} bodyparts={bodyparts} onExerciseClick={loadRankings}  />}
+      {selectedExercise === null && <FilterableExerciseTable exerciseFamilies={exerciseFamilies} bodyparts={bodyparts} onExerciseClick={loadRankings} showAddButton={false} />}
       {selectedExercise === null ? <></> : <LeaderboardExerciseRecordsPage exercise={selectedExercise} rankings={rankings} goBack={resetSelectedExercise}/>}
     </>
   )

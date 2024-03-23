@@ -35,7 +35,7 @@ export function ExercisesPage({ exerciseFamilies, bodyparts, handleUpdateExercis
 
   return (
     <>
-      {selectedExercise === null && <FilterableExerciseTable exerciseFamilies={exerciseFamilies} bodyparts={bodyparts} onExerciseClick={setSelectedExercise} />}
+      {selectedExercise === null && <FilterableExerciseTable exerciseFamilies={exerciseFamilies} bodyparts={bodyparts} onExerciseClick={setSelectedExercise} showAddButton={true}/>}
       {selectedExercise === null ? <></> : <ExercisePage family={selectedExercise.getFamily(exerciseFamilies)} exercise={selectedExercise} goBack={resetSelectedExercise} handleUpdateExerciseSets={handleUpdateExerciseSets} />}
     </>
   )

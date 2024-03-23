@@ -25,7 +25,7 @@ export function InfoModal({ message, onClose }: { message: string; onClose: any 
       >
         <p>{message}</p>
         <button
-          className="mt-4 py-2 px-4 bg-blue-500 hover:bg-blue-700 text-white font-bold rounded"
+          className="mt-4 py-2 px-4 bg-purple-900 hover:bg-purple-800 text-white font-bold rounded"
           onClick={onClose}
         >
           OK
