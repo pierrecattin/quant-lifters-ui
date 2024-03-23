@@ -8,43 +8,41 @@ export function ExerciseRecordsPage({ exercise }: { exercise: ExerciseWithHistor
   const repsSorted = Array.from(recordsByTotalReps(exercise.sets).keys()).sort((a, b) => a - b);
 
   return (
-    <div className="relative overflow-x-auto">
-      <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-        <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-          <tr>
-            <th scope="col" className="px-6 py-3">
-              Record per Reps
-            </th>
-            {repsSorted.map((reps) => (
-              <th key={reps} scope="col" className="px-6 py-3">
-                {reps}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-            <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-              Weight
-            </th>
-            {repsSorted.map((reps) => (
-              <td key={reps} className="px-6 py-4">
-                {recordsByTotalReps(exercise.sets).get(reps)!.weight.valueOf()}
-              </td>
-            ))}
-          </tr>
-          <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-            <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-              Wilks-adjusted Weight
-            </th>
-            {repsSorted.map((reps) => (
-              <td key={reps} className="px-6 py-4">
-                {recordsByTotalReps(exercise.sets).get(reps)!.wilks.valueOf()}
-              </td>
-            ))}
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <>
+      <div className="me-12 pt-1">
+        <div className="bg-gray-800 border border-gray-200 rounded-lg p-4 mb-4 ">
+          <table className="text-sm">
+            <thead>
+              <tr>
+                <th scope="col" className="px-2 text-right">
+                  Reps
+                </th>
+                <th scope="col" className="px-2 text-right">
+                  Weight
+                </th>
+                <th scope="col" className="px-2 text-right">
+                  Wilks-agjusted Weight
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {repsSorted.map((reps) => (
+                <tr key={reps}>
+                  <td className="text-right">
+                    {reps}
+                  </td>
+                  <td className="px-2 text-right">
+                    {recordsByTotalReps(exercise.sets).get(reps)!.weight.valueOf()}
+                  </td>
+                  <td className="px-2 text-right">
+                      {recordsByTotalReps(exercise.sets).get(reps)!.wilks.valueOf()}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </>
   )
 } 
