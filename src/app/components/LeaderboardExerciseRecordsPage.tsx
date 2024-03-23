@@ -2,10 +2,12 @@
 
 import { ExerciseWithHistory } from "../classes"
 
+import {IRanking, RankingTables} from "./LeaderboardPage"
+
 import Image from "next/image";
 
-export function LeaderboardExerciseRecordsPage({ exercise, goBack }:
-  { exercise: ExerciseWithHistory, goBack: any}) {
+export function LeaderboardExerciseRecordsPage({ exercise, rankings, goBack }:
+  { exercise: ExerciseWithHistory, rankings: Array<IRanking>, goBack: any}) {
   return (
     <div className="z-40 fixed w-full">
       <div className="top-0">
@@ -28,7 +30,7 @@ export function LeaderboardExerciseRecordsPage({ exercise, goBack }:
           </span>
         </div>
         <div>
-          TODO: Records per Exercise page
+          <RankingTables rankings={rankings} />
         </div>
       </div>
     </div>
