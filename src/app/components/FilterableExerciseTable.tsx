@@ -3,8 +3,8 @@ import Image from "next/image";
 import { useState } from "react";
 import { ExerciseWithHistory, ExerciseFamily } from "../classes"
 import { ExerciseCreatorPage } from "./ExerciseCreatorPage"
-export function FilterableExerciseTable({ exerciseFamilies, bodyparts, onExerciseClick, showAddButton }: 
-  { exerciseFamilies: ExerciseFamily[], bodyparts: string[], onExerciseClick: any, showAddButton:boolean }) {
+export function FilterableExerciseTable({ exerciseFamilies, bodyparts, onExerciseClick, showAddButton, handleAddExercise }:
+  { exerciseFamilies: ExerciseFamily[], bodyparts: string[], onExerciseClick: any, showAddButton: boolean, handleAddExercise: any }) {
   const [filterText, setFilterText] = useState('');
   const [selectedBodyparts, setSelectedBodyparts] = useState<string[]>([])
   const [showCreatorPage, setShowCreatorPage] = useState(false);
@@ -35,31 +35,31 @@ export function FilterableExerciseTable({ exerciseFamilies, bodyparts, onExercis
 
   return (
     <>
-    {!showCreatorPage && 
-      <>
-      <div>
-        <div className="flex justify-between items-center">
-          <SearchBar filterText={filterText} onFilterChange={setFilterText} />
-          {showAddButton && <button
-            className="ml-3 h-10 w-10 flex justify-center items-center rounded-full bg-green-950 border border-green-800 shadow-black shadow-lg text-white text-xl hover:bg-green-800"
-            onClick={() => setShowCreatorPage(true)}>
-            <Image
-              src="icons/plus.svg"
-              alt="Add"
-              width={20}
-              height={20}
-            />
-          </button>}
-        </div>
-        {bodypartButtons}
-        <div className="mb-32 grid lg:max-w-5xl lg:w-full grid-cols-1 lg:mb-0 lg:grid-cols-4 lg:text-left">
-          {familiesFilteredAndSorted.map(family => (
-            <ExerciseFamilyBox key={family.id} family={family} onExerciseClick={onExerciseClick} filterText={filterText.toLowerCase()} />
-          ))}
-        </div>
-      </div>
-    </>}
-    {showCreatorPage &&<ExerciseCreatorPage goBack={() => setShowCreatorPage(false)} exerciseFamilies={exerciseFamilies}/>}
+      {!showCreatorPage &&
+        <>
+          <div>
+            <div className="flex justify-between items-center">
+              <SearchBar filterText={filterText} onFilterChange={setFilterText} />
+              {showAddButton && <button
+                className="ml-3 h-10 w-10 flex justify-center items-center rounded-full bg-green-950 border border-green-800 shadow-black shadow-lg text-white text-xl hover:bg-green-800"
+                onClick={() => setShowCreatorPage(true)}>
+                <Image
+                  src="icons/plus.svg"
+                  alt="Add"
+                  width={20}
+                  height={20}
+                />
+              </button>}
+            </div>
+            {bodypartButtons}
+            <div className="mb-32 grid lg:max-w-5xl lg:w-full grid-cols-1 lg:mb-0 lg:grid-cols-4 lg:text-left">
+              {familiesFilteredAndSorted.map(family => (
+                <ExerciseFamilyBox key={family.id} family={family} onExerciseClick={onExerciseClick} filterText={filterText.toLowerCase()} />
+              ))}
+            </div>
+          </div>
+        </>}
+      {showCreatorPage && <ExerciseCreatorPage goBack={() => setShowCreatorPage(false)} exerciseFamilies={exerciseFamilies} handleAddExercise={handleAddExercise}/>}
     </>
   );
 }

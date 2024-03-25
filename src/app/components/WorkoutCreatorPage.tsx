@@ -5,7 +5,7 @@ import Image from "next/image";
 import { FilterableExerciseTable } from "./FilterableExerciseTable"
 import { WorkoutTemplate, ExerciseWithHistory, ExerciseFamily, PlannedExerciseSet } from "../classes"
 
-export function WorkoutCreatorPage({ showHome, exerciseFamilies, bodyparts }: { showHome: any, exerciseFamilies: ExerciseFamily[], bodyparts: string[] }) {
+export function WorkoutCreatorPage({ showHome, exerciseFamilies, bodyparts, handleAddExercise }: { showHome: any, exerciseFamilies: ExerciseFamily[], bodyparts: string[], handleAddExercise:any }) {
   const [templateTitle, setTemplateTitle] = useState("");
   const [plannedExercises, setPlannedExercises] = useState<PlannedExerciseSet[][]>([]);
   const [showExercisesTable, setShowExercisesTable] = useState(false);
@@ -72,7 +72,7 @@ export function WorkoutCreatorPage({ showHome, exerciseFamilies, bodyparts }: { 
       </div>
     }
       {showExercisesTable &&
-        <FilterableExerciseTable exerciseFamilies={exerciseFamilies} bodyparts={bodyparts} onExerciseClick={selectExercise} showAddButton={true}/>}
+        <FilterableExerciseTable exerciseFamilies={exerciseFamilies} bodyparts={bodyparts} onExerciseClick={selectExercise} showAddButton={true} handleAddExercise={handleAddExercise}/>}
     </>
   )
 }

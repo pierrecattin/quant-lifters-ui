@@ -159,16 +159,25 @@ export class Records {
 export class ExerciseWithHistory {
   id: string;
   name: string;
+  weightFactor: number;
+  bodyWeightInclusionFactor: number;
+  isUnilateral: boolean;
   isCustom: boolean;
   createdBy: string;
   sharedWith: string[];
   sets: ExerciseSetForExerciseLog[];
 
 
-  constructor(id: string, name: string, isCustom: boolean,
+
+  constructor(id: string, name: string, weightFactor: number,
+    bodyWeightInclusionFactor: number,
+    isUnilateral: boolean, isCustom: boolean,
     createdBy: string, sharedWith: string[], sets: ExerciseSetForExerciseLog[]) {
     this.id = id;
     this.name = name;
+    this.weightFactor = weightFactor;
+    this.bodyWeightInclusionFactor = bodyWeightInclusionFactor;
+    this.isUnilateral = isUnilateral;
     this.isCustom = isCustom;
     this.createdBy = createdBy;
     this.sharedWith = sharedWith;
@@ -197,6 +206,9 @@ export class ExerciseWithHistory {
     return new ExerciseWithHistory(
       this.id,
       this.name,
+      this.weightFactor,
+      this.bodyWeightInclusionFactor,
+      this.isUnilateral,
       this.isCustom,
       this.createdBy,
       sharedWithCopy,
@@ -204,16 +216,12 @@ export class ExerciseWithHistory {
     );
   }
 
-  getFamily(exerciseFamilies: ExerciseFamily[]): ExerciseFamily{
-    for (const family of exerciseFamilies){
-      for (const e of family.exercises){
-        if (this.name == e.name){
-          return(family)
-        }
-      }
-    }
-    throw("Exercise not found in families list")
+  getFamily(exerciseFamilies: ExerciseFamily[]): ExerciseFamily {
+    const family = exerciseFamilies.find(family => family.exercises.some(e => e.id === this.id));
+    if (!family) throw new Error("Exercise not found in families list");
+    return family;
   }
+
 
   static deserialize(data: string) {
     const parsedData = JSON.parse(data);
@@ -221,6 +229,9 @@ export class ExerciseWithHistory {
     return new ExerciseWithHistory(
       parsedData.id,
       parsedData.name,
+      parsedData.weightFactor,
+      parsedData.bodyWeightInclusionFactor,
+      parsedData.isUnilateral,
       parsedData.isCustom,
       parsedData.createdBy,
       parsedData.sharedWith,

@@ -1,16 +1,20 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { ExerciseFamily } from '../classes';
+
+import { Config } from "../config"
+import { ExerciseFamily, ExerciseWithHistory } from '../classes';
 import { InfoButton } from './InfoButton'
 import { InfoModal } from './InfoModal';
+import { LoadingModal } from './LoadingModal';
 
-export function ExerciseCreatorPage({ goBack, exerciseFamilies }: { goBack: any, exerciseFamilies: ExerciseFamily[] }) {
+export function ExerciseCreatorPage({ goBack, exerciseFamilies, handleAddExercise }: { goBack: any, exerciseFamilies: ExerciseFamily[], handleAddExercise: any }) {
     const [exerciseTitle, setExerciseTitle] = useState("");
     const [selectedFamily, setSelectedFamily] = useState<ExerciseFamily | undefined>(undefined);
     const [isUnilateral, setIsUnilateral] = useState(false);
     const [weightFactor, setWeightFactor] = useState(1);
     const [bodyweightInclusionFactor, setBodyweightInclusionFactor] = useState(0);
     const [infoModalMessage, setInfoModalMessage] = useState<string | undefined>(undefined);
+    const [showLoadingModal, setShowLoadingModal] = useState(false);
 
     function changeSelectedFamily(id: string) {
         const s = exerciseFamilies.find(family => family.id == id)
@@ -19,36 +23,67 @@ export function ExerciseCreatorPage({ goBack, exerciseFamilies }: { goBack: any,
 
     async function handleSave() {
         if (exerciseTitle === "") {
-            alert("Please enter a name for the new exercise.");
+            setInfoModalMessage("Please enter a name for the new exercise.");
             return;
         }
         if (selectedFamily === undefined) {
-            alert("Please select an exercise family.");
+            setInfoModalMessage("Please select an exercise family.");
             return;
         }
 
-        const exerciseData = {
+        const body = {
             name: exerciseTitle,
-            exercise_family_id: selectedFamily.id,
+            family_id: selectedFamily.id,
             is_unilateral: isUnilateral,
             weight_factor: weightFactor,
             bodyweight_inclusion_factor: bodyweightInclusionFactor,
         };
 
-        alert("TODO");
+
+        setShowLoadingModal(true)
+        const response = await fetch(`${Config.backendUrl}createcustomexercise`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify(body),
+        });
+        setShowLoadingModal(false)
+        if (response.ok) {
+            setInfoModalMessage("Exercise saved.");
+            const newExerciseJson: any = await response.json()
+            const newExercise = new ExerciseWithHistory(newExerciseJson.id,
+                newExerciseJson.name,
+                newExerciseJson.weight_factor,
+                newExerciseJson.bodyweight_inclusion_factor,
+                newExerciseJson.is_unilateral,
+                newExerciseJson.is_custom,
+                newExerciseJson.created_by.username,
+                newExerciseJson.shared_with,
+                []
+            )
+            handleAddExercise(newExercise, selectedFamily.id);
+            goBack();
+        } else if(response.status===409){
+            console.log(response)
+            setInfoModalMessage(`Failed to save the exercise. ${(await response.json())?.error}`);
+        } else {
+            setInfoModalMessage("Failed to save the exercise. Check your connection and retry later.");
+        }
     }
 
     function handleInfo(fieldName: string) {
         let message = '';
         switch (fieldName) {
             case 'is_unilateral':
-                message = 'For unilateral exercises (e.g. one arm biceps curl), one set is for one half of the body. Entering three sets in a template means that during the workout, you be able to log three sets per body half.';
+                message = 'Unilateral exercises, such as one-arm biceps curls, work one side of the body per set. Entering three sets in a template means that during the workout, you will log a total of six sets: three for each half of your body.';
                 break;
             case 'weight_factor':
-                message = 'The weight factor is used to multiply the input weight for volume calculations. Set it to 100% for e.g. barbell exercises, and 200% for bilateral dumbbell exercises. This way if you use 10kg dumbbells, you can simply enter 10kg, but the volume calculations will know that the total weight is 20kg.';
+                message = 'The weight factor multiplies the input weight for volume calculations. Set it to 100% for exercises like barbell curls, and 200% for bilateral dumbbell exercises. Thus, if you use 10kg dumbbells, simply enter 10kg, and the system will calculate the volume using a total load of 20kg.';
                 break;
             case 'bodyweight_inclusion_factor':
-                message = 'The bodyweight inclusion factor indicates the percentage of your bodyweight to include for 1RM and volume calculations. It should be 0% for exercises that don\'t include bodyweight (e.g. benchpress), and 100% for full bodyweight exercises (e.g., pull-ups).';
+                message = 'The bodyweight inclusion factor specifies the percentage of your bodyweight to be considered in 1RM and volume calculations. For exercises that do not incorporate bodyweight, like bench press, set it to 0%. For bodyweight exercises, such as pull-ups, set it to 100%. For instance, if you perform pull-ups with an additional 10kg weight and your bodyweight is 80kg, the system will automatically use a total load of 90kg.';
                 break;
         }
         setInfoModalMessage(message);
@@ -102,7 +137,7 @@ export function ExerciseCreatorPage({ goBack, exerciseFamilies }: { goBack: any,
             )}
             <div className="flex items-center my-2 mt-4">
                 <label className="flex items-center">
-                    Is Unilateral
+                    Unilateral:
                     <div className="relative mx-2">
                         <input
                             id="isUnilateralCheckbox"
@@ -141,6 +176,7 @@ export function ExerciseCreatorPage({ goBack, exerciseFamilies }: { goBack: any,
                 <InfoButton onClick={() => handleInfo('bodyweight_inclusion_factor')} />
             </div>
             {infoModalMessage !== undefined && <InfoModal message={infoModalMessage} onClose={() => setInfoModalMessage(undefined)} />}
+            {showLoadingModal && <LoadingModal message="Saving exercise..." />}
         </>
     );
 }

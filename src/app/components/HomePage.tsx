@@ -104,6 +104,9 @@ function Content({ currentPage, logout }: { currentPage: pageName, logout: any }
 
         const newExercise = new ExerciseWithHistory(exerciseJson.id,
           exerciseJson.name,
+          exerciseJson.weightFactor,
+          exerciseJson.bodyweight_inclusion_factor,
+          exerciseJson.is_unilateral,
           exerciseJson.is_custom,
           exerciseJson.created_by,
           exerciseJson.shared_with,
@@ -193,18 +196,28 @@ function Content({ currentPage, logout }: { currentPage: pageName, logout: any }
       }
       return exerciseFamily
     })
-  setExerciseFamilies(newExerciseFamilies)
-}
+    setExerciseFamilies(newExerciseFamilies)
+  }
 
-return (
-  <div className={"absolute p-3 w-full"} >
-    {currentPage === pageName.profile && <ProfilePage logout={logout} />}
-    {currentPage === pageName.workout && <WorkoutPage workoutTemplates={workoutTemplates} workoutLog={workoutLog} exerciseFamilies={exerciseFamilies} bodyparts={bodyparts} />}
-    {currentPage === pageName.exercises && <ExercisesPage exerciseFamilies={exerciseFamilies} bodyparts={bodyparts} handleUpdateExerciseSets={handleUpdateExerciseSets} />}
-    {currentPage === pageName.stats && <StatsPage />}
-    {currentPage === pageName.competition && <LeaderboardPage exerciseFamilies={exerciseFamilies} bodyparts={bodyparts}/>}
-  </div>
-)
+  function handleAddExercise(newExercise: ExerciseWithHistory, familyId: string) {
+    const newExerciseFamilies = exerciseFamilies.map(exerciseFamily => {
+      if (exerciseFamily.id === familyId) {
+        exerciseFamily.exercises.push(newExercise)
+      }
+      return exerciseFamily
+    })
+    setExerciseFamilies(newExerciseFamilies)
+  }
+
+  return (
+    <div className={"absolute p-3 w-full"} >
+      {currentPage === pageName.profile && <ProfilePage logout={logout} />}
+      {currentPage === pageName.workout && <WorkoutPage workoutTemplates={workoutTemplates} workoutLog={workoutLog} exerciseFamilies={exerciseFamilies} bodyparts={bodyparts} handleAddExercise={handleAddExercise} />}
+      {currentPage === pageName.exercises && <ExercisesPage exerciseFamilies={exerciseFamilies} bodyparts={bodyparts} handleUpdateExerciseSets={handleUpdateExerciseSets} handleAddExercise={handleAddExercise} />}
+      {currentPage === pageName.stats && <StatsPage />}
+      {currentPage === pageName.competition && <LeaderboardPage exerciseFamilies={exerciseFamilies} bodyparts={bodyparts} />}
+    </div>
+  )
 }
 
 function BottomNavBar({ currentPage, showProfile, showWorkout, showExercises, showStats, showCompetition }:

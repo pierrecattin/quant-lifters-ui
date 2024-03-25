@@ -7,11 +7,11 @@ import { ExerciseWithHistory, ExerciseFamily } from "../classes"
 import { FilterableExerciseTable } from "./FilterableExerciseTable"
 import { ExercisePage } from "./ExercisePage"
 
-export function ExercisesPage({ exerciseFamilies, bodyparts, handleUpdateExerciseSets }:
-  { exerciseFamilies: ExerciseFamily[], bodyparts: string[], handleUpdateExerciseSets: any }) {
+export function ExercisesPage({ exerciseFamilies, bodyparts, handleUpdateExerciseSets, handleAddExercise }:
+  { exerciseFamilies: ExerciseFamily[], bodyparts: string[], handleUpdateExerciseSets: any, handleAddExercise: any }) {
   const [selectedExercise, setSelectedExercise] = useState<ExerciseWithHistory | null>(() => {
     let selectedExercise = null
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && exerciseFamilies.length>0) { // Checking that exercisesFamilies is populated, else when refreshing the page, selectedExercise might be in storage, but exercisesFamilies not loaded yet. selectedExercise.getFamily would fail.
       selectedExercise = sessionStorage.getItem("selectedExercise");
     }
     if (selectedExercise !== null) {
@@ -35,7 +35,7 @@ export function ExercisesPage({ exerciseFamilies, bodyparts, handleUpdateExercis
 
   return (
     <>
-      {selectedExercise === null && <FilterableExerciseTable exerciseFamilies={exerciseFamilies} bodyparts={bodyparts} onExerciseClick={setSelectedExercise} showAddButton={true}/>}
+      {selectedExercise === null && <FilterableExerciseTable exerciseFamilies={exerciseFamilies} bodyparts={bodyparts} onExerciseClick={setSelectedExercise} showAddButton={true} handleAddExercise={handleAddExercise}/>}
       {selectedExercise === null ? <></> : <ExercisePage family={selectedExercise.getFamily(exerciseFamilies)} exercise={selectedExercise} goBack={resetSelectedExercise} handleUpdateExerciseSets={handleUpdateExerciseSets} />}
     </>
   )
