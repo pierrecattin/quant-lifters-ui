@@ -160,7 +160,7 @@ export class ExerciseWithHistory {
   id: string;
   name: string;
   weightFactor: number;
-  bodyWeightInclusionFactor: number;
+  bodyweightInclusionFactor: number;
   isUnilateral: boolean;
   isCustom: boolean;
   createdBy: string;
@@ -170,13 +170,13 @@ export class ExerciseWithHistory {
 
 
   constructor(id: string, name: string, weightFactor: number,
-    bodyWeightInclusionFactor: number,
+    bodyweightInclusionFactor: number,
     isUnilateral: boolean, isCustom: boolean,
     createdBy: string, sharedWith: string[], sets: ExerciseSetForExerciseLog[]) {
     this.id = id;
     this.name = name;
     this.weightFactor = weightFactor;
-    this.bodyWeightInclusionFactor = bodyWeightInclusionFactor;
+    this.bodyweightInclusionFactor = bodyweightInclusionFactor;
     this.isUnilateral = isUnilateral;
     this.isCustom = isCustom;
     this.createdBy = createdBy;
@@ -207,7 +207,7 @@ export class ExerciseWithHistory {
       this.id,
       this.name,
       this.weightFactor,
-      this.bodyWeightInclusionFactor,
+      this.bodyweightInclusionFactor,
       this.isUnilateral,
       this.isCustom,
       this.createdBy,
@@ -230,7 +230,7 @@ export class ExerciseWithHistory {
       parsedData.id,
       parsedData.name,
       parsedData.weightFactor,
-      parsedData.bodyWeightInclusionFactor,
+      parsedData.bodyweightInclusionFactor,
       parsedData.isUnilateral,
       parsedData.isCustom,
       parsedData.createdBy,

@@ -7,13 +7,15 @@ import { InfoButton } from './InfoButton'
 import { InfoModal } from './InfoModal';
 import { LoadingModal } from './LoadingModal';
 
+import {getInfoMessage} from "../utils"
+
 export function ExerciseCreatorPage({ goBack, exerciseFamilies, handleAddExercise }: { goBack: any, exerciseFamilies: ExerciseFamily[], handleAddExercise: any }) {
     const [exerciseTitle, setExerciseTitle] = useState("");
     const [selectedFamily, setSelectedFamily] = useState<ExerciseFamily | undefined>(undefined);
     const [isUnilateral, setIsUnilateral] = useState(false);
     const [weightFactor, setWeightFactor] = useState(1);
     const [bodyweightInclusionFactor, setBodyweightInclusionFactor] = useState(0);
-    const [infoModalMessage, setInfoModalMessage] = useState<string | undefined>(undefined);
+    const [infoModalMessage, setInfoModalMessage] = useState<string | null>(null);
     const [showLoadingModal, setShowLoadingModal] = useState(false);
 
     function changeSelectedFamily(id: string) {
@@ -71,22 +73,6 @@ export function ExerciseCreatorPage({ goBack, exerciseFamilies, handleAddExercis
         } else {
             setInfoModalMessage("Failed to save the exercise. Check your connection and retry later.");
         }
-    }
-
-    function handleInfo(fieldName: string) {
-        let message = '';
-        switch (fieldName) {
-            case 'is_unilateral':
-                message = 'Unilateral exercises, such as one-arm biceps curls, work one side of the body per set. Entering three sets in a template means that during the workout, you will log a total of six sets: three for each half of your body.';
-                break;
-            case 'weight_factor':
-                message = 'The weight factor multiplies the input weight for volume calculations. Set it to 100% for exercises like barbell curls, and 200% for bilateral dumbbell exercises. Thus, if you use 10kg dumbbells, simply enter 10kg, and the system will calculate the volume using a total load of 20kg.';
-                break;
-            case 'bodyweight_inclusion_factor':
-                message = 'The bodyweight inclusion factor specifies the percentage of your bodyweight to be considered in 1RM and volume calculations. For exercises that do not incorporate bodyweight, like bench press, set it to 0%. For bodyweight exercises, such as pull-ups, set it to 100%. For instance, if you perform pull-ups with an additional 10kg weight and your bodyweight is 80kg, the system will automatically use a total load of 90kg.';
-                break;
-        }
-        setInfoModalMessage(message);
     }
 
     return (
@@ -150,32 +136,32 @@ export function ExerciseCreatorPage({ goBack, exerciseFamilies, handleAddExercis
                             {isUnilateral && <span className="flex items-center justify-center text-white">✓</span>}
                         </div>
                     </div>
-                    <InfoButton onClick={() => handleInfo('is_unilateral')} />
+                    <InfoButton onClick={() => setInfoModalMessage(getInfoMessage('is_unilateral'))} />
                 </label>
             </div>
             <div className="flex items-center my-2">
-                <span>Weight Factor (%):</span>
+                <span>Weight factor (%):</span>
                 <input
-                    className="rounded-lg bg-gray-800 text-white py-1 px-2 mx-2 w-12"
+                    className="rounded-lg bg-gray-800 text-white py-1 px-2 mx-2 w-14"
                     type="number"
                     value={weightFactor * 100}
                     onChange={(e) => setWeightFactor(Number(e.target.value) / 100)}
                 />
-                <InfoButton onClick={() => handleInfo('weight_factor')} />
+                <InfoButton onClick={() => <InfoButton onClick={() => setInfoModalMessage(getInfoMessage('weight_factor'))} />} />
             </div>
             <div className="flex items-center my-2">
-                <span>Bodyweight Inclusion Factor (%):</span>
+                <span>Bodyweight inclusion factor (%):</span>
                 <input
-                    className="rounded-lg bg-gray-800 text-white py-1 px-2 mx-2 w-12"
+                    className="rounded-lg bg-gray-800 text-white py-1 px-2 mx-2 w-14"
                     type="number"
                     value={bodyweightInclusionFactor * 100}
                     onChange={(e) => setBodyweightInclusionFactor(Number(e.target.value) / 100)}
                     min="0"
                     max="100"
                 />
-                <InfoButton onClick={() => handleInfo('bodyweight_inclusion_factor')} />
+                <InfoButton onClick={() =>  setInfoModalMessage(getInfoMessage('bodyweight_inclusion_factor'))} />
             </div>
-            {infoModalMessage !== undefined && <InfoModal message={infoModalMessage} onClose={() => setInfoModalMessage(undefined)} />}
+            {infoModalMessage !== null && <InfoModal message={infoModalMessage} onClose={() => setInfoModalMessage(null)} />}
             {showLoadingModal && <LoadingModal message="Saving exercise..." />}
         </>
     );

@@ -104,11 +104,11 @@ function Content({ currentPage, logout }: { currentPage: pageName, logout: any }
 
         const newExercise = new ExerciseWithHistory(exerciseJson.id,
           exerciseJson.name,
-          exerciseJson.weightFactor,
+          exerciseJson.weight_factor,
           exerciseJson.bodyweight_inclusion_factor,
           exerciseJson.is_unilateral,
           exerciseJson.is_custom,
-          exerciseJson.created_by,
+          exerciseJson.created_by?.username,
           exerciseJson.shared_with,
           exerciseSets)
         exercises.push(newExercise)
