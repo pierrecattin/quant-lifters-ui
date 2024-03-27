@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { Config } from "../config"
 import { LoginOrSignupPage } from "./LoginOrSignupPage"
 import { pageName } from "../enums"
-import { ExerciseSetForExerciseLog, ExerciseSetForWorkoutLog, Workout, ExerciseWithHistory, PlannedExercise, WorkoutTemplate, PlannedExerciseSet, ExerciseFamily } from "../classes"
+import { ExerciseSetForExerciseLog, Workout, ExerciseWithHistory, PlannedExercise, WorkoutTemplate, PlannedExerciseSet, ExerciseFamily } from "../classes"
 
 import { ProfilePage } from "./ProfilePage"
 import { WorkoutPage } from "./WorkoutPage"
@@ -98,7 +98,7 @@ function Content({ currentPage, logout }: { currentPage: pageName, logout: any }
         let exerciseSets: ExerciseSetForExerciseLog[] = []
         const exerciseSetsRaw: any[] = exerciseJson.sets
         exerciseSetsRaw.forEach(s => {
-          const exerciseSet = new ExerciseSetForExerciseLog(s.id, new Date(s.workout.start_time), s.weight, s.reps, s.rir, s.wilksScore)
+          const exerciseSet = new ExerciseSetForExerciseLog(s.id, new Date(s.workout.start_time), s.weight, s.reps, s.rir, s.wilksScore, s.number_within_workout)
           exerciseSets.push(exerciseSet)
         })
 

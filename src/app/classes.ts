@@ -28,13 +28,15 @@ abstract class BaseExerciseSet {
   reps: number;
   rir: number;
   wilks: number;
+  numberWithinWorkout: number;
 
-  constructor(id: string, weight: number, reps: number, rir: number, wilks: number) {
+  constructor(id: string, weight: number, reps: number, rir: number, wilks: number, numberWithinWorkout: number) {
     this.id = id;
     this.weight = weight;
     this.reps = reps;
     this.rir = rir;
     this.wilks = wilks;
+    this.numberWithinWorkout = numberWithinWorkout;
   }
 
   abstract clone(): BaseExerciseSet;
@@ -43,8 +45,8 @@ abstract class BaseExerciseSet {
 export class ExerciseSetForExerciseLog extends BaseExerciseSet {
   time: Date;
 
-  constructor(id: string, time: Date | string, weight: number, reps: number, rir: number, wilks: number) {
-    super(id, weight, reps, rir, wilks);
+  constructor(id: string, time: Date | string, weight: number, reps: number, rir: number, wilks: number, numberWithinWorkout: number) {
+    super(id, weight, reps, rir, wilks, numberWithinWorkout);
     this.time = (typeof time === 'string') ? new Date(time) : time;
   }
 
@@ -59,7 +61,8 @@ export class ExerciseSetForExerciseLog extends BaseExerciseSet {
       this.weight,
       this.reps,
       this.rir,
-      this.wilks
+      this.wilks,
+      this.numberWithinWorkout
     );
   }
 
@@ -71,7 +74,8 @@ export class ExerciseSetForExerciseLog extends BaseExerciseSet {
       parseFloat(parsedData.weight),
       parseInt(parsedData.reps, 10),
       parseInt(parsedData.rir, 10),
-      parseFloat(parsedData.wilks)
+      parseFloat(parsedData.wilks),
+      parsedData.numberWithinWorkout||parsedData.number_within_workout
     );
   }
 }
@@ -79,8 +83,8 @@ export class ExerciseSetForExerciseLog extends BaseExerciseSet {
 export class ExerciseSetForWorkoutLog extends BaseExerciseSet {
   exercise: NameAndId;
 
-  constructor(id: string, exercise: NameAndId, weight: number, reps: number, rir: number, wilks: number) {
-    super(id, weight, reps, rir, wilks);
+  constructor(id: string, exercise: NameAndId, weight: number, reps: number, rir: number, wilks: number, numberWithinWorkout: number) {
+    super(id, weight, reps, rir, wilks, numberWithinWorkout);
     this.exercise = exercise;
   }
 
@@ -91,7 +95,8 @@ export class ExerciseSetForWorkoutLog extends BaseExerciseSet {
       this.weight,
       this.reps,
       this.rir,
-      this.wilks
+      this.wilks,
+      this.numberWithinWorkout
     );
   }
 
@@ -103,7 +108,8 @@ export class ExerciseSetForWorkoutLog extends BaseExerciseSet {
       parseFloat(parsedData.weight),
       parseInt(parsedData.reps, 10),
       parseInt(parsedData.rir, 10),
-      parseFloat(parsedData.wilks)
+      parseFloat(parsedData.wilks),
+      parsedData.numberWithinWorkout||parsedData.number_within_workout
     );
   }
 }

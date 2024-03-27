@@ -22,16 +22,17 @@ export function WorkoutHistoryPage({ showHome, workoutLog }: { showHome: any, wo
               })}
             </header>
             <div className="space-y-2">
-              {workout.sets.reduce<React.ReactNode[]>((acc, set, index, array) => {
-                const isDifferent = index === 0 || set.exercise.name !== array[index - 1].exercise.name;
-                if (isDifferent) acc.push(<div key={`exercise-${index}`} className="font-semibold">{set.exercise.name}</div>);
-                acc.push(
-                  <div key={`details-${index}`} className="ml-4">
-                    {set.reps} x {set.weight}kg with {set.rir} RIR
-                  </div>
-                );
-                return acc;
-              }, [])}
+              {workout.sets.sort((a, b) => a.numberWithinWorkout < b.numberWithinWorkout ? -1 : 2).reduce<React.ReactNode[]>(
+                (acc, set, index, array) => {
+                  const isDifferent = index === 0 || set.exercise.name !== array[index - 1].exercise.name;
+                  if (isDifferent) acc.push(<div key={`exercise-${index}`} className="font-semibold">{set.exercise.name}</div>);
+                  acc.push(
+                    <div key={set.id} className="ml-4">
+                      {set.numberWithinWorkout}. {set.reps} x {set.weight}kg with {set.rir} RIR
+                    </div>
+                  );
+                  return acc;
+                }, [])}
             </div>
           </article>
         ))}

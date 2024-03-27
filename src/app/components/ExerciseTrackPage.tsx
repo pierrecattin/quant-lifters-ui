@@ -52,10 +52,14 @@ export function ExerciseTrackPage({ exercise, handleAddExerciseSets }: { exercis
   const handleSubmit = async (e: React.FormEvent) => {
     setShowLoadingModal(true)
     const time = new Date().toISOString();
+    const setsWithNumber = sets.map((set, index) => ({
+      ...set,
+      number_within_workout: index
+    }));
     const body = {
       "exercise_id": exercise.id,
       "time": time,
-      "sets": sets,
+      "sets": setsWithNumber,
     }
     e.preventDefault();
     const response = await fetch(`${Config.backendUrl}saveexercisesets`, {
@@ -73,7 +77,7 @@ export function ExerciseTrackPage({ exercise, handleAddExerciseSets }: { exercis
       const setsJson: any[] = await response.json()
       // Store new sets in react state so that it's available without having to fetch from the backend
       const completedExerciseSets = setsJson.map(exerciseSet =>
-        new ExerciseSetForExerciseLog(exerciseSet.id, time, parseFloat(exerciseSet.weight), parseInt(exerciseSet.reps), parseInt(exerciseSet.rir), exerciseSet.wilksScore)
+        new ExerciseSetForExerciseLog(exerciseSet.id, time, parseFloat(exerciseSet.weight), parseInt(exerciseSet.reps), parseInt(exerciseSet.rir), exerciseSet.wilksScore, exerciseSet.number_within_workout)
       );
       handleAddExerciseSets(completedExerciseSets)
       setSets([new ExerciseSetInProgress()]);
