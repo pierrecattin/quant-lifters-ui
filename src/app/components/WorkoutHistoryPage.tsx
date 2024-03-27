@@ -28,7 +28,7 @@ export function WorkoutHistoryPage({ showHome, workoutLog }: { showHome: any, wo
                   if (isDifferent) acc.push(<div key={`exercise-${index}`} className="font-semibold">{set.exercise.name}</div>);
                   acc.push(
                     <div key={set.id} className="ml-4">
-                      {set.numberWithinWorkout}. {set.reps} x {set.weight}kg with {set.rir} RIR
+                      {set.numberWithinWorkout+1}. {set.reps} x {set.weight}kg with {set.rir} RIR
                     </div>
                   );
                   return acc;

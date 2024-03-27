@@ -80,7 +80,7 @@ export function ExerciseHistoryPage({ exerciseSets, handleDeleteExerciseSets }: 
                                         a.numberWithinWorkout<b.numberWithinWorkout ? -1 : 1
                                     ).map((set, index) => (
                                         <div key={index} className="">
-                                            <span>{set.numberWithinWorkout}. {set.reps} x {1 * set.weight}kg with {set.rir} RiR</span>
+                                            <span>{set.numberWithinWorkout+1}. {set.reps} x {1 * set.weight}kg with {set.rir} RiR</span>
                                         </div>
                                     ))}
                                 </div>
