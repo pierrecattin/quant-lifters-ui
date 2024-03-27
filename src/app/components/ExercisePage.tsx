@@ -38,18 +38,12 @@ export function ExercisePage({ family, exercise, goBack, handleUpdateExerciseSet
 
   function handleAddExerciseSets(newSets: ExerciseSetForExerciseLog[]) {
     const updatedSets = [...currentExercise.sets, ...newSets];
-    const updatedExercise = currentExercise.clone();
-    updatedExercise.sets = updatedSets;
-    setCurrentExercise(updatedExercise);
-    handleUpdateExerciseSets(exercise.id, newSets);
+    handleUpdateExerciseSets(family.id, exercise.id, updatedSets);
   };
 
   function handleDeleteExerciseSets(setsIds: string[]) {
     const updatedSets = currentExercise.sets.filter((set) => !(setsIds.includes(set.id)))
-    const updatedExercise = currentExercise.clone()
-    updatedExercise.sets = updatedSets
-    setCurrentExercise(updatedExercise);
-    handleUpdateExerciseSets(exercise.id, updatedExercise.sets);
+    handleUpdateExerciseSets(family.id, exercise.id, updatedSets);
   };
 
   function showTrack() {

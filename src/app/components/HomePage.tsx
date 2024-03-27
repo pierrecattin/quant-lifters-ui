@@ -182,14 +182,13 @@ function Content({ currentPage, logout }: { currentPage: pageName, logout: any }
     setWorkoutTemplates([t1, t2, t3, t4])
   }, []);
 
-  function handleUpdateExerciseSets(exerciseFamilyId: string, exerciseId: string, newExerciseSets: ExerciseSetForExerciseLog[]) {
+  function handleUpdateExerciseSets(exerciseFamilyId: string, exerciseId: string, updatedExerciseSets: ExerciseSetForExerciseLog[]) {
     const newExerciseFamilies = exerciseFamilies.map(exerciseFamily => {
-      if (exerciseFamily.id === exerciseFamilyId) {
+      if (exerciseFamily.id == exerciseFamilyId) {
         exerciseFamily.exercises.map(exercise => {
-          if (exercise.id === exerciseId) {
-            const newExercise = exercise.clone();
-            newExercise.sets = newExerciseSets
-            return newExercise;
+          if (exercise.id == exerciseId) {
+            exercise.sets = updatedExerciseSets
+            return exercise;
           }
           return exercise;
         })
